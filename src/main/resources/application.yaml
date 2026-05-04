@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ventas-bodega
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/ventasbodegadb
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    generate-ddl: false
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+        enable_lazy_load_no_trans: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    hibernate:
+      ddl-auto: update
+
+security:
+  jwt:
+    key:
+      private: mi_clave_super_secreta_123456
+    user:
+      generator: ventas-bodega-app
