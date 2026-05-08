@@ -186,4 +186,19 @@ public class ProductMapper {
         return price.divide(FACTOR, 2, RoundingMode.HALF_UP);
     }
 
+    public static Object[] entityToObject(ProductEntity productEntity) {
+        if(productEntity == null) {
+            return null;
+        } else {
+            return new Object[]{
+                    productEntity.getId(),
+                    productEntity.getName(),
+                    productEntity.getDescription(),
+                    productEntity.getPrice(),
+                    productEntity.getBarcode(),
+                    productEntity.getCreatedDate(),
+                    productEntity.getUpdatedDate()
+            };
+        }
+    }
 }

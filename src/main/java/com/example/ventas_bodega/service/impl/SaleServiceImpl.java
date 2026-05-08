@@ -1,11 +1,14 @@
 package com.example.ventas_bodega.service.impl;
 
+import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.SaleDto;
+import com.example.ventas_bodega.entity.ProductEntity;
 import com.example.ventas_bodega.entity.SaleDetailEntity;
 import com.example.ventas_bodega.entity.SaleEntity;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.mapper.SaleDetailMapper;
 import com.example.ventas_bodega.mapper.SaleMapper;
+import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.repository.SaleDetailRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
 import com.example.ventas_bodega.response.MessageResponse;
@@ -25,12 +28,14 @@ public class SaleServiceImpl implements SaleService {
     private final SaleRepository saleRepository;
     private final SaleDetailRepository saleDetailRepository;
     private final ProductService productService;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public SaleServiceImpl(SaleRepository saleRepository, SaleDetailRepository saleDetailRepository, ProductService productService) {
+    public SaleServiceImpl(SaleRepository saleRepository, SaleDetailRepository saleDetailRepository, ProductService productService, ProductRepository productRepository) {
         this.saleRepository = saleRepository;
         this.saleDetailRepository = saleDetailRepository;
         this.productService = productService;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -51,6 +56,15 @@ public class SaleServiceImpl implements SaleService {
             saleToCreate.setUser(userEntity);
             SaleEntity saleCreated = saleRepository.save(saleToCreate);
             for (int i=0; i<saleDto.getSaleDetails().size(); i++) {
+                //Ha largo plazo modificar este metodo en una cola para optimizar el tiempo del proceso
+                if (!productRepository.existsById(saleDto.getSaleDetails().get(i).getProductId())) {
+                    ProductDto productDto = new ProductDto();
+                    productDto.setUnitePrice(saleDto.getSaleDetails().get(0).getUnitePrice());
+                    productDto.setName(saleDto.getSaleDetails().get(0).getName());
+                    Object[] productCreated = productService.createProduct(productDto, userEntity).getObject();
+
+                    saleDto.getSaleDetails().get(i).setProductId(Long.parseLong(productCreated[0].toString()));
+                }
                 SaleDetailEntity saleDetailEntity = SaleDetailMapper.dtoToEntity(saleDto.getSaleDetails().get(i));
                 saleDetailEntity.setSaleEntity(saleCreated);
                 saleDetailRepository.save(saleDetailEntity);

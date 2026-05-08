@@ -10,6 +10,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import java.util.List;
 @RequestMapping(AuthController.API_PATH)
 public class AuthController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     public static final String API_PATH = "/api/auth";
 
     public final AuthService authService;
@@ -32,8 +35,11 @@ public class AuthController {
 
     @PostMapping("/signIn")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest, HttpServletResponse response) {
+        logger.info("Intento de login para usuario: {}", signInRequest.getEmail());
         SignInResponse signInResponse = authService.signIn(signInRequest);
         if(signInResponse.getStatus() == 200) {
+            logger.info("Login exitoso para usuario: {}", signInRequest.getEmail());
+
             Cookie cookie = new Cookie("auth_token", signInResponse.getToken());
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
@@ -44,12 +50,14 @@ public class AuthController {
             signInResponse.setToken(null);
             return new ResponseEntity<>(signInResponse, HttpStatus.OK);
         } else {
+            logger.warn("Login fallido para usuario: {}", signInRequest.getEmail());
             return new ResponseEntity<>(signInResponse, HttpStatus.UNAUTHORIZED);
         }
     }
 
     @PostMapping("/signUp")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest, HttpServletResponse response) {
+        logger.info("Intento de signUp para usuario: {}", signUpRequest.getEmail());
         SignUpResponse signUpResponse = authService.signUp(signUpRequest);
 
         Cookie cookie = new Cookie("auth_token", signUpResponse.getToken());

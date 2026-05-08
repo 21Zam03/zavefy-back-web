@@ -7,8 +7,8 @@ spring:
 
   datasource:
     #url: jdbc:mysql://localhost:3306/ventasbodegadb
-    #url: jdbc:mysql://vps-5943657-x.dattaweb.com:3306/zavefy_db?allowPublicKeyRetrieval=true
-    url: jdbc:mysql://localhost:3306/zavefy_db?allowPublicKeyRetrieval=true
+    url: jdbc:mysql://vps-5943657-x.dattaweb.com:3306/zavefy_db?allowPublicKeyRetrieval=true
+    #url: jdbc:mysql://localhost:3306/zavefy_db?allowPublicKeyRetrieval=true
     #username: root
     username: zavefy_user
     #password: 123456

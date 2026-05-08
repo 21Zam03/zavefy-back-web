@@ -10,6 +10,7 @@ public class SaleDetailDto {
     private BigDecimal unitePrice;
     private BigDecimal total;
     private Long productId;
+    private String name;
 
     public SaleDetailDto() {}
 
@@ -67,5 +68,13 @@ public class SaleDetailDto {
 
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

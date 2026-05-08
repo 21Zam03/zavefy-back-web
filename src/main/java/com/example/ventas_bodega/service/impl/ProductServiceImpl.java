@@ -139,6 +139,7 @@ public class ProductServiceImpl implements ProductService {
 
         messageResponse.setMessage("El producto se ha registrado exitosamente");
         messageResponse.setStatus(true);
+        messageResponse.setObject(ProductMapper.entityToObject(productCreated));
         return messageResponse;
     }
 

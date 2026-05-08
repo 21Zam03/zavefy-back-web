@@ -9,6 +9,7 @@ public class MessageResponse {
     private boolean status;
     private ProductDto productDto;
     private SaleDto saleDto;
+    private Object[] object;
 
     public MessageResponse() {
     }
@@ -52,4 +53,9 @@ public class MessageResponse {
     public void setSaleDto(SaleDto saleDto) {
         this.saleDto = saleDto;
     }
+
+    public Object[] getObject() {
+        return object;
+    }
+    public void setObject(Object[] object) {}
 }
