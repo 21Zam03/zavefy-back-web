@@ -42,7 +42,7 @@ public class AuthController {
 
             Cookie cookie = new Cookie("auth_token", signInResponse.getToken());
             cookie.setHttpOnly(true);
-            cookie.setSecure(true);
+            //cookie.setSecure(true);
             cookie.setPath("/");
             cookie.setMaxAge(1800);
             response.addCookie(cookie);
@@ -62,7 +62,7 @@ public class AuthController {
 
         Cookie cookie = new Cookie("auth_token", signUpResponse.getToken());
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        //cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(1800);
         response.addCookie(cookie);
@@ -81,7 +81,7 @@ public class AuthController {
 
         for (Cookie cookie : cookiesList) {
             cookie.setHttpOnly(true);
-            cookie.setSecure(true);
+            //cookie.setSecure(true);
             cookie.setPath("/");
             cookie.setMaxAge(0);
             response.addCookie(cookie);
