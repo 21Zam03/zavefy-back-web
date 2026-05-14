@@ -12,5 +12,6 @@ public interface SaleDetailDtoInter {
     String getProductName();
     String getNotes();
     String getMeasurementUnit();
+    String getBarcode();
 
 }

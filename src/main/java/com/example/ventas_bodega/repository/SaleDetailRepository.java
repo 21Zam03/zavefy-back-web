@@ -20,8 +20,11 @@ public interface SaleDetailRepository extends JpaRepository<SaleDetailEntity, Lo
             dv.id_producto AS productId,
             dv.nombre_producto AS productName,
             dv.notas AS notes,
-            dv.unidad_medida AS measurementUnit
+            dv.unidad_medida AS measurementUnit,
+            p.codigo_barras AS barcode
         FROM tb_detalle_venta dv
+       INNER JOIN tb_producto p 
+            ON p.id_producto = dv.id_producto
         WHERE dv.id_venta = :saleId
         """, nativeQuery = true)
     List<SaleDetailDtoInter> findDetailsBySaleId(@Param("saleId") Long saleId);

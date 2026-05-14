@@ -51,8 +51,23 @@ public class SaleEntity {
     @Column(name = "tipo_documento_cliente")
     private String clientDocumentType;
 
+    @Column(name = "direccion_cliente")
+    private String clientAddress;
+
     @Column(name = "metodo_pago")
     private String paymentMethod;
+
+    @Column(name = "identificador")
+    private String identifier;
+
+    @Column(name = "ruc_emisor")
+    private String issuerRuc;
+
+    @Column(name = "observaciones")
+    private String notes;
+
+    @Column(name = "descuento")
+    private BigDecimal discount;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
@@ -64,6 +79,7 @@ public class SaleEntity {
         LocalDateTime localDateTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         this.registerDate = localDateTime.format(formatter);
+        this.identifier = this.issuerRuc+"-"+this.serial+"-"+this.number;
     }
 
     public SaleEntity() {
@@ -197,4 +213,69 @@ public class SaleEntity {
         this.igv = igv;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public String getIssuerRuc() {
+        return issuerRuc;
+    }
+
+    public void setIssuerRuc(String issuerRuc) {
+        this.issuerRuc = issuerRuc;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(BigDecimal discount) {
+        this.discount = discount;
+    }
+
+    public String getClientAddress() {
+        return clientAddress;
+    }
+
+    public void setClientAddress(String clientAddress) {
+        this.clientAddress = clientAddress;
+    }
+
+    @Override
+    public String toString() {
+        return "SaleEntity{" +
+                "ventaId=" + ventaId +
+                ", type='" + type + '\'' +
+                ", serial='" + serial + '\'' +
+                ", number=" + number +
+                ", total=" + total +
+                ", subTotal=" + subTotal +
+                ", igv=" + igv +
+                ", createdDate=" + createdDate +
+                ", registerDate='" + registerDate + '\'' +
+                ", moneyType='" + moneyType + '\'' +
+                ", clientName='" + clientName + '\'' +
+                ", clientDocumentNumber='" + clientDocumentNumber + '\'' +
+                ", clientDocumentType='" + clientDocumentType + '\'' +
+                ", clientAddress='" + clientAddress + '\'' +
+                ", paymentMethod='" + paymentMethod + '\'' +
+                ", identifier='" + identifier + '\'' +
+                ", issuerRuc='" + issuerRuc + '\'' +
+                ", notes='" + notes + '\'' +
+                ", discount=" + discount +
+                ", user=" + user +
+                '}';
+    }
 }
