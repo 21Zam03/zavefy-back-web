@@ -63,6 +63,7 @@ public class ProductMapper {
         product.setImageUrl(productDto.getImageUrl());
         product.setQuantity(productDto.getStock());
         product.setBarcode(productDto.getBarcode());
+        product.setMeasurementUnit(productDto.getMeasurementUnit());
         return product;
     }
 
@@ -72,10 +73,10 @@ public class ProductMapper {
         product.setName(productEntity.getName());
         product.setDescription(productEntity.getDescription());
         product.setPrice(productEntity.getPrice());
-        if(productEntity.getUnitePrice() != null) {
-            product.setUnitePrice(productEntity.getUnitePrice());
+        if(productEntity.getUnitPrice() != null) {
+            product.setUnitPrice(productEntity.getUnitPrice());
         } else {
-            product.setUnitePrice(calculatePrice(productEntity.getPrice()));
+            product.setUnitPrice(calculatePrice(productEntity.getPrice()));
         }
         product.setActive(productEntity.isActive());
         product.setImageUrl(productEntity.getImageUrl());
@@ -84,7 +85,17 @@ public class ProductMapper {
         product.setCategories(buildCategoriesInListStringFromEntity(productEntity.getCategoryEntityList()));
         product.setCreatedDate(formatToYearMonthDay(productEntity.getCreatedDate()));
         product.setUpdatedDate(formatToYearMonthDay(productEntity.getUpdatedDate()));
+        product.setMeasurementUnit(productEntity.getMeasurementUnit());
         return product;
+    }
+
+    public static List<ProductDto> entityListToDtoList(List<ProductEntity> productEntityList) {
+        List<ProductDto> productDtoList = new ArrayList<>();
+        for (ProductEntity productEntity : productEntityList) {
+            ProductDto productDto = ProductMapper.entityToDto(productEntity);
+            productDtoList.add(productDto);
+        }
+        return productDtoList;
     }
 
     public static ProductGeneralEntity dtoToEntityGeneral(ProductDto productDto) {
@@ -187,6 +198,7 @@ public class ProductMapper {
     }
 
     public static Object[] entityToObject(ProductEntity productEntity) {
+        System.out.println("PRODUCT RECIBIDO: "+productEntity.toString());
         if(productEntity == null) {
             return null;
         } else {
@@ -194,6 +206,7 @@ public class ProductMapper {
                     productEntity.getId(),
                     productEntity.getName(),
                     productEntity.getDescription(),
+                    productEntity.getNotes(),
                     productEntity.getPrice(),
                     productEntity.getBarcode(),
                     productEntity.getCreatedDate(),

@@ -140,6 +140,8 @@ public class ProductServiceImpl implements ProductService {
         messageResponse.setMessage("El producto se ha registrado exitosamente");
         messageResponse.setStatus(true);
         messageResponse.setObject(ProductMapper.entityToObject(productCreated));
+
+        System.out.println("RESPONSE: "+messageResponse.toString());
         return messageResponse;
     }
 
@@ -173,6 +175,12 @@ public class ProductServiceImpl implements ProductService {
             productDtoList.add(productDto);
         }
         return new PageImpl<>(productDtoList, pageable, productEntityPage.getTotalElements());
+    }
+
+    @Override
+    public ProductDto searchProductsInSaleModule(String ruc, String search) {
+        ProductEntity product = productRepository.searchProductsByCompanyForSaleModule(ruc, search);
+        return ProductMapper.entityToDto(product);
     }
 
     @Override
@@ -312,7 +320,6 @@ public class ProductServiceImpl implements ProductService {
     public MessageResponse createHistoryStock(List<SaleDetailDto> saleDetailDtoList, UserEntity userEntity) {
 
         // Convertimos a batch args (forma más estable en Spring Boot 4)
-        System.out.println("cantidad: "+saleDetailDtoList.get(0).getQuantity());
         List<Object[]> batchArgs = saleDetailDtoList.stream()
                 .map(item -> new Object[]{
                         item.getQuantity(),

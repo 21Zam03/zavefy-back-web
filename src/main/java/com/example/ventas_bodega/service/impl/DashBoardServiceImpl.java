@@ -55,13 +55,17 @@ public class DashBoardServiceImpl implements DashBoardService {
             topProductResult.add(new TopProductDto(name, totalSales, totalIncome));
         }
 
-        List<Object[]> productAlert = productRepository.getTopLowStockAlerts(user.getCompany().getRuc());
         List<ProductAlertDto> productAlertResult = new ArrayList<>();
-        for (Object[] row : productAlert) {
-            String name = row[0].toString();
-            Long stock = ((Number) row[1]).longValue();
-            String stockState = row[2].toString();
-            productAlertResult.add(new ProductAlertDto(name, stock, stockState));
+        if(user.getCompany().isHasStock()) {
+            List<Object[]> productAlert = productRepository.getTopLowStockAlerts(user.getCompany().getRuc());
+            if(!productAlert.isEmpty()) {
+                for (Object[] row : productAlert) {
+                    String name = row[0].toString();
+                    Long stock = ((Number) row[1]).longValue();
+                    String stockState = row[2].toString();
+                    productAlertResult.add(new ProductAlertDto(name, stock, stockState));
+                }
+            }
         }
 
         DashboardDataDto dashboardDataDto = new DashboardDataDto();

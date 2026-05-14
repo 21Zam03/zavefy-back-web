@@ -18,6 +18,7 @@ public class SaleRequest {
     private String clientName;
     private String clientDocumentNumber;
     private String clientDocumentType;
+    private String paymentMethod;
     private List<SaleDetailDto> saleDetails;
 
     public SaleRequest() {}
@@ -117,5 +118,13 @@ public class SaleRequest {
 
     public void setClientDocumentType(String clientDocumentType) {
         this.clientDocumentType = clientDocumentType;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }

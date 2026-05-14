@@ -47,4 +47,9 @@ public class SaleController {
         return new ResponseEntity<>(saleService.getNextNumber(user, type, serial), HttpStatus.OK);
     }
 
+    @GetMapping("/details/{id}")
+    public ResponseEntity<?> getDetails(@CurrentUser UserEntity user, @PathVariable Long id) {
+        return new ResponseEntity<>(saleService.getDetailsOfSale(user, id), HttpStatus.OK);
+    }
+
 }

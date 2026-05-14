@@ -13,6 +13,7 @@ public interface ProductService {
     public MessageResponse createProduct(ProductDto productDto, UserEntity userEntity) throws Exception;
     public ProductDto searchProduct(String barcode);
     public Page<ProductDto> getProductsByCompany(String ruc, String barcode, String name, String stockStatus, Boolean active, Long categoryId, int page, int size);
+    public ProductDto searchProductsInSaleModule(String ruc, String search);
     public ProductDto getProductByUserLogged(String barcode, String ruc);
     public MessageResponse updateProduct(ProductDto productDto, UserEntity userEntity) throws Exception;
     public MessageResponse deactivateProduct(Long id, UserEntity userEntity) throws Exception;

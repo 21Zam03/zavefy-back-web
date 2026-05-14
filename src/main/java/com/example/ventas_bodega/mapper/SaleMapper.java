@@ -16,11 +16,13 @@ public class SaleMapper {
         saleEntity.setClientName(saleDto.getClientName());
         saleEntity.setClientDocumentNumber(saleDto.getClientDocumentNumber());
         saleEntity.setClientDocumentType(saleDto.getClientDocumentType());
+        saleEntity.setPaymentMethod(saleDto.getPaymentMethod());
         return saleEntity;
     }
 
     public static SaleDto entityToDto(SaleEntity saleEntity) {
         SaleDto saleDto = new SaleDto();
+        saleDto.setVentaId(saleEntity.getVentaId());
         saleDto.setType(saleEntity.getType());
         saleDto.setSerial(saleEntity.getSerial());
         saleDto.setNumber(saleEntity.getNumber());
@@ -29,6 +31,7 @@ public class SaleMapper {
         saleDto.setRegisterDate(saleEntity.getRegisterDate());
         saleDto.setMoneyType(saleEntity.getMoneyType());
         saleDto.setClientName(saleEntity.getClientName());
+        saleDto.setPaymentMethod(saleEntity.getPaymentMethod());
         return saleDto;
     }
 
@@ -44,6 +47,7 @@ public class SaleMapper {
         saleDto.setClientName(saleRequest.getClientName());
         saleDto.setClientDocumentNumber(saleRequest.getClientDocumentNumber());
         saleDto.setClientDocumentType(saleRequest.getClientDocumentType());
+        saleDto.setPaymentMethod(saleRequest.getPaymentMethod());
         return saleDto;
     }
 

@@ -11,6 +11,9 @@ public class SaleDetailDto {
     private BigDecimal total;
     private Long productId;
     private String name;
+    private String measurementUnit;
+    private boolean hasAutomaticSaved;
+    private String notes;
 
     public SaleDetailDto() {}
 
@@ -76,5 +79,29 @@ public class SaleDetailDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getMeasurementUnit() {
+        return measurementUnit;
+    }
+
+    public void setMeasurementUnit(String measurementUnit) {
+        this.measurementUnit = measurementUnit;
+    }
+
+    public boolean isHasAutomaticSaved() {
+        return hasAutomaticSaved;
+    }
+
+    public void setHasAutomaticSaved(boolean hasAutomaticSaved) {
+        this.hasAutomaticSaved = hasAutomaticSaved;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

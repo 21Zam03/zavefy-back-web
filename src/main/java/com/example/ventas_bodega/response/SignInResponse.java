@@ -1,5 +1,9 @@
 package com.example.ventas_bodega.response;
 
+import com.example.ventas_bodega.dto.ProductDto;
+
+import java.util.List;
+
 public class SignInResponse {
 
     private String firstname;
@@ -12,6 +16,7 @@ public class SignInResponse {
     private String message;
     private String token;
     private Integer status;
+    private List<ProductDto> products;
 
     public SignInResponse() {
     }
@@ -105,4 +110,11 @@ public class SignInResponse {
         this.hasBarcode = hasBarcode;
     }
 
+    public List<ProductDto> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<ProductDto> products) {
+        this.products = products;
+    }
 }

@@ -25,7 +25,7 @@ public class ProductEntity {
     private BigDecimal price;
 
     @Column(name = "precio_unitario")
-    private BigDecimal unitePrice;
+    private BigDecimal unitPrice;
 
     @Column(name = "activo")
     private boolean active;
@@ -51,6 +51,9 @@ public class ProductEntity {
     @Column(name = "fecha_actualizacion")
     private LocalDateTime updatedDate;
 
+    @Column(name = "notas")
+    private String notes;
+
     @ManyToOne
     @JoinColumn(name = "id_empresa")
     private CompanyEntity company;
@@ -58,6 +61,9 @@ public class ProductEntity {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_categorias_productos", joinColumns = @JoinColumn(name = "id_producto"), inverseJoinColumns = @JoinColumn(name = "id_categoria"))
     private List<CategoryEntity> categoryEntityList;
+
+    @Column(name = "unidad_medida")
+    private String measurementUnit;
 
     @PrePersist
     public void prePersist() {
@@ -188,12 +194,12 @@ public class ProductEntity {
         this.updatedDate = updatedDate;
     }
 
-    public BigDecimal getUnitePrice() {
-        return unitePrice;
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
     }
 
     public void setUnitePrice(BigDecimal unitePrice) {
-        this.unitePrice = unitePrice;
+        this.unitPrice = unitePrice;
     }
 
     public String getRegisterDate() {
@@ -202,6 +208,22 @@ public class ProductEntity {
 
     public void setRegisterDate(String registerDate) {
         this.registerDate = registerDate;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getMeasurementUnit() {
+        return measurementUnit;
+    }
+
+    public void setMeasurementUnit(String measurementUnit) {
+        this.measurementUnit = measurementUnit;
     }
 
     @Override

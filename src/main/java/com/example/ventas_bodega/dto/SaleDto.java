@@ -17,6 +17,7 @@ public class SaleDto {
     private String clientName;
     private String clientDocumentNumber;
     private String clientDocumentType;
+    private String paymentMethod;
     private List<SaleDetailDto> saleDetails;
 
     public Integer getVentaId() {
@@ -113,5 +114,13 @@ public class SaleDto {
 
     public void setRegisterDate(String registerDate) {
         this.registerDate = registerDate;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }

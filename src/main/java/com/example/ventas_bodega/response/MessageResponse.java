@@ -3,6 +3,8 @@ package com.example.ventas_bodega.response;
 import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.SaleDto;
 
+import java.util.Arrays;
+
 public class MessageResponse {
 
     private String message;
@@ -57,5 +59,18 @@ public class MessageResponse {
     public Object[] getObject() {
         return object;
     }
-    public void setObject(Object[] object) {}
+    public void setObject(Object[] object) {
+        this.object = object;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageResponse{" +
+                "message='" + message + '\'' +
+                ", status=" + status +
+                ", productDto=" + productDto +
+                ", saleDto=" + saleDto +
+                ", object=" + Arrays.toString(object) +
+                '}';
+    }
 }

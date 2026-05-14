@@ -51,4 +51,9 @@ public class MaintenanceController {
         return new ResponseEntity<>(maintenanceService.getYapesByCompany(user.getCompany().getCompanyId()), HttpStatus.OK);
     }
 
+    @GetMapping("/measurementUnits")
+    public ResponseEntity<?> getMeasurementUnits(@CurrentUser UserEntity user) {
+        return new ResponseEntity<>(maintenanceService.getMeasurementUnits(), HttpStatus.OK);
+    }
+
 }

@@ -29,6 +29,15 @@ public class SaleDetailEntity {
     @Column(name = "id_producto")
     private Long productId;
 
+    @Column(name = "unidad_medida")
+    private String measurementUnit;
+
+    @Column(name = "notas")
+    private String notes;
+
+    @Column(name = "nombre_producto")
+    private String name;
+
     public SaleDetailEntity() {}
 
     public SaleDetailEntity(Long id, SaleEntity saleEntity, Integer quantity, BigDecimal unitePrice, BigDecimal total) {
@@ -86,4 +95,29 @@ public class SaleDetailEntity {
     public void setProductId(Long productId) {
         this.productId = productId;
     }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getMeasurementUnit() {
+        return measurementUnit;
+    }
+
+    public void setMeasurementUnit(String measurementUnit) {
+        this.measurementUnit = measurementUnit;
+    }
+
 }

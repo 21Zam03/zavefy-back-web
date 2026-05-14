@@ -1,13 +1,12 @@
 package com.example.ventas_bodega.service.impl;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.example.ventas_bodega.entity.CompanyEntity;
-import com.example.ventas_bodega.entity.PermissionEntity;
-import com.example.ventas_bodega.entity.RoleEntity;
-import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.entity.*;
 import com.example.ventas_bodega.exceptions.DuplicateException;
 import com.example.ventas_bodega.exceptions.NotFoundException;
+import com.example.ventas_bodega.mapper.ProductMapper;
 import com.example.ventas_bodega.repository.CompanyRepository;
+import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.repository.RoleRepository;
 import com.example.ventas_bodega.repository.UserRepository;
 import com.example.ventas_bodega.request.SignInRequest;
@@ -33,16 +32,24 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final CompanyRepository companyRepository;
+    private final ProductRepository productRepository;
 
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, CompanyRepository companyRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            CompanyRepository companyRepository,
+            JwtUtil jwtUtil,
+            PasswordEncoder passwordEncoder,
+            ProductRepository productRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.companyRepository = companyRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -128,6 +135,9 @@ public class AuthServiceImpl implements AuthService {
         signInResponse.setEmail(user.getEmail());
         signInResponse.setFirstname(user.getFirstname());
         signInResponse.setLastname(user.getLastname());
+
+        List<ProductEntity> productEntityList = productRepository.findByCompany_Ruc(user.getCompany().getRuc());
+        signInResponse.setProducts(ProductMapper.entityListToDtoList(productEntityList));
         signInResponse.setMessage("User logged successfully");
         signInResponse.setToken(accessToken);
         signInResponse.setStatus(200);
@@ -153,6 +163,7 @@ public class AuthServiceImpl implements AuthService {
         userLoggedResponse.setSocialReason(user.getCompany().getSocialReason());
         userLoggedResponse.setHasBarcode(user.getCompany().isHasBarcode());
         userLoggedResponse.setHasStock(user.getCompany().isHasStock());
+        userLoggedResponse.setHasAutomaticSaved(user.getCompany().isHasAutomaticSaved());
         return userLoggedResponse;
 
     }

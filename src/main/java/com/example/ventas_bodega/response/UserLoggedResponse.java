@@ -8,6 +8,7 @@ public class UserLoggedResponse {
     private Long idCompany;
     private boolean hasStock;
     private boolean hasBarcode;
+    private boolean hasAutomaticSaved;
     private String role;
     private String type;
     private String ruc;
@@ -112,5 +113,13 @@ public class UserLoggedResponse {
 
     public void setHasBarcode(boolean hasBarcode) {
         this.hasBarcode = hasBarcode;
+    }
+
+    public boolean isHasAutomaticSaved() {
+        return hasAutomaticSaved;
+    }
+
+    public void setHasAutomaticSaved(boolean hasAutomaticSaved) {
+        this.hasAutomaticSaved = hasAutomaticSaved;
     }
 }

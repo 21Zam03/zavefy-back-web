@@ -6,6 +6,7 @@ import com.example.ventas_bodega.response.SignInResponse;
 import com.example.ventas_bodega.response.SignUpResponse;
 import com.example.ventas_bodega.response.UserLoggedResponse;
 import com.example.ventas_bodega.service.AuthService;
+import com.example.ventas_bodega.util.CookieUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +27,14 @@ public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     public static final String API_PATH = "/api/auth";
+    private final CookieUtil cookieUtil;
 
     public final AuthService authService;
 
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, CookieUtil cookieUtil) {
         this.authService = authService;
+        this.cookieUtil = cookieUtil;
     }
 
     @PostMapping("/signIn")
@@ -40,11 +44,7 @@ public class AuthController {
         if(signInResponse.getStatus() == 200) {
             logger.info("Login exitoso para usuario: {}", signInRequest.getEmail());
 
-            Cookie cookie = new Cookie("auth_token", signInResponse.getToken());
-            cookie.setHttpOnly(true);
-            //cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(1800);
+            Cookie cookie = cookieUtil.getCookie(signInResponse.getToken());
             response.addCookie(cookie);
 
             signInResponse.setToken(null);
@@ -60,11 +60,7 @@ public class AuthController {
         logger.info("Intento de signUp para usuario: {}", signUpRequest.getEmail());
         SignUpResponse signUpResponse = authService.signUp(signUpRequest);
 
-        Cookie cookie = new Cookie("auth_token", signUpResponse.getToken());
-        cookie.setHttpOnly(true);
-        //cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(1800);
+        Cookie cookie = cookieUtil.getCookie(signUpResponse.getToken());
         response.addCookie(cookie);
 
         signUpResponse.setToken(null);

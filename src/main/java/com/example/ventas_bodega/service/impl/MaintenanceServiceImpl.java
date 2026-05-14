@@ -1,14 +1,18 @@
 package com.example.ventas_bodega.service.impl;
 
 import com.example.ventas_bodega.dto.CategoryDto;
+import com.example.ventas_bodega.dto.MeasurementUnitDto;
 import com.example.ventas_bodega.dto.YapeDto;
 import com.example.ventas_bodega.dto.interfaces.CategoryDtoInter;
 import com.example.ventas_bodega.entity.CategoryClientEntity;
 import com.example.ventas_bodega.entity.CategoryEntity;
+import com.example.ventas_bodega.entity.MeasurementUnitEntity;
 import com.example.ventas_bodega.mapper.CategoryMapper;
+import com.example.ventas_bodega.mapper.MeasurementUnitMapper;
 import com.example.ventas_bodega.mapper.YapeMapper;
 import com.example.ventas_bodega.repository.CategoryClientRepository;
 import com.example.ventas_bodega.repository.CategoryRepository;
+import com.example.ventas_bodega.repository.MeasurementUnitRepository;
 import com.example.ventas_bodega.repository.YapeRepository;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.MaintenanceService;
@@ -29,12 +33,19 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     private CategoryRepository categoryRepository;
     private YapeRepository yapeRepository;
     private CategoryClientRepository categoryClientRepository;
+    private MeasurementUnitRepository measurementUnitRepository;
 
     @Autowired
-    public MaintenanceServiceImpl(CategoryRepository categoryRepository, YapeRepository yapeRepository, CategoryClientRepository categoryClientRepository) {
+    public MaintenanceServiceImpl(
+            CategoryRepository categoryRepository,
+            YapeRepository yapeRepository,
+            CategoryClientRepository categoryClientRepository,
+            MeasurementUnitRepository measurementUnitRepository
+    ) {
         this.categoryRepository = categoryRepository;
         this.yapeRepository = yapeRepository;
         this.categoryClientRepository = categoryClientRepository;
+        this.measurementUnitRepository = measurementUnitRepository;
     }
 
     @Override
@@ -88,6 +99,12 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     @Override
     public List<YapeDto> getYapesByCompany(Long companyId) {
         return YapeMapper.mapEntityListToDtoList(yapeRepository.findByCompanyId(companyId));
+    }
+
+    @Override
+    public List<MeasurementUnitDto> getMeasurementUnits() {
+        List<MeasurementUnitEntity> measurementUnitEntityList = measurementUnitRepository.findAll();
+        return MeasurementUnitMapper.entityListToDtoList(measurementUnitEntityList);
     }
 
 }

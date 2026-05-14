@@ -6,6 +6,8 @@ import com.example.ventas_bodega.mapper.ProductMapper;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.ProductService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductController {
 
     public static final String API_PATH = "/api/product";
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
     private final ProductService productService;
 
@@ -39,7 +42,7 @@ public class ProductController {
             @RequestPart(value = "file", required = false) MultipartFile file,
             @CurrentUser UserEntity user
     ) throws Exception {
-        System.out.println("USER: "+ user);
+        logger.info("Intento de crear producto para usuario: {}", user.getEmail());
 
         ProductDto productDto = ProductMapper.buildProductDtoFromController(null, name, description, price, categories, active, imageUrl, quantity, barcode, file);
 
@@ -72,9 +75,19 @@ public class ProductController {
     }
 
     @GetMapping
+    public ResponseEntity<?> searchProductsByCompany(
+            @RequestParam(required = false) String search,
+            @CurrentUser UserEntity user
+    ) {
+        return new ResponseEntity(this.productService.searchProductsInSaleModule(user.getCompany().getRuc(), search), HttpStatus.OK);
+    }
+
+    /*
+    @GetMapping
     public ResponseEntity<?> getProductByCompany(@RequestParam String barcode,  @CurrentUser UserEntity user) {
         return new ResponseEntity<>(productService.getProductByUserLogged(barcode, user.getCompany().getRuc()), HttpStatus.OK);
     }
+    * */
 
     @PatchMapping("/deactivate")
     public ResponseEntity<?> deactivateProduct(@RequestParam Long id, @CurrentUser UserEntity user) throws Exception {

@@ -41,6 +41,9 @@ public class CompanyEntity {
     @Column(name = "tiene_codigo_barras")
     private boolean hasBarcode;
 
+    @Column(name = "tiene_guardado_automatico")
+    private boolean hasAutomaticSaved;
+
     public CompanyEntity() {}
 
     public CompanyEntity(Long companyId, String comertialName, String ruc) {
@@ -135,6 +138,14 @@ public class CompanyEntity {
 
     public void setHasBarcode(boolean hasBarcode) {
         this.hasBarcode = hasBarcode;
+    }
+
+    public boolean isHasAutomaticSaved() {
+        return hasAutomaticSaved;
+    }
+
+    public void setHasAutomaticSaved(boolean hasAutomaticSaved) {
+        this.hasAutomaticSaved = hasAutomaticSaved;
     }
 
     @Override

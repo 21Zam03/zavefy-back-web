@@ -1,8 +1,9 @@
 package com.example.ventas_bodega.service.impl;
 
 import com.example.ventas_bodega.dto.ProductDto;
+import com.example.ventas_bodega.dto.SaleDetailDto;
 import com.example.ventas_bodega.dto.SaleDto;
-import com.example.ventas_bodega.entity.ProductEntity;
+import com.example.ventas_bodega.dto.interfaces.SaleDetailDtoInter;
 import com.example.ventas_bodega.entity.SaleDetailEntity;
 import com.example.ventas_bodega.entity.SaleEntity;
 import com.example.ventas_bodega.entity.UserEntity;
@@ -57,19 +58,25 @@ public class SaleServiceImpl implements SaleService {
             SaleEntity saleCreated = saleRepository.save(saleToCreate);
             for (int i=0; i<saleDto.getSaleDetails().size(); i++) {
                 //Ha largo plazo modificar este metodo en una cola para optimizar el tiempo del proceso
-                if (!productRepository.existsById(saleDto.getSaleDetails().get(i).getProductId())) {
+                if (saleDto.getSaleDetails().get(i).getProductId() == null && saleDto.getSaleDetails().get(i).isHasAutomaticSaved() && !userEntity.getCompany().isHasStock()) {
                     ProductDto productDto = new ProductDto();
-                    productDto.setUnitePrice(saleDto.getSaleDetails().get(0).getUnitePrice());
+                    productDto.setPrice(saleDto.getSaleDetails().get(0).getUnitePrice());
                     productDto.setName(saleDto.getSaleDetails().get(0).getName());
+                    productDto.setMeasurementUnit(saleDto.getSaleDetails().get(0).getMeasurementUnit());
+                    productDto.setNotes("Producto creado de forma automatica");
+                    productDto.setActive(true);
                     Object[] productCreated = productService.createProduct(productDto, userEntity).getObject();
 
                     saleDto.getSaleDetails().get(i).setProductId(Long.parseLong(productCreated[0].toString()));
+                    saleDto.getSaleDetails().get(i).setNotes(productCreated[4].toString());
                 }
                 SaleDetailEntity saleDetailEntity = SaleDetailMapper.dtoToEntity(saleDto.getSaleDetails().get(i));
                 saleDetailEntity.setSaleEntity(saleCreated);
                 saleDetailRepository.save(saleDetailEntity);
             }
-            productService.createHistoryStock(saleDto.getSaleDetails(), userEntity);
+            if(userEntity.getCompany().isHasStock()) {
+                productService.createHistoryStock(saleDto.getSaleDetails(), userEntity);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             messageResponse.setMessage("ERROR: "+e.getMessage());
@@ -99,7 +106,6 @@ public class SaleServiceImpl implements SaleService {
         Integer lastNumber = null;
         try {
             lastNumber = saleRepository.findMaxNumber(type, serial, user.getCompany().getRuc());
-            System.out.println("LAST NUMBER: "+lastNumber);
             if(lastNumber != null) {
                 lastNumber++;
             } else {
@@ -110,5 +116,11 @@ public class SaleServiceImpl implements SaleService {
             System.out.println("ERROR: "+ e.getMessage());
         }
         return lastNumber;
+    }
+
+    @Override
+    public List<SaleDetailDto> getDetailsOfSale(UserEntity user, Long id) {
+        List<SaleDetailDtoInter> detailEntityList = saleDetailRepository.findDetailsBySaleId(id);
+        return SaleDetailMapper.interListToDtoList(detailEntityList);
     }
 }

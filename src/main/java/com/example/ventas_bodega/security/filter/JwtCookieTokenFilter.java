@@ -39,17 +39,12 @@ public class JwtCookieTokenFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("Entro al filtro");
-
         Cookie[] cookies = request.getCookies();
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
 
                 if ("auth_token".equals(cookie.getName())) {
-
-                    System.out.println("SI tiene cookie");
-
                     try {
                         String jwtToken = cookie.getValue();
 

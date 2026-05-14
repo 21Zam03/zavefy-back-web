@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.repository;
 
+import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.entity.ProductEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     ProductEntity findByBarcodeAndCompany_RucAndActive(String barcode, String ruc, boolean active);
     boolean existsByBarcodeAndCompany_Ruc(String barcode, String ruc);
     Page<ProductEntity> findByCompany_Ruc(String ruc, Pageable pageable);
+    List<ProductEntity> findByCompany_Ruc(String ruc);
 
     @Query(value = """
     SELECT DISTINCT p.*
@@ -63,6 +65,26 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             @Param("active") Boolean active,
             @Param("category") Long categoryId,
             Pageable pageable
+    );
+
+    @Query(
+            value = """
+        SELECT DISTINCT p.*
+        FROM tb_producto p
+        INNER JOIN tb_empresa e 
+            ON p.id_empresa = e.id_empresa
+        WHERE e.ruc = :ruc
+        AND (
+            LOWER(p.nombre) = LOWER(:search)
+            OR p.codigo_barras = :search
+        )
+        ORDER BY p.fecha_actualizacion DESC
+        """,
+            nativeQuery = true
+    )
+    ProductEntity searchProductsByCompanyForSaleModule(
+            @Param("ruc") String ruc,
+            @Param("search") String search
     );
 
     @Modifying

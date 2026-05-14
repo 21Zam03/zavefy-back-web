@@ -27,6 +27,12 @@ public class SaleEntity {
     @Column(name = "monto_total")
     private BigDecimal total;
 
+    @Column(name = "sub_total")
+    private BigDecimal subTotal;
+
+    @Column(name = "monto_igv")
+    private BigDecimal igv;
+
     @Column(name = "fecha_creacion")
     private LocalDateTime createdDate;
 
@@ -44,6 +50,9 @@ public class SaleEntity {
 
     @Column(name = "tipo_documento_cliente")
     private String clientDocumentType;
+
+    @Column(name = "metodo_pago")
+    private String paymentMethod;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
@@ -163,4 +172,29 @@ public class SaleEntity {
     public void setClientDocumentType(String clientDocumentType) {
         this.clientDocumentType = clientDocumentType;
     }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public BigDecimal getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(BigDecimal subTotal) {
+        this.subTotal = subTotal;
+    }
+
+    public BigDecimal getIgv() {
+        return igv;
+    }
+
+    public void setIgv(BigDecimal igv) {
+        this.igv = igv;
+    }
+
 }

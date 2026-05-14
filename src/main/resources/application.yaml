@@ -9,17 +9,12 @@ spring:
     #url: jdbc:mysql://localhost:3306/ventasbodegadb
     url: jdbc:mysql://vps-5943657-x.dattaweb.com:3306/zavefy_db?allowPublicKeyRetrieval=true
     #url: jdbc:mysql://localhost:3306/zavefy_db?allowPublicKeyRetrieval=true
+    #url: jdbc:mysql://vps-5943657-x.dattaweb.com:3306/zavefy_db?allowPublicKeyRetrieval=true
+    #url: jdbc:mysql://localhost:3306/zavefy_db?allowPublicKeyRetrieval=true
     #username: root
     username: zavefy_user
     #password: 123456
     password: josesamuel
-    url: jdbc:mysql://localhost:3306/ventasbodegadb
-    #url: jdbc:mysql://vps-5943657-x.dattaweb.com:3306/zavefy_db?allowPublicKeyRetrieval=true
-    #url: jdbc:mysql://localhost:3306/zavefy_db?allowPublicKeyRetrieval=true
-    username: root
-    #username: zavefy_user
-    password: 123456
-    #password: josesamuel
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -42,3 +37,10 @@ security:
       private: mi_clave_super_secreta_123456
     user:
       generator: ventas-bodega-app
+
+parameters:
+  cookie_is_secure: false
+  cookie_max_age: 1800
+  cookie_name: auth_token
+  cookie_http_only: true
+  cookie_path: /

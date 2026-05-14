@@ -12,7 +12,7 @@ public class ProductDto {
     private String name;
     private String description;
     private BigDecimal price;
-    private BigDecimal unitePrice;
+    private BigDecimal unitPrice;
     private List<String> categories;
     private boolean active;
     private String imageUrl;
@@ -21,6 +21,9 @@ public class ProductDto {
     private String filePath;
     private String createdDate;
     private String updatedDate;
+    private String measurementUnit;
+    private boolean automaticSaved;
+    private String notes;
 
     public ProductDto() {
     }
@@ -141,12 +144,36 @@ public class ProductDto {
         this.updatedDate = updatedDate;
     }
 
-    public BigDecimal getUnitePrice() {
-        return unitePrice;
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
     }
 
-    public void setUnitePrice(BigDecimal unitePrice) {
-        this.unitePrice = unitePrice;
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public String getMeasurementUnit() {
+        return measurementUnit;
+    }
+
+    public void setMeasurementUnit(String measurementUnit) {
+        this.measurementUnit = measurementUnit;
+    }
+
+    public boolean isAutomaticSaved() {
+        return automaticSaved;
+    }
+
+    public void setAutomaticSaved(boolean automaticSaved) {
+        this.automaticSaved = automaticSaved;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     @Override
