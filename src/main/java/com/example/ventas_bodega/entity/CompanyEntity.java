@@ -152,8 +152,17 @@ public class CompanyEntity {
     public String toString() {
         return "CompanyEntity{" +
                 "companyId=" + companyId +
-                ", comertialName='" + comertialName + '\'' +
                 ", ruc='" + ruc + '\'' +
+                ", socialReason='" + socialReason + '\'' +
+                ", comertialName='" + comertialName + '\'' +
+                ", address='" + address + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", hasStock=" + hasStock +
+                ", filePath='" + filePath + '\'' +
+                ", hasBarcode=" + hasBarcode +
+                ", hasAutomaticSaved=" + hasAutomaticSaved +
                 '}';
     }
 }

@@ -12,7 +12,7 @@ public class SalePdfDto {
     private String phoneNumber;
     private String email;
     private String ruc;
-    private String saleName;
+    private String identifier;
     private String clientName;
     private String clientAddress;
     private String clientDocumentNumber;
@@ -24,6 +24,7 @@ public class SalePdfDto {
     private BigDecimal total;
     private String notes;
     private String imageUrl;
+    private String type;
     private List<SaleDetailPdfDto> saleDetailPdfDtoList;
 
     public String getComertialName() {
@@ -74,12 +75,12 @@ public class SalePdfDto {
         this.ruc = ruc;
     }
 
-    public String getSaleName() {
-        return saleName;
+    public String getIdentifier() {
+        return identifier;
     }
 
-    public void setSaleName(String saleName) {
-        this.saleName = saleName;
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public String getClientName() {
@@ -178,4 +179,11 @@ public class SalePdfDto {
         this.imageUrl = imageUrl;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }

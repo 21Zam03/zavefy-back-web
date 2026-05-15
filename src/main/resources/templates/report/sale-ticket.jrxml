@@ -79,60 +79,61 @@
 		<band splitType="Stretch"/>
 	</background>
 	<detail>
-		<band height="129" splitType="Stretch">
+		<band height="80">
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="39" width="205" height="10" uuid="a8c88885-6200-43eb-88eb-c571a7622c13">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["LIMA  -  LIMA  -  LURIN  -  "+$P{direccion}]]></textFieldExpression>
+			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="2" y="103" width="205" height="12" uuid="8d7deb80-4d2a-461c-aa6b-0740eb7c831d"/>
-				<textElement textAlignment="Center">
-					<font fontName="SansSerif" size="9" isBold="true"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="29" width="205" height="10" uuid="8d7deb80-4d2a-461c-aa6b-0740eb7c831d">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{razonSocial}+"  -  "+$P{ruc}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="14" width="205" height="15" uuid="2ebfd940-978a-4ca2-a17c-fec0d730d515">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{nombreComercial}]]></textFieldExpression>
 			</textField>
-			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="5" y="115" width="196" height="12" uuid="2ebfd940-978a-4ca2-a17c-fec0d730d515"/>
-				<textElement textAlignment="Center">
-					<font fontName="SansSerif" size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{razonSocial}]]></textFieldExpression>
-			</textField>
-			<image>
-				<reportElement x="65" y="10" width="84" height="84" uuid="00f62d4a-f73b-46f3-b473-a433684bfecf"/>
-				<imageExpression><![CDATA[$P{urlImage}]]></imageExpression>
-			</image>
-		</band>
-		<band height="10" splitType="Stretch">
-			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="9" y="0" width="196" height="10" uuid="a8c88885-6200-43eb-88eb-c571a7622c13"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="SansSerif" size="7"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{direccion}]]></textFieldExpression>
-			</textField>
-		</band>
-		<band height="33" splitType="Stretch">
 			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="22" width="205" height="11" uuid="298c3cfe-fc8c-413e-b476-fa5322baaf77"/>
-				<textElement textAlignment="Center">
-					<font fontName="SansSerif" size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{serieCorrelativo}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="11" width="205" height="11" uuid="061ef04c-1eb0-43f6-9018-db01cc059d1b"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="53" width="205" height="10" uuid="061ef04c-1eb0-43f6-9018-db01cc059d1b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="SansSerif" size="9" isBold="true"/>
+					<font fontName="SansSerif" size="7" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{nombreComprobante}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="0" width="205" height="11" uuid="a0552329-cd06-4f5e-a78b-92f67a4a5515"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="63" width="205" height="10" uuid="298c3cfe-fc8c-413e-b476-fa5322baaf77">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="SansSerif" size="9" isBold="true"/>
+					<font fontName="SansSerif" size="7" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["RUC "+$P{ruc}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{serieCorrelativo}]]></textFieldExpression>
 			</textField>
-		</band>
-		<band height="15" splitType="Stretch">
-			<printWhenExpression><![CDATA[!$P{isProduction}]]></printWhenExpression>
+			<line>
+				<reportElement x="11" y="53" width="185" height="1" uuid="0bc8e459-bbf0-4150-858f-6dc5ed54f77b"/>
+			</line>
+			<line>
+				<reportElement x="11" y="73" width="185" height="1" uuid="cbe098c4-9a48-47f0-8d2c-7403e74a5d69"/>
+			</line>
 		</band>
 		<band height="11" splitType="Stretch">
 			<printWhenExpression><![CDATA[true]]></printWhenExpression>

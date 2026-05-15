@@ -49,6 +49,8 @@ public class FileServiceImpl implements FileService {
             });
             System.out.println("SALE: " + saleEntity.toString());
             CompanyEntity company = companyRepository.findByRuc(saleEntity.getUser().getCompany().getRuc());
+            System.out.println("COMPANY: "+company.toString());
+
             List<SaleDetailDtoInter> productList = saleDetailRepository.findDetailsBySaleId(id);
             List<SaleDetailPdfDto> saleDetailPdfDtoList = new ArrayList<>();
             for (SaleDetailDtoInter saleDetailDtoInter : productList) {
@@ -61,13 +63,12 @@ public class FileServiceImpl implements FileService {
                 saleDetailPdfDtoList.add(saleDetailPdfDto);
             }
             SalePdfDto salePdfDto = new SalePdfDto();
-            salePdfDto.setComertialName(company.getComertialName());
+            salePdfDto.setComertialName(company.getComertialName().toUpperCase());
             salePdfDto.setSocialReason(company.getSocialReason());
             salePdfDto.setAddress(company.getAddress());
             salePdfDto.setPhoneNumber(company.getPhoneNumber());
             salePdfDto.setEmail(company.getEmail());
             salePdfDto.setRuc(company.getRuc());
-            salePdfDto.setSaleName(saleEntity.getIdentifier());
             salePdfDto.setClientName(saleEntity.getClientName());
             salePdfDto.setClientAddress(saleEntity.getClientAddress());
             salePdfDto.setClientDocumentNumber(saleEntity.getClientDocumentNumber());
@@ -80,6 +81,8 @@ public class FileServiceImpl implements FileService {
             salePdfDto.setNotes(saleEntity.getNotes());
             salePdfDto.setSaleDetailPdfDtoList(saleDetailPdfDtoList);
             salePdfDto.setImageUrl(company.getImageUrl());
+            salePdfDto.setType(saleEntity.getType());
+            salePdfDto.setIdentifier(saleEntity.getIdentifier());
             return new ByteArrayInputStream(getByteFromPdfTicket(salePdfDto));
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,13 +92,22 @@ public class FileServiceImpl implements FileService {
 
     public byte[] getByteFromPdfTicket(SalePdfDto salePdfDto) throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("nombreComercial", salePdfDto.getComertialName());
-        params.put("razonSocial", salePdfDto.getSocialReason());
-        params.put("direccion", salePdfDto.getAddress());
+        params.put("nombreComercial", salePdfDto.getComertialName().toUpperCase());
+        params.put("razonSocial", salePdfDto.getSocialReason().toUpperCase());
+        params.put("direccion", salePdfDto.getAddress().toUpperCase());
         params.put("telefono", salePdfDto.getPhoneNumber());
         params.put("email", salePdfDto.getEmail());
         params.put("ruc", salePdfDto.getRuc());
-        params.put("nombreComprobante", salePdfDto.getSaleName());
+
+        String saleName = "";
+        if(salePdfDto.getType().equals("03")) {
+            saleName = "BOLETA DE VENTA ELECTRONICA";
+        } else {
+            saleName = "FACTURA DE VENTA ELECTRÓNICA";
+        }
+        params.put("nombreComprobante", saleName);
+        System.out.println("serie correlativo: "+getSerieAndNumber(salePdfDto.getIdentifier()));
+        params.put("serieCorrelativo" , getSerieAndNumber(salePdfDto.getIdentifier()));
         params.put("nombreCliente", salePdfDto.getClientName());
         params.put("direccionCliente", salePdfDto.getClientAddress());
         params.put("observaciones", salePdfDto.getNotes());
@@ -133,7 +145,6 @@ public class FileServiceImpl implements FileService {
         params.put("totalPagar", String.valueOf(salePdfDto.getTotal()));
         params.put("listProducts", salePdfDto.getSaleDetailPdfDtoList());
         params.put("urlImage", salePdfDto.getImageUrl());
-        System.out.println("URLIMAGE: "+ salePdfDto.getImageUrl());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             InputStream jasperStream = getJasperCotizacionTemplateFromStorage();
@@ -166,4 +177,18 @@ public class FileServiceImpl implements FileService {
         }
     }
 
+    private String getSerieAndNumber(String value) {
+
+        if (value == null || !value.contains("-")) {
+            return value;
+        }
+
+        String[] parts = value.split("-", 3);
+
+        if (parts.length < 3) {
+            return value;
+        }
+
+        return parts[1] + "-" + parts[2];
+    }
 }
