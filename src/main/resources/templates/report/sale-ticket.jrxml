@@ -5,12 +5,12 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="576"/>
 	<subDataset name="dataset1" uuid="824c3274-942b-427a-bc67-15660564076f">
-		<parameter name="codigoProducto" class="java.lang.Boolean"/>
-		<field name="descripcion" class="java.lang.String"/>
-		<field name="cantidad" class="java.lang.String"/>
-		<field name="precioUnitario" class="java.lang.String"/>
-		<field name="total" class="java.lang.String"/>
-		<field name="codigo" class="java.lang.String"/>
+		<parameter name="barcode" class="java.lang.Boolean"/>
+		<field name="productName" class="java.lang.String"/>
+		<field name="quantity" class="java.lang.String"/>
+		<field name="unitPrice" class="java.lang.String"/>
+		<field name="totalPrice" class="java.lang.String"/>
+		<field name="barcode" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset3" uuid="be315322-e3ee-497b-afba-659b181445e8">
 		<field name="nombreCampo" class="java.lang.String"/>
@@ -64,7 +64,7 @@
 	<parameter name="direccionCliente" class="java.lang.String"/>
 	<parameter name="isc" class="java.lang.String"/>
 	<parameter name="isProduction" class="java.lang.Boolean"/>
-	<parameter name="codigoProducto" class="java.lang.Boolean"/>
+	<parameter name="barcode" class="java.lang.Boolean"/>
 	<parameter name="guiasRemision" class="java.util.List"/>
 	<parameter name="numeroCuentaNoD" class="java.util.List"/>
 	<parameter name="estado_sunat" class="java.lang.String"/>
@@ -277,8 +277,8 @@
 				<reportElement stretchType="RelativeToBandHeight" x="1" y="0" width="205" height="10" isRemoveLineWhenBlank="true" uuid="ffb01de2-9078-41f7-ae5f-c6243354975d"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="dataset1" uuid="a097b6f0-d4ab-488c-bb15-9428cba34100">
-						<datasetParameter name="codigoProducto">
-							<datasetParameterExpression><![CDATA[$P{codigoProducto}]]></datasetParameterExpression>
+						<datasetParameter name="barcode">
+							<datasetParameterExpression><![CDATA[$P{barcode}]]></datasetParameterExpression>
 						</datasetParameter>
 						<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($P{listProducts})]]></dataSourceExpression>
 					</datasetRun>
@@ -288,7 +288,7 @@
 							<textElement textAlignment="Right" verticalAlignment="Middle">
 								<font fontName="SansSerif" size="8"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{totalPrice}]]></textFieldExpression>
 						</textField>
 						<textField textAdjust="StretchHeight" isBlankWhenNull="true">
 							<reportElement positionType="Float" stretchType="ElementGroupHeight" x="30" y="0" width="98" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="987db7c0-b7d3-4995-a1d5-049a91046b23">
@@ -298,14 +298,14 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="SansSerif" size="8"/>
 							</textElement>
-							<textFieldExpression><![CDATA[($F{descripcion}==null?"":$F{descripcion})]]></textFieldExpression>
+							<textFieldExpression><![CDATA[($F{productName}==null?"":$F{productName})]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement positionType="Float" x="128" y="0" width="38" height="10" isRemoveLineWhenBlank="true" uuid="3c1adf93-438d-4a89-9674-22483c236a96"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
 								<font fontName="SansSerif" size="8"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{precioUnitario}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{unitPrice}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement positionType="Float" x="0" y="0" width="30" height="10" isRemoveLineWhenBlank="true" uuid="7e29cf6b-82ec-4089-a96d-47e60d9e0acb"/>
@@ -314,7 +314,7 @@
 								<font fontName="SansSerif" size="8"/>
 								<paragraph leftIndent="1"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{quantity}]]></textFieldExpression>
 						</textField>
 					</jr:listContents>
 				</jr:list>
