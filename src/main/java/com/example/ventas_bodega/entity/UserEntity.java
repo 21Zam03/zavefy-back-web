@@ -37,6 +37,9 @@ public class UserEntity {
     @Column(name= "credenciales_expiradas")
     private boolean credentialExpired;
 
+    @Column(name = "nombre_usuario")
+    private String username;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_usuarios_roles", joinColumns = @JoinColumn(name = "id_usuario"), inverseJoinColumns = @JoinColumn(name = "id_rol"))
     private Set<RoleEntity> roleList;
@@ -146,6 +149,14 @@ public class UserEntity {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override

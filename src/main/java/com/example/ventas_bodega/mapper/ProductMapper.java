@@ -61,7 +61,7 @@ public class ProductMapper {
         product.setUnitePrice(calculatePrice(productDto.getPrice()));
         product.setActive(productDto.isActive());
         product.setImageUrl(productDto.getImageUrl());
-        product.setQuantity(productDto.getStock());
+        //product.setQuantity(productDto.getStock());
         product.setBarcode(productDto.getBarcode());
         product.setMeasurementUnit(productDto.getMeasurementUnit());
         return product;
@@ -127,7 +127,6 @@ public class ProductMapper {
             String description,
             String price,
             String categories,
-            String active,
             String imageUrl,
             String stock,
             String barcode,
@@ -139,7 +138,6 @@ public class ProductMapper {
         productDto.setDescription(description);
         productDto.setPrice(BigDecimal.valueOf(Double.parseDouble(price)));
         productDto.setCategories(Arrays.asList(categories.split(",")));
-        productDto.setActive(Boolean.parseBoolean(active));
         productDto.setStock(Integer.parseInt(stock));
         productDto.setBarcode(barcode);
         productDto.setImageUrl(imageUrl);

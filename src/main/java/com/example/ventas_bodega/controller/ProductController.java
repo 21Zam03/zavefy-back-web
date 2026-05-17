@@ -35,16 +35,15 @@ public class ProductController {
             @RequestPart(value = "description", required = false) String description,
             @RequestPart("price") String price,
             @RequestPart("categories") String categories,
-            @RequestPart("active") String active,
             @RequestPart(value = "imageUrl" , required = false) String imageUrl,
-            @RequestPart("quantity") String quantity,
+            @RequestPart("stock") String stock,
             @RequestPart(value = "barcode", required = false) String barcode,
             @RequestPart(value = "file", required = false) MultipartFile file,
             @CurrentUser UserEntity user
     ) throws Exception {
         logger.info("Intento de crear producto para usuario: {}", user.getEmail());
 
-        ProductDto productDto = ProductMapper.buildProductDtoFromController(null, name, description, price, categories, active, imageUrl, quantity, barcode, file);
+        ProductDto productDto = ProductMapper.buildProductDtoFromController(null, name, description, price, categories, imageUrl, stock, barcode, file);
 
         MessageResponse messageResponse = productService.createProduct(productDto, user);
 
@@ -114,7 +113,7 @@ public class ProductController {
             @CurrentUser UserEntity user
     ) throws Exception {
 
-        ProductDto productDto = ProductMapper.buildProductDtoFromController(Long.valueOf(id), name, description, price, categories, active, imageUrl, quantity, barcode, file);
+        ProductDto productDto = ProductMapper.buildProductDtoFromController(Long.valueOf(id), name, description, price, categories, imageUrl, quantity, barcode, file);
 
         MessageResponse messageResponse = productService.updateProduct(productDto, user);
 

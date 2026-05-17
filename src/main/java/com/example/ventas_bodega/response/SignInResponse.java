@@ -8,6 +8,7 @@ public class SignInResponse {
 
     private String firstname;
     private String lastname;
+    private String username;
     private String email;
     private String companyName;
     private String role;
@@ -21,13 +22,14 @@ public class SignInResponse {
     public SignInResponse() {
     }
 
-    public SignInResponse(String email, String companyName, String role, String message, String token, Integer status) {
+    public SignInResponse(String email, String companyName, String role, String message, String token, Integer status, String username) {
         this.email = email;
         this.companyName = companyName;
         this.role = role;
         this.message = message;
         this.token = token;
         this.status = status;
+        this.username = username;
     }
 
     public String getEmail() {
@@ -116,5 +118,13 @@ public class SignInResponse {
 
     public void setProducts(List<ProductDto> products) {
         this.products = products;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

@@ -5,6 +5,7 @@ public class UserLoggedResponse {
     private String firstName;
     private String lastName;
     private String email;
+    private String username;
     private Long idCompany;
     private boolean hasStock;
     private boolean hasBarcode;
@@ -18,13 +19,14 @@ public class UserLoggedResponse {
     public UserLoggedResponse() {
     }
 
-    public UserLoggedResponse(String firstName, String lastName, String email, Long idCompany, String role, String type) {
+    public UserLoggedResponse(String firstName, String lastName, String email, Long idCompany, String role, String type, String username) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.idCompany = idCompany;
         this.role = role;
         this.type = type;
+        this.username = username;
     }
 
     public String getFirstName() {
@@ -121,5 +123,13 @@ public class UserLoggedResponse {
 
     public void setHasAutomaticSaved(boolean hasAutomaticSaved) {
         this.hasAutomaticSaved = hasAutomaticSaved;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

@@ -99,6 +99,7 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity productToCreate = ProductMapper.dtoToEntity(productDto);
         productToCreate.setCompany(userEntity.getCompany());
         productToCreate.setCategoryEntityList(categoryEntityList);
+        productToCreate.setActive(true);
         ProductEntity productCreated = productRepository.save(productToCreate);
 
         //LOGICA PARA IMAGEN DEL PRODUCTO
@@ -125,7 +126,9 @@ public class ProductServiceImpl implements ProductService {
 
         //LOGICA PARA CREACION DE CODIGO DE BARRAS AUTOMATICO
         if(productCreated.getBarcode() == null) {
-            productRepository.updateBarcodeById(productCreated.getId(), ProductUtil.generarCodigoEAN13(productCreated.getId()));
+            String barcodeGenerated = ProductUtil.generarCodigoEAN13(productCreated.getId());
+            productRepository.updateBarcodeById(productCreated.getId(), barcodeGenerated);
+            productCreated.setBarcode(barcodeGenerated);
         }
 
         //LOGICA PARA REGISTRO DE PRODUCTO A LA TABLA PRODUCT GENERAL
@@ -139,6 +142,7 @@ public class ProductServiceImpl implements ProductService {
 
         messageResponse.setMessage("El producto se ha registrado exitosamente");
         messageResponse.setStatus(true);
+        messageResponse.setProductDto(ProductMapper.entityToDto(productCreated));
         messageResponse.setObject(ProductMapper.entityToObject(productCreated));
 
         System.out.println("RESPONSE: "+messageResponse.toString());

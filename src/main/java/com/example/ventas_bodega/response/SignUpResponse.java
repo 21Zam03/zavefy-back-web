@@ -2,6 +2,7 @@ package com.example.ventas_bodega.response;
 
 public class SignUpResponse {
 
+    private String username;
     private String email;
     private String message;
     private String token;
@@ -10,11 +11,12 @@ public class SignUpResponse {
     public SignUpResponse() {
     }
 
-    public SignUpResponse(String email, String message, String token, Integer status) {
+    public SignUpResponse(String email, String message, String token, Integer status, String username) {
         this.email = email;
         this.message = message;
         this.token = token;
         this.status = status;
+        this.username = username;
     }
 
     public String getEmail() {
@@ -48,4 +50,13 @@ public class SignUpResponse {
     public void setStatus(Integer status) {
         this.status = status;
     }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }
+
