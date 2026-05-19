@@ -30,5 +30,11 @@ public class FileDto {
         this.fileName = fileName;
     }
 
-
+    @Override
+    public String toString() {
+        return "FileDto{" +
+                "url='" + url + '\'' +
+                ", fileName='" + fileName + '\'' +
+                '}';
+    }
 }

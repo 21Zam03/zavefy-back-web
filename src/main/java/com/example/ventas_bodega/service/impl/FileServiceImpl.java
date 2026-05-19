@@ -78,6 +78,7 @@ public class FileServiceImpl implements FileService {
             salePdfDto.setDiscount(saleEntity.getDiscount());
             salePdfDto.setIgv(saleEntity.getIgv());
             salePdfDto.setTotal(saleEntity.getTotal());
+            salePdfDto.setSubTotal(saleEntity.getSubTotal());
             salePdfDto.setNotes(saleEntity.getNotes());
             salePdfDto.setSaleDetailPdfDtoList(saleDetailPdfDtoList);
             salePdfDto.setImageUrl(company.getImageUrl());
@@ -142,10 +143,12 @@ public class FileServiceImpl implements FileService {
         params.put("fechaDate", salePdfDto.getCreatedDate());
         params.put("descuento", String.valueOf(salePdfDto.getDiscount()));
         params.put("igv", String.valueOf(salePdfDto.getIgv()));
+        params.put("subTotal", String.valueOf(salePdfDto));
         params.put("totalPagar", String.valueOf(salePdfDto.getTotal()));
+        params.put("SubTotal", String.valueOf(salePdfDto.getSubTotal()));
         params.put("listProducts", salePdfDto.getSaleDetailPdfDtoList());
         params.put("urlImage", salePdfDto.getImageUrl());
-        System.out.println("DETALLES: "+ salePdfDto.getSaleDetailPdfDtoList());
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             InputStream jasperStream = getJasperCotizacionTemplateFromStorage();

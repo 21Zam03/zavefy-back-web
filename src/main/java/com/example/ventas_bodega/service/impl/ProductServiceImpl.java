@@ -75,7 +75,6 @@ public class ProductServiceImpl implements ProductService {
             CategoryEntity categoryEntity = new CategoryEntity();
             for (int i=0; i<productDto.getCategories().size(); i++) {
                 categoryEntity = categoryRepository.findByName(productDto.getCategories().get(i));
-                System.out.println("CATEGORIA: "+ categoryEntity);
                 if(categoryEntity != null) {
                    categoryEntityList.add(categoryEntity);
                 }
@@ -97,7 +96,6 @@ public class ProductServiceImpl implements ProductService {
         }
 
         ProductEntity productToCreate = ProductMapper.dtoToEntity(productDto);
-        System.out.println("PRODUCTO: "+ productDto);
         productToCreate.setCompany(userEntity.getCompany());
         productToCreate.setCategoryEntityList(categoryEntityList);
         productToCreate.setActive(true);
@@ -111,19 +109,25 @@ public class ProductServiceImpl implements ProductService {
                 String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+productCreated.getId();
                 InputStream inputStream = downloadImage(productDto.getImageUrl());
                 FileDto fileDto = firebaseStorageService.uploadFileFromUrl(inputStream, "/image/jpg", filePath);
-                productDto.setImageUrl(fileDto.getUrl());
-                productDto.setFilePath(filePath);
+                productCreated.setImageUrl(fileDto.getUrl());
+                productCreated.setFilePath(filePath);
             }
         } else {
             //Cuando el cliente sube una imagen de su escritorio
+            System.out.println("FILE SUBIDA POR EL CLIENTE MANUALMENTE: "+productDto.getFile());
             String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+"product-"+productCreated.getId();
             FileDto fileDto = firebaseStorageService.uploadFile(productDto.getFile(), filePath);
-            productDto.setImageUrl(fileDto.getUrl());
-            productDto.setFilePath(filePath);
+            System.out.println("ARCHIVO subido: "+fileDto.toString());
+            productCreated.setImageUrl(fileDto.getUrl());
+            productCreated.setFilePath(filePath);
         }
 
         //ACTUALIZAR EL PRODUCTO CON LA IMAGEN Y FILEPATH query optimizada
-        productRepository.updateImageInfo(productDto.getImageUrl(), productDto.getFilePath(), productCreated.getId(), userEntity.getCompany().getCompanyId());
+        System.out.println("IMAGEN url: "+productDto.getImageUrl());
+        System.out.println("PRODUCT FILE PATH: "+productDto.getFilePath());
+        System.out.println("PRODUCT ID: "+productCreated.getId());
+        System.out.println("COMPANY: "+userEntity.getCompany().getCompanyId());
+        productRepository.updateImageInfo(productCreated.getImageUrl(), productCreated.getFilePath(), productCreated.getId(), userEntity.getCompany().getCompanyId());
 
         //LOGICA PARA CREACION DE CODIGO DE BARRAS AUTOMATICO
         if(productCreated.getBarcode() == null) {
@@ -133,8 +137,8 @@ public class ProductServiceImpl implements ProductService {
         }
 
         //LOGICA PARA REGISTRO DE PRODUCTO A LA TABLA PRODUCT GENERAL
-        if(productDto.getBarcode() != null) {
-            boolean exists = productGeneralRepository.existsByBarcode(productDto.getBarcode());
+        if(productCreated.getBarcode() != null) {
+            boolean exists = productGeneralRepository.existsByBarcode(productCreated.getBarcode());
             if(!exists){
                 ProductGeneralEntity productGeneralToCreate = ProductMapper.dtoToEntityGeneral(productDto);
                 productGeneralRepository.save(productGeneralToCreate);
@@ -218,7 +222,7 @@ public class ProductServiceImpl implements ProductService {
                 }
             } else {
                 //Cuando el cliente sube una imagen de su escritorio
-                System.out.println("FILE: "+productDto.getFile());
+                System.out.println("FILE SUBIDA POR EL CLIENTE MANUALMENTE: "+productDto.getFile());
                 String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+"product-"+productToupdate.getId();
                 FileDto fileDto = firebaseStorageService.uploadFile(productDto.getFile(), filePath);
                 productToupdate.setImageUrl(fileDto.getUrl());
