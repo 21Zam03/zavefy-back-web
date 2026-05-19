@@ -97,6 +97,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         ProductEntity productToCreate = ProductMapper.dtoToEntity(productDto);
+        System.out.println("PRODUCTO: "+ productDto);
         productToCreate.setCompany(userEntity.getCompany());
         productToCreate.setCategoryEntityList(categoryEntityList);
         productToCreate.setActive(true);
@@ -170,9 +171,6 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductDto> getProductsByCompany(String ruc, String barcode, String name, String stockStatus, Boolean active, Long categoryId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductEntity> productEntityPage = productRepository.findProductsByCompanyAndBarcode(ruc, barcode, name, stockStatus, active, categoryId, pageable);
-        for (ProductEntity productEntity : productEntityPage.getContent()) {
-            System.out.println("PRODUCTO: "+productEntity.toString());
-        }
         List<ProductDto> productDtoList = new ArrayList<>();
         for (ProductEntity productEntity : productEntityPage.getContent()) {
             ProductDto productDto = ProductMapper.entityToDto(productEntity);
@@ -228,7 +226,6 @@ public class ProductServiceImpl implements ProductService {
             }
 
 
-
             if(productDto.getBarcode() != null) {
                 productToupdate.setBarcode(productDto.getBarcode());
             }
@@ -237,14 +234,17 @@ public class ProductServiceImpl implements ProductService {
                 productToupdate.setName(productDto.getName());
             }
 
-            if(productToupdate.getDescription() != null) {
+            if(productDto.getDescription() != null) {
                 productToupdate.setDescription(productDto.getDescription());
             }
 
-            if(productToupdate.getPrice() != null) {
+            if(productDto.getPrice() != null) {
                 productToupdate.setPrice(productDto.getPrice());
             }
 
+            if(productDto.getMeasurementUnit() != null) {
+                productToupdate.setMeasurementUnit(productDto.getMeasurementUnit());
+            }
 
             if(productToupdate.getCategoryEntityList() != null) {
                 List<CategoryEntity> list = new ArrayList<>();
@@ -269,7 +269,7 @@ public class ProductServiceImpl implements ProductService {
                 productToupdate.setCategoryEntityList(list);
             }
 
-            productToupdate.setActive(productDto.isActive());
+            productToupdate.setActive(true);
             productRepository.save(productToupdate);
 
             messageResponse.setStatus(true);

@@ -56,4 +56,16 @@ public class SaleDetailPdfDto {
     public void setBarcode(String barcode) {
         this.barcode = barcode;
     }
+
+    @Override
+    public String toString() {
+        return "SaleDetailPdfDto{" +
+                "productName='" + productName + '\'' +
+                ", quantity='" + quantity + '\'' +
+                ", unitPrice='" + unitPrice + '\'' +
+                ", totalPrice='" + totalPrice + '\'' +
+                ", measurementUnit='" + measurementUnit + '\'' +
+                ", barcode='" + barcode + '\'' +
+                '}';
+    }
 }

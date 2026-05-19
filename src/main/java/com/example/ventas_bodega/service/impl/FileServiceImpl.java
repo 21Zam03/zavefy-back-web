@@ -49,7 +49,6 @@ public class FileServiceImpl implements FileService {
             });
             System.out.println("SALE: " + saleEntity.toString());
             CompanyEntity company = companyRepository.findByRuc(saleEntity.getUser().getCompany().getRuc());
-            System.out.println("COMPANY: "+company.toString());
 
             List<SaleDetailDtoInter> productList = saleDetailRepository.findDetailsBySaleId(id);
             List<SaleDetailPdfDto> saleDetailPdfDtoList = new ArrayList<>();
@@ -60,6 +59,7 @@ public class FileServiceImpl implements FileService {
                 saleDetailPdfDto.setUnitPrice(String.valueOf(saleDetailDtoInter.getUnitePrice()));
                 saleDetailPdfDto.setTotalPrice(String.valueOf(saleDetailDtoInter.getTotal()));
                 saleDetailPdfDto.setMeasurementUnit(String.valueOf(saleDetailDtoInter.getMeasurementUnit()));
+                saleDetailPdfDto.setQuantity(String.valueOf(saleDetailDtoInter.getQuantity()));
                 saleDetailPdfDtoList.add(saleDetailPdfDto);
             }
             SalePdfDto salePdfDto = new SalePdfDto();
@@ -145,6 +145,7 @@ public class FileServiceImpl implements FileService {
         params.put("totalPagar", String.valueOf(salePdfDto.getTotal()));
         params.put("listProducts", salePdfDto.getSaleDetailPdfDtoList());
         params.put("urlImage", salePdfDto.getImageUrl());
+        System.out.println("DETALLES: "+ salePdfDto.getSaleDetailPdfDtoList());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             InputStream jasperStream = getJasperCotizacionTemplateFromStorage();

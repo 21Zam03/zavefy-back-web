@@ -130,18 +130,20 @@ public class ProductMapper {
             String imageUrl,
             String stock,
             String barcode,
-            MultipartFile file
+            MultipartFile file,
+            String measurementUnit
     ) {
         ProductDto productDto = new ProductDto();
         productDto.setId(id);
         productDto.setName(name);
         productDto.setDescription(description);
         productDto.setPrice(BigDecimal.valueOf(Double.parseDouble(price)));
-        productDto.setCategories(Arrays.asList(categories.split(",")));
-        productDto.setStock(Integer.parseInt(stock));
+        productDto.setCategories(categories != null ? Arrays.asList(categories.split(",")) : null);
+        productDto.setStock(stock != null ? Integer.parseInt(stock) : 0);
         productDto.setBarcode(barcode);
         productDto.setImageUrl(imageUrl);
         productDto.setFile(file);
+        productDto.setMeasurementUnit(measurementUnit);
         return productDto;
     }
 

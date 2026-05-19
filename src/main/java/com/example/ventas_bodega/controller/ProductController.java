@@ -34,16 +34,17 @@ public class ProductController {
             @RequestPart("name") String name,
             @RequestPart(value = "description", required = false) String description,
             @RequestPart("price") String price,
-            @RequestPart("categories") String categories,
+            @RequestPart(value = "categories", required = false) String categories,
             @RequestPart(value = "imageUrl" , required = false) String imageUrl,
             @RequestPart("stock") String stock,
             @RequestPart(value = "barcode", required = false) String barcode,
             @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestParam("measurementUnit") String measurementUnit,
             @CurrentUser UserEntity user
     ) throws Exception {
         logger.info("Intento de crear producto para usuario: {}", user.getEmail());
 
-        ProductDto productDto = ProductMapper.buildProductDtoFromController(null, name, description, price, categories, imageUrl, stock, barcode, file);
+        ProductDto productDto = ProductMapper.buildProductDtoFromController(null, name, description, price, categories, imageUrl, stock, barcode, file, measurementUnit);
 
         MessageResponse messageResponse = productService.createProduct(productDto, user);
 
@@ -101,19 +102,19 @@ public class ProductController {
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateProduct(
             @RequestParam("id") String id,
-            @RequestPart("name") String name,
-            @RequestPart(value = "description", required = false) String description,
-            @RequestPart("price") String price,
-            @RequestPart("categories") String categories,
-            @RequestPart("active") String active,
-            @RequestPart(value = "imageUrl" , required = false) String imageUrl,
-            @RequestPart("quantity") String quantity,
-            @RequestPart(value = "barcode", required = false) String barcode,
-            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestParam("name") String name,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam("price") String price,
+            @RequestParam(value = "categories", required = false) String categories,
+            @RequestParam(value = "imageUrl" , required = false) String imageUrl,
+            @RequestParam(value = "stock") String stock,
+            @RequestParam(value = "barcode", required = false) String barcode,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "measurementUnit") String measurementUnit,
             @CurrentUser UserEntity user
     ) throws Exception {
-
-        ProductDto productDto = ProductMapper.buildProductDtoFromController(Long.valueOf(id), name, description, price, categories, imageUrl, quantity, barcode, file);
+        System.out.println("MEASUREMENT UNIT+ "+measurementUnit);
+        ProductDto productDto = ProductMapper.buildProductDtoFromController(Long.valueOf(id), name, description, price, categories, imageUrl, stock, barcode, file, measurementUnit);
 
         MessageResponse messageResponse = productService.updateProduct(productDto, user);
 

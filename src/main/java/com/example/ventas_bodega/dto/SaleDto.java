@@ -11,6 +11,8 @@ public class SaleDto {
     private String serial;
     private Integer number;
     private BigDecimal total;
+    private BigDecimal subTotal;
+    private BigDecimal igv;
     private LocalDateTime createdDate;
     private String registerDate;
     private String moneyType;
@@ -18,6 +20,7 @@ public class SaleDto {
     private String clientDocumentNumber;
     private String clientDocumentType;
     private String paymentMethod;
+    private BigDecimal discount;
     private List<SaleDetailDto> saleDetails;
 
     public Integer getVentaId() {
@@ -123,4 +126,29 @@ public class SaleDto {
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
+
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(BigDecimal discount) {
+        this.discount = discount;
+    }
+
+    public BigDecimal getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(BigDecimal subTotal) {
+        this.subTotal = subTotal;
+    }
+
+    public BigDecimal getIgv() {
+        return igv;
+    }
+
+    public void setIgv(BigDecimal igv) {
+        this.igv = igv;
+    }
+
 }

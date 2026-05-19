@@ -184,11 +184,18 @@ public class ProductDto {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", price=" + price +
+                ", unitPrice=" + unitPrice +
                 ", categories=" + categories +
                 ", active=" + active +
                 ", imageUrl='" + imageUrl + '\'' +
                 ", stock=" + stock +
+                ", file=" + file +
+                ", filePath='" + filePath + '\'' +
+                ", createdDate='" + createdDate + '\'' +
+                ", updatedDate='" + updatedDate + '\'' +
+                ", measurementUnit='" + measurementUnit + '\'' +
+                ", automaticSaved=" + automaticSaved +
+                ", notes='" + notes + '\'' +
                 '}';
     }
-
 }
