@@ -27,6 +27,7 @@ public class SalePdfDto {
     private String imageUrl;
     private String type;
     private List<SaleDetailPdfDto> saleDetailPdfDtoList;
+    private String seller;
 
     public String getComertialName() {
         return comertialName;
@@ -194,5 +195,13 @@ public class SalePdfDto {
 
     public void setSubTotal(BigDecimal subTotal) {
         this.subTotal = subTotal;
+    }
+
+    public String getSeller() {
+        return seller;
+    }
+
+    public void setSeller(String seller) {
+        this.seller = seller;
     }
 }

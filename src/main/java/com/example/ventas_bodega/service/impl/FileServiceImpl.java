@@ -10,6 +10,8 @@ import com.example.ventas_bodega.repository.CompanyRepository;
 import com.example.ventas_bodega.repository.SaleDetailRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
 import com.example.ventas_bodega.service.FileService;
+import com.example.ventas_bodega.util.DateUtil;
+import com.example.ventas_bodega.util.MoneyUtil;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.util.JRLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,6 +87,7 @@ public class FileServiceImpl implements FileService {
             salePdfDto.setImageUrl(company.getImageUrl());
             salePdfDto.setType(saleEntity.getType());
             salePdfDto.setIdentifier(saleEntity.getIdentifier());
+            salePdfDto.setSeller(saleEntity.getUser().getFirstname()+" "+saleEntity.getUser().getLastname());
             return new ByteArrayInputStream(getByteFromPdfTicket(salePdfDto));
         } catch (Exception e) {
             e.printStackTrace();
@@ -107,7 +111,6 @@ public class FileServiceImpl implements FileService {
             saleName = "FACTURA DE VENTA ELECTRÓNICA";
         }
         params.put("nombreComprobante", saleName);
-        System.out.println("serie correlativo: "+getSerieAndNumber(salePdfDto.getIdentifier()));
         params.put("serieCorrelativo" , getSerieAndNumber(salePdfDto.getIdentifier()));
         params.put("nombreCliente", salePdfDto.getClientName());
         params.put("direccionCliente", salePdfDto.getClientAddress());
@@ -140,14 +143,19 @@ public class FileServiceImpl implements FileService {
         params.put("tipoDocCliente", tipoDocumento);
         params.put("numDocCliente", salePdfDto.getClientDocumentNumber());
         params.put("moneda", salePdfDto.getMoneyType());
-        params.put("fechaDate", salePdfDto.getCreatedDate());
+        params.put("fecha", DateUtil.formatToYearMonthDay(salePdfDto.getCreatedDate()));
+        params.put("hora", DateUtil.formatToHourMinute(salePdfDto.getCreatedDate()));
         params.put("descuento", String.valueOf(salePdfDto.getDiscount()));
         params.put("igv", String.valueOf(salePdfDto.getIgv()));
-        params.put("subTotal", String.valueOf(salePdfDto));
+        params.put("subTotal", String.valueOf(salePdfDto.getSubTotal()));
         params.put("totalPagar", String.valueOf(salePdfDto.getTotal()));
-        params.put("SubTotal", String.valueOf(salePdfDto.getSubTotal()));
         params.put("listProducts", salePdfDto.getSaleDetailPdfDtoList());
         params.put("urlImage", salePdfDto.getImageUrl());
+        params.put("vendedor", salePdfDto.getSeller());
+
+        String stringMoneda = salePdfDto.getMoneyType() != null ? salePdfDto.getMoneyType().equalsIgnoreCase("USD") ? "Dólares Americanos" : salePdfDto.getMoneyType().equalsIgnoreCase("EUR") ? "Euros" :"Soles" : "Soles";
+
+        params.put("montoLetras", MoneyUtil.convertir(salePdfDto.getTotal().setScale(2, BigDecimal.ROUND_HALF_UP).toString(), stringMoneda, true));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {

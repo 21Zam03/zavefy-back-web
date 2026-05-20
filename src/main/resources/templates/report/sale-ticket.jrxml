@@ -76,6 +76,7 @@
 	<parameter name="porcentajeRetencionDetraccion" class="java.lang.String"/>
 	<parameter name="montoRetencionDetraccion" class="java.lang.String"/>
 	<parameter name="retencionDetraccion" class="java.lang.String"/>
+	<parameter name="vendedor" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -156,7 +157,7 @@
 				<textElement verticalAlignment="Middle" markup="html">
 					<font fontName="SansSerif" size="7" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>Hora: </b>"+$P{fecha}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>Hora: </b>"+$P{hora}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="0" y="20" width="205" height="10" isRemoveLineWhenBlank="true" uuid="e13fe104-3fd5-4280-8162-627cb5ac8976"/>
@@ -170,7 +171,7 @@
 				<textElement verticalAlignment="Middle" markup="html">
 					<font fontName="SansSerif" size="7" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>Vendedor: </b>"+$P{fecha}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>Vendedor: </b>"+$P{vendedor}]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="12">
@@ -263,11 +264,11 @@
 				<textFieldExpression><![CDATA[$P{totalPagar}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="12" y="60" width="190" height="10" uuid="10d78bbc-c5af-4150-992b-68ff99514c38"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="60" width="205" height="10" uuid="10d78bbc-c5af-4150-992b-68ff99514c38"/>
 				<textElement markup="html">
-					<font fontName="SansSerif" size="8"/>
+					<font fontName="SansSerif" size="7"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>IMPORTE EN LETRAS: </b>"+$P{montoLetras}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>Son: </b>"+$P{montoLetras}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="168" y="22" width="38" height="10" uuid="072a5ffe-c409-46d3-b588-0b5e857dff06"/>
