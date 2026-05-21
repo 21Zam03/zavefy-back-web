@@ -1,8 +1,7 @@
 package com.example.ventas_bodega.service;
 
-import com.example.ventas_bodega.dto.CategoryDto;
-import com.example.ventas_bodega.dto.MeasurementUnitDto;
-import com.example.ventas_bodega.dto.YapeDto;
+import com.example.ventas_bodega.dto.*;
+import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.response.MessageResponse;
 import org.springframework.data.domain.Page;
 
@@ -15,5 +14,6 @@ public interface MaintenanceService {
     public Page<CategoryDto> getCategoriesWithPagination(Long UserId, String name, int page, int size);
     public List<YapeDto> getYapesByCompany(Long companyId);
     public List<MeasurementUnitDto> getMeasurementUnits();
+    public MessageResponse createCompany(CompanyDto companyDto, UserDto userDto, UserEntity user, boolean isTest);
 
 }

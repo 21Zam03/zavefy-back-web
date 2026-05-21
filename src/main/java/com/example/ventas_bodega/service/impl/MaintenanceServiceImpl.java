@@ -1,19 +1,10 @@
 package com.example.ventas_bodega.service.impl;
 
-import com.example.ventas_bodega.dto.CategoryDto;
-import com.example.ventas_bodega.dto.MeasurementUnitDto;
-import com.example.ventas_bodega.dto.YapeDto;
+import com.example.ventas_bodega.dto.*;
 import com.example.ventas_bodega.dto.interfaces.CategoryDtoInter;
-import com.example.ventas_bodega.entity.CategoryClientEntity;
-import com.example.ventas_bodega.entity.CategoryEntity;
-import com.example.ventas_bodega.entity.MeasurementUnitEntity;
-import com.example.ventas_bodega.mapper.CategoryMapper;
-import com.example.ventas_bodega.mapper.MeasurementUnitMapper;
-import com.example.ventas_bodega.mapper.YapeMapper;
-import com.example.ventas_bodega.repository.CategoryClientRepository;
-import com.example.ventas_bodega.repository.CategoryRepository;
-import com.example.ventas_bodega.repository.MeasurementUnitRepository;
-import com.example.ventas_bodega.repository.YapeRepository;
+import com.example.ventas_bodega.entity.*;
+import com.example.ventas_bodega.mapper.*;
+import com.example.ventas_bodega.repository.*;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.MaintenanceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,28 +15,34 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class MaintenanceServiceImpl implements MaintenanceService {
 
+    private final UserRepository userRepository;
     private CategoryRepository categoryRepository;
     private YapeRepository yapeRepository;
     private CategoryClientRepository categoryClientRepository;
     private MeasurementUnitRepository measurementUnitRepository;
+    private CompanyRepository companyRepository;
 
     @Autowired
     public MaintenanceServiceImpl(
             CategoryRepository categoryRepository,
             YapeRepository yapeRepository,
             CategoryClientRepository categoryClientRepository,
-            MeasurementUnitRepository measurementUnitRepository
-    ) {
+            MeasurementUnitRepository measurementUnitRepository,
+            CompanyRepository companyRepository,
+            UserRepository userRepository) {
         this.categoryRepository = categoryRepository;
         this.yapeRepository = yapeRepository;
         this.categoryClientRepository = categoryClientRepository;
         this.measurementUnitRepository = measurementUnitRepository;
+        this.companyRepository = companyRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -105,6 +102,33 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     public List<MeasurementUnitDto> getMeasurementUnits() {
         List<MeasurementUnitEntity> measurementUnitEntityList = measurementUnitRepository.findAll();
         return MeasurementUnitMapper.entityListToDtoList(measurementUnitEntityList);
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse createCompany(CompanyDto companyDto, UserDto userDto, UserEntity user, boolean isTest) {
+        MessageResponse messageResponse = new MessageResponse();
+        try {
+
+            CompanyEntity companyEntity = CompanyMapper.dtoToEntity(companyDto);
+            CompanyEntity companyCreated = companyRepository.save(companyEntity);
+
+            UserEntity userEntity = UserMapper.dtoToEntity(userDto);
+            userEntity.setCompany(companyCreated);
+            userEntity.setEnabled(true);
+            userEntity.setAccountExpired(false);
+            userEntity.setAccountLocked(false);
+            userEntity.setCredentialExpired(false);
+            userEntity.setPasswordReset(true);
+            userEntity.setPasswordUpdateDate(LocalDateTime.now());
+            userRepository.save(userEntity);
+
+            messageResponse.setStatus(true);
+            messageResponse.setMessage("Empresa creada con exitosamente");
+            return messageResponse;
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package com.example.ventas_bodega.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -36,6 +37,12 @@ public class UserEntity {
 
     @Column(name= "credenciales_expiradas")
     private boolean credentialExpired;
+
+    @Column(name = "reseteo_contrasena")
+    private boolean passwordReset;
+
+    @Column(name = "fecha_actualizacion_contrasena")
+    private LocalDateTime passwordUpdateDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_usuarios_roles", joinColumns = @JoinColumn(name = "id_usuario"), inverseJoinColumns = @JoinColumn(name = "id_rol"))
@@ -146,6 +153,22 @@ public class UserEntity {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public boolean isPasswordReset() {
+        return passwordReset;
+    }
+
+    public void setPasswordReset(boolean passwordReset) {
+        this.passwordReset = passwordReset;
+    }
+
+    public LocalDateTime getPasswordUpdateDate() {
+        return passwordUpdateDate;
+    }
+
+    public void setPasswordUpdateDate(LocalDateTime passwordUpdateDate) {
+        this.passwordUpdateDate = passwordUpdateDate;
     }
 
     @Override

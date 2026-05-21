@@ -44,6 +44,9 @@ public class CompanyEntity {
     @Column(name = "tiene_guardado_automatico")
     private boolean hasAutomaticSaved;
 
+    @Column(name = "es_prueba")
+    private boolean isTest;
+
     public CompanyEntity() {}
 
     public CompanyEntity(Long companyId, String comertialName, String ruc) {
@@ -146,6 +149,14 @@ public class CompanyEntity {
 
     public void setHasAutomaticSaved(boolean hasAutomaticSaved) {
         this.hasAutomaticSaved = hasAutomaticSaved;
+    }
+
+    public boolean isTest() {
+        return isTest;
+    }
+
+    public void setTest(boolean test) {
+        isTest = test;
     }
 
     @Override

@@ -1,14 +1,20 @@
 package com.example.ventas_bodega.controller;
 
 import com.example.ventas_bodega.dto.CategoryDto;
+import com.example.ventas_bodega.dto.CompanyDto;
+import com.example.ventas_bodega.dto.UserDto;
 import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.mapper.CompanyMapper;
+import com.example.ventas_bodega.mapper.UserMapper;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.MaintenanceService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(MaintenanceController.API_PATH)
@@ -54,6 +60,31 @@ public class MaintenanceController {
     @GetMapping("/measurementUnits")
     public ResponseEntity<?> getMeasurementUnits(@CurrentUser UserEntity user) {
         return new ResponseEntity<>(maintenanceService.getMeasurementUnits(), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/company", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createCompany(
+            @RequestParam("ruc") String ruc,
+            @RequestParam("socialReason") String socialReason,
+            @RequestParam("comertialName") String comertialName,
+            @RequestParam("address") String address,
+            @RequestParam("email") String email,
+            @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam(value = "imageUrl" , required = false) String imageUrl,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam("hasBarcode") String hasBarcode,
+            @RequestParam("username") String username,
+            @RequestParam("password") String password,
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("userEmail") String userEmail,
+            @RequestParam("userPhoneNumber") String userPhoneNumber,
+            @RequestParam("isTest") String isTest,
+            @CurrentUser UserEntity user
+    ) {
+        CompanyDto companyDto = CompanyMapper.buildCompanyDtoFromController(null, ruc, socialReason, comertialName, address, email, phoneNumber, imageUrl, file, hasBarcode);
+        UserDto userDto = UserMapper.buildCompanyDtoFromController(username, password, firstName, lastName, userEmail, userPhoneNumber);
+        return new ResponseEntity<>(maintenanceService.createCompany(companyDto, userDto, user, Boolean.parseBoolean(isTest)), HttpStatus.CREATED);
     }
 
 }

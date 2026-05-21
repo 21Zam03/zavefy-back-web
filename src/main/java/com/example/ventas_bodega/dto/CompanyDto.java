@@ -16,6 +16,7 @@ public class CompanyDto {
     private String filePath;
     private boolean hasStock;
     private boolean hasBarcode;
+    private boolean isTest;
 
     public CompanyDto() {
     }
@@ -125,5 +126,13 @@ public class CompanyDto {
 
     public void setHasBarcode(boolean hasBarcode) {
         this.hasBarcode = hasBarcode;
+    }
+
+    public boolean isTest() {
+        return isTest;
+    }
+
+    public void setTest(boolean test) {
+        isTest = test;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.controller;
 
+import com.example.ventas_bodega.request.ChangePasswordRequest;
 import com.example.ventas_bodega.request.SignInRequest;
 import com.example.ventas_bodega.request.SignUpRequest;
 import com.example.ventas_bodega.response.SignInResponse;
@@ -55,6 +56,7 @@ public class AuthController {
         }
     }
 
+    /*
     @PostMapping("/signUp")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest, HttpServletResponse response) {
         logger.info("Intento de signUp para usuario: {}", signUpRequest.getEmail());
@@ -66,6 +68,7 @@ public class AuthController {
         signUpResponse.setToken(null);
         return new ResponseEntity<>(signUpResponse, HttpStatus.CREATED);
     }
+    * */
 
     @PostMapping("/signOut")
     public ResponseEntity<?> signOut(HttpServletResponse response) {
@@ -94,6 +97,11 @@ public class AuthController {
         }
         UserLoggedResponse userLoggedResponse = authService.validateSession(token);
         return new ResponseEntity<>(userLoggedResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/change")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        return new ResponseEntity<>("", HttpStatus.OK);
     }
 
     private String extractTokenFromCookie(HttpServletRequest request) {
