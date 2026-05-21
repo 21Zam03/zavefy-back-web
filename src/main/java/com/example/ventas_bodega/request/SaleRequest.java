@@ -13,6 +13,8 @@ public class SaleRequest {
     private String serial;
     private Integer number;
     private BigDecimal total;
+    private BigDecimal subTotal;
+    private BigDecimal igv;
     private LocalDateTime createdDate;
     private String moneyType;
     private String clientName;
@@ -126,5 +128,21 @@ public class SaleRequest {
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public BigDecimal getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(BigDecimal subTotal) {
+        this.subTotal = subTotal;
+    }
+
+    public BigDecimal getIgv() {
+        return igv;
+    }
+
+    public void setIgv(BigDecimal igv) {
+        this.igv = igv;
     }
 }

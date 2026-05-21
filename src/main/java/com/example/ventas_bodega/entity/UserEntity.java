@@ -2,7 +2,6 @@ package com.example.ventas_bodega.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -37,6 +36,9 @@ public class UserEntity {
 
     @Column(name= "credenciales_expiradas")
     private boolean credentialExpired;
+
+    @Column(name = "nombre_usuario")
+    private String username;
 
     @Column(name = "reseteo_contrasena")
     private boolean passwordReset;
@@ -153,6 +155,14 @@ public class UserEntity {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public boolean isPasswordReset() {

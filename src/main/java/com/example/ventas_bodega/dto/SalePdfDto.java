@@ -22,10 +22,12 @@ public class SalePdfDto {
     private BigDecimal discount;
     private BigDecimal igv;
     private BigDecimal total;
+    private BigDecimal subTotal;
     private String notes;
     private String imageUrl;
     private String type;
     private List<SaleDetailPdfDto> saleDetailPdfDtoList;
+    private String seller;
 
     public String getComertialName() {
         return comertialName;
@@ -185,5 +187,21 @@ public class SalePdfDto {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public BigDecimal getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(BigDecimal subTotal) {
+        this.subTotal = subTotal;
+    }
+
+    public String getSeller() {
+        return seller;
+    }
+
+    public void setSeller(String seller) {
+        this.seller = seller;
     }
 }

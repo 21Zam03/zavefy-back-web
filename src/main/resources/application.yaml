@@ -16,7 +16,14 @@ spring:
     #password: 123456
     password: josesamuel
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000
+      max-lifetime: 540000
+      keepalive-time: 300000
+      connection-timeout: 30000
+      validation-timeout: 5000
   jpa:
     generate-ddl: false
     show-sql: false
@@ -31,6 +38,12 @@ spring:
     hibernate:
       ddl-auto: update
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 25MB
+      max-request-size: 25MB
+
 security:
   jwt:
     key:
@@ -44,3 +57,4 @@ parameters:
   cookie_name: auth_token
   cookie_http_only: true
   cookie_path: /
+

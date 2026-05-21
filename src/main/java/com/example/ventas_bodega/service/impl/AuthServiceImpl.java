@@ -17,6 +17,9 @@ import com.example.ventas_bodega.response.UserLoggedResponse;
 import com.example.ventas_bodega.service.AuthService;
 import com.example.ventas_bodega.util.JwtUtil;
 import org.hibernate.service.spi.ServiceException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +39,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+
 
     public AuthServiceImpl(
             UserRepository userRepository,
@@ -43,13 +48,15 @@ public class AuthServiceImpl implements AuthService {
             CompanyRepository companyRepository,
             JwtUtil jwtUtil,
             PasswordEncoder passwordEncoder,
-            ProductRepository productRepository) {
+            ProductRepository productRepository,
+            AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.companyRepository = companyRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.productRepository = productRepository;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
@@ -80,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
         userToCreate.setCredentialExpired(false);
         userToCreate.setRoleList(roleList);
         userToCreate.setCompany(company);
+        userToCreate.setUsername(signUpRequest.getUsername());
 
         UserEntity userCreated = userRepository.save(userToCreate);
 
@@ -96,22 +104,28 @@ public class AuthServiceImpl implements AuthService {
                 .map(PermissionEntity::getName)
                 .toList();
 
-        String accessToken = jwtUtil.createToken(userCreated.getEmail(), nombresRoles, nombresPermisos);
-        return new SignUpResponse(userCreated.getEmail(), "Client was registered successfully", accessToken, 200);
+        String accessToken = jwtUtil.createToken(userCreated.getUsername(), nombresRoles, nombresPermisos);
+        return new SignUpResponse(userCreated.getEmail(), "Client was registered successfully", accessToken, 200, userCreated.getUsername());
     }
 
     @Override
     public SignInResponse signIn(SignInRequest signInRequest) {
-        String email = signInRequest.getEmail();
-        String password = signInRequest.getPassword();
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
-
-        if(!passwordEncoder.matches(password, user.getPassword())) {
-            SignInResponse signInResponse = new SignInResponse();
-            signInResponse.setStatus(401);
-            signInResponse.setMessage("Contraseña invalida");
-            return signInResponse;
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            signInRequest.getUsername(),
+                            signInRequest.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(
+                    "Correo o contraseña incorrectos"
+            );
         }
+
+        UserEntity user = userRepository.findByUsername(signInRequest.getUsername())
+                .orElseThrow(() ->
+                        new NotFoundException("Usuario no encontrado"));
 
         Set<RoleEntity> roles = user.getRoleList();
 
@@ -127,17 +141,33 @@ public class AuthServiceImpl implements AuthService {
                 .map(PermissionEntity::getName)
                 .toList();
 
-        String accessToken = jwtUtil.createToken(user.getEmail(), nombresRoles, nombresPermisos);
+        String accessToken = jwtUtil.createToken(
+                user.getUsername(),
+                nombresRoles,
+                nombresPermisos
+        );
 
         SignInResponse signInResponse = new SignInResponse();
-        signInResponse.setCompanyName(user.getCompany().getComertialName());
+
+        signInResponse.setCompanyName(
+                user.getCompany().getComertialName()
+        );
+
         signInResponse.setRole(nombresRoles.get(0));
         signInResponse.setEmail(user.getEmail());
+        signInResponse.setUsername(user.getUsername());
         signInResponse.setFirstname(user.getFirstname());
         signInResponse.setLastname(user.getLastname());
 
-        List<ProductEntity> productEntityList = productRepository.findByCompany_Ruc(user.getCompany().getRuc());
-        signInResponse.setProducts(ProductMapper.entityListToDtoList(productEntityList));
+        List<ProductEntity> productEntityList =
+                productRepository.findByCompany_Ruc(
+                        user.getCompany().getRuc()
+                );
+
+        signInResponse.setProducts(
+                ProductMapper.entityListToDtoList(productEntityList)
+        );
+
         signInResponse.setMessage("User logged successfully");
         signInResponse.setToken(accessToken);
         signInResponse.setStatus(200);
@@ -148,8 +178,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserLoggedResponse validateSession(String token) {
         DecodedJWT decodedJWT = jwtUtil.verifyToken(token);
-        String email = jwtUtil.extractUsername(decodedJWT);
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
+        String username = jwtUtil.extractUsername(decodedJWT);
+        UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
         List<RoleEntity> list = new ArrayList<>(user.getRoleList());
 
         UserLoggedResponse userLoggedResponse = new UserLoggedResponse();
@@ -164,6 +194,7 @@ public class AuthServiceImpl implements AuthService {
         userLoggedResponse.setHasBarcode(user.getCompany().isHasBarcode());
         userLoggedResponse.setHasStock(user.getCompany().isHasStock());
         userLoggedResponse.setHasAutomaticSaved(user.getCompany().isHasAutomaticSaved());
+        userLoggedResponse.setUsername(user.getUsername());
         return userLoggedResponse;
 
     }

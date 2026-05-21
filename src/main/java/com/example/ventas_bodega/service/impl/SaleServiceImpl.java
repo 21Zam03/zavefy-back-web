@@ -20,6 +20,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class SaleServiceImpl implements SaleService {
             return messageResponse;
         }
 
+        validateDataOfSaleDto(saleDto);
         //Hacer una validacion en el backend para validar si los productos de una venta ya no tienen stock
 
         try {
@@ -122,5 +124,11 @@ public class SaleServiceImpl implements SaleService {
     public List<SaleDetailDto> getDetailsOfSale(UserEntity user, Long id) {
         List<SaleDetailDtoInter> detailEntityList = saleDetailRepository.findDetailsBySaleId(id);
         return SaleDetailMapper.interListToDtoList(detailEntityList);
+    }
+
+    private void validateDataOfSaleDto(SaleDto saleDto) {
+        if(saleDto.getDiscount() == null) {
+            saleDto.setDiscount(BigDecimal.ZERO);
+        }
     }
 }

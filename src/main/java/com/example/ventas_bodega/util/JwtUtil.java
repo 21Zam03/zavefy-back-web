@@ -25,7 +25,6 @@ public class JwtUtil {
 
     public String createToken(String userName, List<String> roles, List<String> permissions) {
         Algorithm algorithm = Algorithm.HMAC256(this.privateKey);
-
         return JWT.create()
                 .withIssuer(this.userGenerator)
                 .withSubject(userName)

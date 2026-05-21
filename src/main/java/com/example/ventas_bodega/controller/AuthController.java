@@ -40,10 +40,10 @@ public class AuthController {
 
     @PostMapping("/signIn")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest, HttpServletResponse response) {
-        logger.info("Intento de login para usuario: {}", signInRequest.getEmail());
+        logger.info("Intento de login para usuario: {}", signInRequest.getUsername());
         SignInResponse signInResponse = authService.signIn(signInRequest);
         if(signInResponse.getStatus() == 200) {
-            logger.info("Login exitoso para usuario: {}", signInRequest.getEmail());
+            logger.info("Login exitoso para usuario: {}", signInRequest.getUsername());
 
             Cookie cookie = cookieUtil.getCookie(signInResponse.getToken());
             response.addCookie(cookie);
@@ -51,7 +51,7 @@ public class AuthController {
             signInResponse.setToken(null);
             return new ResponseEntity<>(signInResponse, HttpStatus.OK);
         } else {
-            logger.warn("Login fallido para usuario: {}", signInRequest.getEmail());
+            logger.warn("Login fallido para usuario: {}", signInRequest.getUsername());
             return new ResponseEntity<>(signInResponse, HttpStatus.UNAUTHORIZED);
         }
     }

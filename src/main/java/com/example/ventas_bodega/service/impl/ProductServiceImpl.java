@@ -75,7 +75,6 @@ public class ProductServiceImpl implements ProductService {
             CategoryEntity categoryEntity = new CategoryEntity();
             for (int i=0; i<productDto.getCategories().size(); i++) {
                 categoryEntity = categoryRepository.findByName(productDto.getCategories().get(i));
-                System.out.println("CATEGORIA: "+ categoryEntity);
                 if(categoryEntity != null) {
                    categoryEntityList.add(categoryEntity);
                 }
@@ -99,6 +98,7 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity productToCreate = ProductMapper.dtoToEntity(productDto);
         productToCreate.setCompany(userEntity.getCompany());
         productToCreate.setCategoryEntityList(categoryEntityList);
+        productToCreate.setActive(true);
         ProductEntity productCreated = productRepository.save(productToCreate);
 
         //LOGICA PARA IMAGEN DEL PRODUCTO
@@ -109,28 +109,36 @@ public class ProductServiceImpl implements ProductService {
                 String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+productCreated.getId();
                 InputStream inputStream = downloadImage(productDto.getImageUrl());
                 FileDto fileDto = firebaseStorageService.uploadFileFromUrl(inputStream, "/image/jpg", filePath);
-                productDto.setImageUrl(fileDto.getUrl());
-                productDto.setFilePath(filePath);
+                productCreated.setImageUrl(fileDto.getUrl());
+                productCreated.setFilePath(filePath);
             }
         } else {
             //Cuando el cliente sube una imagen de su escritorio
+            System.out.println("FILE SUBIDA POR EL CLIENTE MANUALMENTE: "+productDto.getFile());
             String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+"product-"+productCreated.getId();
             FileDto fileDto = firebaseStorageService.uploadFile(productDto.getFile(), filePath);
-            productDto.setImageUrl(fileDto.getUrl());
-            productDto.setFilePath(filePath);
+            System.out.println("ARCHIVO subido: "+fileDto.toString());
+            productCreated.setImageUrl(fileDto.getUrl());
+            productCreated.setFilePath(filePath);
         }
 
         //ACTUALIZAR EL PRODUCTO CON LA IMAGEN Y FILEPATH query optimizada
-        productRepository.updateImageInfo(productDto.getImageUrl(), productDto.getFilePath(), productCreated.getId(), userEntity.getCompany().getCompanyId());
+        System.out.println("IMAGEN url: "+productDto.getImageUrl());
+        System.out.println("PRODUCT FILE PATH: "+productDto.getFilePath());
+        System.out.println("PRODUCT ID: "+productCreated.getId());
+        System.out.println("COMPANY: "+userEntity.getCompany().getCompanyId());
+        productRepository.updateImageInfo(productCreated.getImageUrl(), productCreated.getFilePath(), productCreated.getId(), userEntity.getCompany().getCompanyId());
 
         //LOGICA PARA CREACION DE CODIGO DE BARRAS AUTOMATICO
         if(productCreated.getBarcode() == null) {
-            productRepository.updateBarcodeById(productCreated.getId(), ProductUtil.generarCodigoEAN13(productCreated.getId()));
+            String barcodeGenerated = ProductUtil.generarCodigoEAN13(productCreated.getId());
+            productRepository.updateBarcodeById(productCreated.getId(), barcodeGenerated);
+            productCreated.setBarcode(barcodeGenerated);
         }
 
         //LOGICA PARA REGISTRO DE PRODUCTO A LA TABLA PRODUCT GENERAL
-        if(productDto.getBarcode() != null) {
-            boolean exists = productGeneralRepository.existsByBarcode(productDto.getBarcode());
+        if(productCreated.getBarcode() != null) {
+            boolean exists = productGeneralRepository.existsByBarcode(productCreated.getBarcode());
             if(!exists){
                 ProductGeneralEntity productGeneralToCreate = ProductMapper.dtoToEntityGeneral(productDto);
                 productGeneralRepository.save(productGeneralToCreate);
@@ -139,6 +147,7 @@ public class ProductServiceImpl implements ProductService {
 
         messageResponse.setMessage("El producto se ha registrado exitosamente");
         messageResponse.setStatus(true);
+        messageResponse.setProductDto(ProductMapper.entityToDto(productCreated));
         messageResponse.setObject(ProductMapper.entityToObject(productCreated));
 
         System.out.println("RESPONSE: "+messageResponse.toString());
@@ -166,9 +175,6 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductDto> getProductsByCompany(String ruc, String barcode, String name, String stockStatus, Boolean active, Long categoryId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductEntity> productEntityPage = productRepository.findProductsByCompanyAndBarcode(ruc, barcode, name, stockStatus, active, categoryId, pageable);
-        for (ProductEntity productEntity : productEntityPage.getContent()) {
-            System.out.println("PRODUCTO: "+productEntity.toString());
-        }
         List<ProductDto> productDtoList = new ArrayList<>();
         for (ProductEntity productEntity : productEntityPage.getContent()) {
             ProductDto productDto = ProductMapper.entityToDto(productEntity);
@@ -216,13 +222,12 @@ public class ProductServiceImpl implements ProductService {
                 }
             } else {
                 //Cuando el cliente sube una imagen de su escritorio
-                System.out.println("FILE: "+productDto.getFile());
+                System.out.println("FILE SUBIDA POR EL CLIENTE MANUALMENTE: "+productDto.getFile());
                 String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+"product-"+productToupdate.getId();
                 FileDto fileDto = firebaseStorageService.uploadFile(productDto.getFile(), filePath);
                 productToupdate.setImageUrl(fileDto.getUrl());
                 productToupdate.setFilePath(filePath);
             }
-
 
 
             if(productDto.getBarcode() != null) {
@@ -233,14 +238,17 @@ public class ProductServiceImpl implements ProductService {
                 productToupdate.setName(productDto.getName());
             }
 
-            if(productToupdate.getDescription() != null) {
+            if(productDto.getDescription() != null) {
                 productToupdate.setDescription(productDto.getDescription());
             }
 
-            if(productToupdate.getPrice() != null) {
+            if(productDto.getPrice() != null) {
                 productToupdate.setPrice(productDto.getPrice());
             }
 
+            if(productDto.getMeasurementUnit() != null) {
+                productToupdate.setMeasurementUnit(productDto.getMeasurementUnit());
+            }
 
             if(productToupdate.getCategoryEntityList() != null) {
                 List<CategoryEntity> list = new ArrayList<>();
@@ -265,7 +273,7 @@ public class ProductServiceImpl implements ProductService {
                 productToupdate.setCategoryEntityList(list);
             }
 
-            productToupdate.setActive(productDto.isActive());
+            productToupdate.setActive(true);
             productRepository.save(productToupdate);
 
             messageResponse.setStatus(true);

@@ -12,11 +12,14 @@ public class SaleMapper {
         saleEntity.setSerial(saleDto.getSerial());
         saleEntity.setNumber(saleDto.getNumber());
         saleEntity.setTotal(saleDto.getTotal());
+        saleEntity.setSubTotal(saleDto.getSubTotal());
+        saleEntity.setIgv(saleDto.getIgv());
         saleEntity.setMoneyType(saleDto.getMoneyType());
         saleEntity.setClientName(saleDto.getClientName());
         saleEntity.setClientDocumentNumber(saleDto.getClientDocumentNumber());
         saleEntity.setClientDocumentType(saleDto.getClientDocumentType());
         saleEntity.setPaymentMethod(saleDto.getPaymentMethod());
+        saleEntity.setDiscount(saleDto.getDiscount());
         return saleEntity;
     }
 
@@ -27,6 +30,8 @@ public class SaleMapper {
         saleDto.setSerial(saleEntity.getSerial());
         saleDto.setNumber(saleEntity.getNumber());
         saleDto.setTotal(saleEntity.getTotal());
+        saleDto.setSubTotal(saleEntity.getSubTotal());
+        saleDto.setIgv(saleEntity.getIgv());
         saleDto.setCreatedDate(saleEntity.getCreatedDate());
         saleDto.setRegisterDate(saleEntity.getRegisterDate());
         saleDto.setMoneyType(saleEntity.getMoneyType());
@@ -41,6 +46,8 @@ public class SaleMapper {
         saleDto.setSerial(saleRequest.getSerial());
         saleDto.setNumber(saleRequest.getNumber());
         saleDto.setTotal(saleRequest.getTotal());
+        saleDto.setSubTotal(saleRequest.getSubTotal());
+        saleDto.setIgv(saleRequest.getIgv());
         saleDto.setCreatedDate(saleRequest.getCreatedDate());
         saleDto.setSaleDetails(saleRequest.getSaleDetails());
         saleDto.setMoneyType(saleRequest.getMoneyType());
