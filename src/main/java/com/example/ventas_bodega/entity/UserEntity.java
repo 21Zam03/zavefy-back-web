@@ -2,6 +2,7 @@ package com.example.ventas_bodega.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity

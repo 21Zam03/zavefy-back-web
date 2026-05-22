@@ -52,6 +52,14 @@ public class MaintenanceController {
         return new ResponseEntity<>(maintenanceService.createCategory(categoryDto, user.getCompany().getCompanyId()),  HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/categories")
+    public ResponseEntity<?> deleteCategory(
+            @RequestParam Long idCategory,
+            @CurrentUser UserEntity user
+    ) {
+        return new ResponseEntity<>(maintenanceService.deleteCategory(idCategory, user), HttpStatus.OK);
+    }
+
     @GetMapping("/yapes")
     public ResponseEntity<?> getYapes(@CurrentUser UserEntity user) {
         return new ResponseEntity<>(maintenanceService.getYapesByCompany(user.getCompany().getCompanyId()), HttpStatus.OK);

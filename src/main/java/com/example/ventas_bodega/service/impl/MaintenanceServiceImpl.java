@@ -23,6 +23,7 @@ import java.util.List;
 public class MaintenanceServiceImpl implements MaintenanceService {
 
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
     private CategoryRepository categoryRepository;
     private YapeRepository yapeRepository;
     private CategoryClientRepository categoryClientRepository;
@@ -36,13 +37,14 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             CategoryClientRepository categoryClientRepository,
             MeasurementUnitRepository measurementUnitRepository,
             CompanyRepository companyRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
         this.yapeRepository = yapeRepository;
         this.categoryClientRepository = categoryClientRepository;
         this.measurementUnitRepository = measurementUnitRepository;
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -63,6 +65,34 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             messageResponse.setMessage("Ocurrio un erro al crear la categoria");
         }
         return messageResponse;
+    }
+
+    @Override
+    public MessageResponse deleteCategory(Long idCategory, UserEntity user) {
+        MessageResponse messageResponse = new MessageResponse();
+        try {
+            boolean exist =
+                    productRepository
+                            .existsProductsByCategoryAndCompany(
+                                    idCategory,
+                                    user.getCompany().getCompanyId()
+                            ) == 1;
+            if(exist) {
+                //NO se puede eliminar
+                messageResponse.setStatus(false);
+                messageResponse.setMessage("No se puede eliminar una categoria que ya ha sido usada en un producto");
+                return messageResponse;
+            } else {
+                categoryRepository.deactivateCategory(idCategory, user.getCompany().getCompanyId());
+                messageResponse.setStatus(true);
+                messageResponse.setMessage("Categoria eliminada exitosamente");
+                return messageResponse;
+            }
+        } catch (Exception ex) {
+            messageResponse.setStatus(false);
+            messageResponse.setMessage(ex.getMessage());
+            return messageResponse;
+        }
     }
 
     @Override

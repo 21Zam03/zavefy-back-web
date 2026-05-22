@@ -149,5 +149,18 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             @Param("ruc") String ruc
     );
 
+    @Query(value = """
+    SELECT EXISTS (
+        SELECT 1
+        FROM tb_producto
+        WHERE id_categoria = :categoryId
+        AND id_empresa = :companyId
+    )
+    """, nativeQuery = true)
+    Integer existsProductsByCategoryAndCompany(
+            @Param("categoryId") Long categoryId,
+            @Param("companyId") Long companyId
+    );
+
 }
 

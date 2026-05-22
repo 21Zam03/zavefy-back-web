@@ -58,6 +58,11 @@ public class ProductEntity {
     @JoinColumn(name = "id_empresa")
     private CompanyEntity company;
 
+    @ManyToOne
+    @JoinColumn(name = "id_categoria")
+    private CategoryEntity categoryEntity;
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_categorias_productos", joinColumns = @JoinColumn(name = "id_producto"), inverseJoinColumns = @JoinColumn(name = "id_categoria"))
     private List<CategoryEntity> categoryEntityList;
