@@ -49,7 +49,7 @@ public class MaintenanceController {
             @RequestBody CategoryDto categoryDto,
             @CurrentUser UserEntity user
             ) {
-        return new ResponseEntity<>(maintenanceService.createCategory(categoryDto, Long.valueOf(user.getUserId())),  HttpStatus.CREATED);
+        return new ResponseEntity<>(maintenanceService.createCategory(categoryDto, user.getCompany().getCompanyId()),  HttpStatus.CREATED);
     }
 
     @GetMapping("/yapes")

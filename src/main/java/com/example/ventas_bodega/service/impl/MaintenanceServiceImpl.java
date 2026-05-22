@@ -47,25 +47,14 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     @Override
     @Transactional
-    public MessageResponse createCategory(CategoryDto categoryDto, Long idUser) {
+    public MessageResponse createCategory(CategoryDto categoryDto, Long companyId) {
         CategoryEntity categoryEntity = new CategoryEntity();
         MessageResponse messageResponse = new MessageResponse();
         if(categoryDto != null) {
             categoryEntity = CategoryMapper.mapDtoToEntity(categoryDto);
-            boolean exist = categoryRepository.existsByName(categoryEntity.getName());
-
-            CategoryEntity categoryCreated = null;
-            if(!exist) {
-                System.out.println("No existe");
-                categoryCreated = categoryRepository.save(categoryEntity);
-            } else {
-                System.out.println("EXISTE");
-                categoryCreated = categoryRepository.findByName(categoryEntity.getName());
-            }
-            CategoryClientEntity categoryClientEntity = new CategoryClientEntity();
-            categoryClientEntity.setCategoryId(categoryCreated.getId());
-            categoryClientEntity.setClientId(idUser);
-            categoryClientRepository.save(categoryClientEntity);
+            categoryEntity.setCompanyId(companyId);
+            categoryEntity.setActive(true);
+            CategoryEntity categoryCreated = categoryRepository.save(categoryEntity);
 
             messageResponse.setStatus(true);
             messageResponse.setMessage("Categoria creada exitosamente");
@@ -85,7 +74,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     @Override
     public Page<CategoryDto> getCategoriesWithPagination(Long userId, String name, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<CategoryDtoInter> categories = categoryClientRepository.findCategoriesByUserWithPagination(userId, name, pageable);
+        Page<CategoryDtoInter> categories = categoryRepository.findCategoriesByUserWithPagination(userId, name, pageable);
         List<CategoryDto> data = new ArrayList<>();
         for (int i = 0; i<categories.getContent().size(); i++) {
             data.add(CategoryMapper.mapIntefaceToDto(categories.getContent().get(i)));
