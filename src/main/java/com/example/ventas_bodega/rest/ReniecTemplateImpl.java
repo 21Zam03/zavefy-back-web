@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class ReniecTemplateImpl implements ReniecRestTemplate {
 
-    private final String BASE_URL = "http://190.216.114.149:8080/";
+    private final String BASE_URL = "https://dniruc.apisperu.com/api/v1/dni";
     private final RestTemplate restTemplate;
 
     @Autowired
@@ -25,10 +25,10 @@ public class ReniecTemplateImpl implements ReniecRestTemplate {
     @Override
     public ReniecDataDto consultarPorDNI(String dni) {
 
-        String url = BASE_URL + "/ServicioRENIECEx/reniec/consultarPorDNI/" + dni;
+        String url = BASE_URL + "/" + dni + "?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6IjIxemFtMDMuZnJlZUBnbWFpbC5jb20ifQ.uOXXTqAaGgu6ZYcQy3Y4WkYxJZldHV18tFD_fif0uJo";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("User-Agent", "PostmanRuntime");
+        //headers.set("User-Agent", "PostmanRuntime");
         headers.set("Accept", "application/json");
 
         HttpEntity<String> entity = new HttpEntity<>(headers);

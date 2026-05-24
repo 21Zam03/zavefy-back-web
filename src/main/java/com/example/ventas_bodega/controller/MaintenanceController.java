@@ -52,6 +52,14 @@ public class MaintenanceController {
         return new ResponseEntity<>(maintenanceService.createCategory(categoryDto, user.getCompany().getCompanyId()),  HttpStatus.CREATED);
     }
 
+    @PutMapping("/categories")
+    public ResponseEntity<?> updateCategory(
+            @RequestBody CategoryDto categoryDto,
+            @CurrentUser UserEntity user
+    ) {
+        return new ResponseEntity<>(maintenanceService.updateCategory(categoryDto, user.getCompany().getCompanyId()),  HttpStatus.OK);
+    }
+
     @DeleteMapping("/categories")
     public ResponseEntity<?> deleteCategory(
             @RequestParam Long idCategory,
@@ -93,6 +101,20 @@ public class MaintenanceController {
         CompanyDto companyDto = CompanyMapper.buildCompanyDtoFromController(null, ruc, socialReason, comertialName, address, email, phoneNumber, imageUrl, file, hasBarcode);
         UserDto userDto = UserMapper.buildCompanyDtoFromController(username, password, firstName, lastName, userEmail, userPhoneNumber);
         return new ResponseEntity<>(maintenanceService.createCompany(companyDto, userDto, user, Boolean.parseBoolean(isTest)), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/clients")
+    public ResponseEntity<?> getClientsByCompany(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String searchKey,
+            @RequestParam(required = false) String active,
+            @RequestParam(required = false) String documentType,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
+            @CurrentUser UserEntity user) {
+        System.out.println("ACTIVO: "+active);
+        return new ResponseEntity<>(maintenanceService.getClientsByCompany(user, searchKey, active == null? null : Boolean.valueOf(active) , documentType, fromDate, toDate, page, size), HttpStatus.OK);
     }
 
 }

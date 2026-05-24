@@ -18,6 +18,7 @@ public class SaleMapper {
         saleEntity.setClientName(saleDto.getClientName());
         saleEntity.setClientDocumentNumber(saleDto.getClientDocumentNumber());
         saleEntity.setClientDocumentType(saleDto.getClientDocumentType());
+        saleEntity.setClientPhoneNumber(saleDto.getClientPhoneNumber());
         saleEntity.setPaymentMethod(saleDto.getPaymentMethod());
         saleEntity.setDiscount(saleDto.getDiscount());
         return saleEntity;
@@ -54,6 +55,7 @@ public class SaleMapper {
         saleDto.setClientName(saleRequest.getClientName());
         saleDto.setClientDocumentNumber(saleRequest.getClientDocumentNumber());
         saleDto.setClientDocumentType(saleRequest.getClientDocumentType());
+        saleDto.setClientPhoneNumber(saleRequest.getClientPhoneNumber());
         saleDto.setPaymentMethod(saleRequest.getPaymentMethod());
         return saleDto;
     }

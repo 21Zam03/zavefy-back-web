@@ -20,6 +20,7 @@ public class SaleRequest {
     private String clientName;
     private String clientDocumentNumber;
     private String clientDocumentType;
+    private String clientPhoneNumber;
     private String paymentMethod;
     private List<SaleDetailDto> saleDetails;
 
@@ -144,5 +145,13 @@ public class SaleRequest {
 
     public void setIgv(BigDecimal igv) {
         this.igv = igv;
+    }
+
+    public String getClientPhoneNumber() {
+        return clientPhoneNumber;
+    }
+
+    public void setClientPhoneNumber(String clientPhoneNumber) {
+        this.clientPhoneNumber = clientPhoneNumber;
     }
 }

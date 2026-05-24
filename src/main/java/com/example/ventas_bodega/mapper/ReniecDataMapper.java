@@ -10,7 +10,7 @@ public class ReniecDataMapper {
         dto.setNombres(reniecDataResponse.getNombres());
         dto.setApellidoMaterno(reniecDataResponse.getApellidoMaterno());
         dto.setApellidoPaterno(reniecDataResponse.getApellidoPaterno());
-        dto.setNumeroDNI(reniecDataResponse.getNumeroDNI());
+        dto.setNumeroDNI(reniecDataResponse.getDni());
         return dto;
     }
 

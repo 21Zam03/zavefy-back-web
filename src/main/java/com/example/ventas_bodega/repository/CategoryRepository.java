@@ -21,6 +21,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
         WHERE c.id_empresa = :companyId
           AND c.activo = true
           AND (:nombre IS NULL OR LOWER(c.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
+                ORDER BY c.fecha_actualizacion DESC
         """,
             countQuery = """
         SELECT COUNT(*)
@@ -28,6 +29,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
         WHERE c.id_empresa = :companyId
           AND c.activo = true
           AND (:nombre IS NULL OR LOWER(c.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
+                ORDER BY c.fecha_actualizacion DESC
         """,
             nativeQuery = true)
     Page<CategoryDtoInter> findCategoriesByUserWithPagination(
@@ -45,6 +47,19 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
     AND id_empresa = :companyId
     """, nativeQuery = true)
     void deactivateCategory(
+            @Param("categoryId") Long categoryId,
+            @Param("companyId") Long companyId
+    );
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+    UPDATE tb_categoria
+    SET activo = true
+    WHERE id_categoria = :categoryId
+    AND id_empresa = :companyId
+    """, nativeQuery = true)
+    void activateCategory(
             @Param("categoryId") Long categoryId,
             @Param("companyId") Long companyId
     );

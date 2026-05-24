@@ -2,6 +2,7 @@ package com.example.ventas_bodega.service.impl;
 
 import com.example.ventas_bodega.dto.*;
 import com.example.ventas_bodega.dto.interfaces.CategoryDtoInter;
+import com.example.ventas_bodega.dto.interfaces.ClientDtoInter;
 import com.example.ventas_bodega.entity.*;
 import com.example.ventas_bodega.mapper.*;
 import com.example.ventas_bodega.repository.*;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MaintenanceServiceImpl implements MaintenanceService {
@@ -29,6 +31,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     private CategoryClientRepository categoryClientRepository;
     private MeasurementUnitRepository measurementUnitRepository;
     private CompanyRepository companyRepository;
+    private ClientRepository clientRepository;
 
     @Autowired
     public MaintenanceServiceImpl(
@@ -37,7 +40,8 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             CategoryClientRepository categoryClientRepository,
             MeasurementUnitRepository measurementUnitRepository,
             CompanyRepository companyRepository,
-            UserRepository userRepository, ProductRepository productRepository) {
+            UserRepository userRepository, ProductRepository productRepository,
+            ClientRepository clientRepository) {
         this.categoryRepository = categoryRepository;
         this.yapeRepository = yapeRepository;
         this.categoryClientRepository = categoryClientRepository;
@@ -45,6 +49,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.clientRepository = clientRepository;
     }
 
     @Override
@@ -56,7 +61,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             categoryEntity = CategoryMapper.mapDtoToEntity(categoryDto);
             categoryEntity.setCompanyId(companyId);
             categoryEntity.setActive(true);
-            CategoryEntity categoryCreated = categoryRepository.save(categoryEntity);
+            categoryRepository.save(categoryEntity);
 
             messageResponse.setStatus(true);
             messageResponse.setMessage("Categoria creada exitosamente");
@@ -71,19 +76,15 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     public MessageResponse deleteCategory(Long idCategory, UserEntity user) {
         MessageResponse messageResponse = new MessageResponse();
         try {
-            boolean exist =
-                    productRepository
-                            .existsProductsByCategoryAndCompany(
-                                    idCategory,
-                                    user.getCompany().getCompanyId()
-                            ) == 1;
+            boolean exist = productRepository.existsProductsByCategoryAndCompany(idCategory, user.getCompany().getCompanyId()) == 1;
             if(exist) {
                 //NO se puede eliminar
                 messageResponse.setStatus(false);
                 messageResponse.setMessage("No se puede eliminar una categoria que ya ha sido usada en un producto");
                 return messageResponse;
             } else {
-                categoryRepository.deactivateCategory(idCategory, user.getCompany().getCompanyId());
+                //categoryRepository.deactivateCategory(idCategory, user.getCompany().getCompanyId());
+                categoryRepository.deleteById(idCategory);
                 messageResponse.setStatus(true);
                 messageResponse.setMessage("Categoria eliminada exitosamente");
                 return messageResponse;
@@ -110,6 +111,24 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             data.add(CategoryMapper.mapIntefaceToDto(categories.getContent().get(i)));
         }
         return new PageImpl<>(data, pageable, categories.getTotalElements());
+    }
+
+    @Override
+    public MessageResponse updateCategory(CategoryDto categoryDto, Long UserId) {
+        MessageResponse messageResponse = new MessageResponse();
+        Optional<CategoryEntity> categoryToUpdate = categoryRepository.findById(categoryDto.getId());
+        if(categoryToUpdate.isPresent()) {
+            CategoryEntity categoryEntity = categoryToUpdate.get();
+            categoryEntity.setName(categoryDto.getName());
+
+            categoryRepository.save(categoryEntity);
+            messageResponse.setStatus(true);
+            messageResponse.setMessage("Categoria actualizada exitosamente");
+        } else {
+            messageResponse.setStatus(false);
+            messageResponse.setMessage("Ocurrio un erro al crear la categoria");
+        }
+        return messageResponse;
     }
 
     @Override
@@ -148,6 +167,28 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    @Override
+    public Page<ClientDto> getClientsByCompany(UserEntity user, String searchKey, Boolean active, String documentType, String fromDate, String toDate, int page, int size) {
+        System.out.println("========== FILTROS CLIENTES ==========");
+        System.out.println("CompanyId: " + user.getCompany().getCompanyId());
+        System.out.println("searchKey: " + searchKey);
+        System.out.println("active: " + active);
+        System.out.println("documentType: " + documentType);
+        System.out.println("fromDate: " + fromDate);
+        System.out.println("toDate: " + toDate);
+        System.out.println("page: " + page);
+        System.out.println("size: " + size);
+        System.out.println("======================================");
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ClientDtoInter> clients = clientRepository.findClientsByFilters(user.getCompany().getCompanyId(), searchKey, active, documentType, fromDate, toDate, pageable);
+        List<ClientDto> data = new ArrayList<>();
+        for (int i = 0; i<clients.getContent().size(); i++) {
+            data.add(ClientMapper.mapIntefaceToDto(clients.getContent().get(i)));
+        }
+        return new PageImpl<>(data, pageable, clients.getTotalElements());
     }
 
 }

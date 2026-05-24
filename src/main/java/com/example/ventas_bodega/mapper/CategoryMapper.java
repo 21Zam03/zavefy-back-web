@@ -18,7 +18,6 @@ public class CategoryMapper {
         } return null;
     }
 
-
     public static CategoryDto mapEntityToDto(CategoryEntity categoryEntity) {
         if (categoryEntity != null) {
             CategoryDto categoryDto = new CategoryDto();

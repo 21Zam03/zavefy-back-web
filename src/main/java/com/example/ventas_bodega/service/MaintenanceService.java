@@ -13,8 +13,10 @@ public interface MaintenanceService {
     public MessageResponse deleteCategory(Long idCategory, UserEntity user);
     public List<CategoryDto> getCategories(Long UserId);
     public Page<CategoryDto> getCategoriesWithPagination(Long UserId, String name, int page, int size);
+    public MessageResponse updateCategory(CategoryDto categoryDto, Long UserId);
     public List<YapeDto> getYapesByCompany(Long companyId);
     public List<MeasurementUnitDto> getMeasurementUnits();
     public MessageResponse createCompany(CompanyDto companyDto, UserDto userDto, UserEntity user, boolean isTest);
+    public Page<ClientDto> getClientsByCompany(UserEntity user, String searchKey, Boolean active, String documentType, String fromDate, String toDate, int page, int size);
 
 }

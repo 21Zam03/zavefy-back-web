@@ -5,19 +5,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReniecDataResponse {
 
-    private String numeroDNI;
+    private boolean success;
+    private String dni;
+    private String nombres;
     private String apellidoPaterno;
     private String apellidoMaterno;
-    private String nombres;
+    private String codVerifica;
+    private String codVerificaLetra;
 
     public ReniecDataResponse() {}
 
-    public String getNumeroDNI() {
-        return numeroDNI;
+    public String getDni() {
+        return dni;
     }
 
-    public void setNumeroDNI(String numeroDNI) {
-        this.numeroDNI = numeroDNI;
+    public void setDni(String dni) {
+        this.dni = dni;
     }
 
     public String getApellidoPaterno() {

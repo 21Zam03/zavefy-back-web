@@ -51,6 +51,9 @@ public class SaleEntity {
     @Column(name = "tipo_documento_cliente")
     private String clientDocumentType;
 
+    @Column(name = "numero_telefono_cliente")
+    private String clientPhoneNumber;
+
     @Column(name = "direccion_cliente")
     private String clientAddress;
 
@@ -251,6 +254,14 @@ public class SaleEntity {
 
     public void setClientAddress(String clientAddress) {
         this.clientAddress = clientAddress;
+    }
+
+    public String getClientPhoneNumber() {
+        return clientPhoneNumber;
+    }
+
+    public void setClientPhoneNumber(String clientPhoneNumber) {
+        this.clientPhoneNumber = clientPhoneNumber;
     }
 
     @Override

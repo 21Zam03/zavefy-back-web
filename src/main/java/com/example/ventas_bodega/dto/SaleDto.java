@@ -19,6 +19,7 @@ public class SaleDto {
     private String clientName;
     private String clientDocumentNumber;
     private String clientDocumentType;
+    private String clientPhoneNumber;
     private String paymentMethod;
     private BigDecimal discount;
     private List<SaleDetailDto> saleDetails;
@@ -151,4 +152,11 @@ public class SaleDto {
         this.igv = igv;
     }
 
+    public String getClientPhoneNumber() {
+        return clientPhoneNumber;
+    }
+
+    public void setClientPhoneNumber(String clientPhoneNumber) {
+        this.clientPhoneNumber = clientPhoneNumber;
+    }
 }
