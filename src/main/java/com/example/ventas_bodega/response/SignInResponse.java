@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.response;
 
+import com.example.ventas_bodega.dto.ClientDto;
 import com.example.ventas_bodega.dto.ProductDto;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class SignInResponse {
     private String token;
     private Integer status;
     private List<ProductDto> products;
+    private List<ClientDto> clients;
 
     public SignInResponse() {
     }
@@ -126,5 +128,13 @@ public class SignInResponse {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public List<ClientDto> getClients() {
+        return clients;
+    }
+
+    public void setClients(List<ClientDto> clients) {
+        this.clients = clients;
     }
 }

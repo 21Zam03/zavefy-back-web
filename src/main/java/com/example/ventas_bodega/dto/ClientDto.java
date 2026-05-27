@@ -7,6 +7,7 @@ public class ClientDto {
     private Integer clientId;
     private String firstname;
     private String lastname;
+    private String fullName;
     private String email;
     private boolean isEnabled;
     private Long companyId;
@@ -111,5 +112,13 @@ public class ClientDto {
 
     public void setUpdatedDate(LocalDateTime updatedDate) {
         this.updatedDate = updatedDate;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }

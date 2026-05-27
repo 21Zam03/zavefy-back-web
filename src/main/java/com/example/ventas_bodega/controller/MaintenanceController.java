@@ -1,6 +1,7 @@
 package com.example.ventas_bodega.controller;
 
 import com.example.ventas_bodega.dto.CategoryDto;
+import com.example.ventas_bodega.dto.ClientDto;
 import com.example.ventas_bodega.dto.CompanyDto;
 import com.example.ventas_bodega.dto.UserDto;
 import com.example.ventas_bodega.entity.UserEntity;
@@ -8,7 +9,6 @@ import com.example.ventas_bodega.mapper.CompanyMapper;
 import com.example.ventas_bodega.mapper.UserMapper;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.MaintenanceService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -115,6 +115,14 @@ public class MaintenanceController {
             @CurrentUser UserEntity user) {
         System.out.println("ACTIVO: "+active);
         return new ResponseEntity<>(maintenanceService.getClientsByCompany(user, searchKey, active == null? null : Boolean.valueOf(active) , documentType, fromDate, toDate, page, size), HttpStatus.OK);
+    }
+
+    @PostMapping("/clients")
+    public ResponseEntity<?> saveClient(
+            @RequestBody ClientDto clientDto,
+            @CurrentUser UserEntity user
+    ) {
+        return new ResponseEntity<>(maintenanceService.createClient(clientDto, user),  HttpStatus.CREATED);
     }
 
 }

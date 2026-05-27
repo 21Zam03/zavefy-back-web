@@ -9,6 +9,7 @@ import com.example.ventas_bodega.repository.*;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.MaintenanceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSourceAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final MessageSourceAware messageSourceAware;
     private CategoryRepository categoryRepository;
     private YapeRepository yapeRepository;
     private CategoryClientRepository categoryClientRepository;
@@ -41,7 +43,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             MeasurementUnitRepository measurementUnitRepository,
             CompanyRepository companyRepository,
             UserRepository userRepository, ProductRepository productRepository,
-            ClientRepository clientRepository) {
+            ClientRepository clientRepository, MessageSourceAware messageSourceAware) {
         this.categoryRepository = categoryRepository;
         this.yapeRepository = yapeRepository;
         this.categoryClientRepository = categoryClientRepository;
@@ -50,6 +52,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.clientRepository = clientRepository;
+        this.messageSourceAware = messageSourceAware;
     }
 
     @Override
@@ -67,7 +70,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             messageResponse.setMessage("Categoria creada exitosamente");
         } else {
             messageResponse.setStatus(false);
-            messageResponse.setMessage("Ocurrio un erro al crear la categoria");
+            messageResponse.setMessage("Ocurrio un error al crear la categoria");
         }
         return messageResponse;
     }
@@ -171,17 +174,6 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     @Override
     public Page<ClientDto> getClientsByCompany(UserEntity user, String searchKey, Boolean active, String documentType, String fromDate, String toDate, int page, int size) {
-        System.out.println("========== FILTROS CLIENTES ==========");
-        System.out.println("CompanyId: " + user.getCompany().getCompanyId());
-        System.out.println("searchKey: " + searchKey);
-        System.out.println("active: " + active);
-        System.out.println("documentType: " + documentType);
-        System.out.println("fromDate: " + fromDate);
-        System.out.println("toDate: " + toDate);
-        System.out.println("page: " + page);
-        System.out.println("size: " + size);
-        System.out.println("======================================");
-
         Pageable pageable = PageRequest.of(page, size);
         Page<ClientDtoInter> clients = clientRepository.findClientsByFilters(user.getCompany().getCompanyId(), searchKey, active, documentType, fromDate, toDate, pageable);
         List<ClientDto> data = new ArrayList<>();
@@ -189,6 +181,24 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             data.add(ClientMapper.mapIntefaceToDto(clients.getContent().get(i)));
         }
         return new PageImpl<>(data, pageable, clients.getTotalElements());
+    }
+
+    @Override
+    public MessageResponse createClient(ClientDto clientDto, UserEntity user) {
+        ClientEntity clientEntity = new ClientEntity();
+        MessageResponse messageResponse = new MessageResponse();
+        if(clientDto != null) {
+            clientEntity = ClientMapper.dtoToEntity(clientDto);
+            clientEntity.setCompanyId(user.getCompany().getCompanyId());
+            clientRepository.save(clientEntity);
+
+            messageResponse.setStatus(true);
+            messageResponse.setMessage("Cliente creada con exitosamente");
+        } else {
+            messageResponse.setStatus(false);
+            messageResponse.setMessage("Ocurrio un error al crear la cliente");
+        }
+        return messageResponse;
     }
 
 }

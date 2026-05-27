@@ -4,11 +4,9 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.ventas_bodega.entity.*;
 import com.example.ventas_bodega.exceptions.DuplicateException;
 import com.example.ventas_bodega.exceptions.NotFoundException;
+import com.example.ventas_bodega.mapper.ClientMapper;
 import com.example.ventas_bodega.mapper.ProductMapper;
-import com.example.ventas_bodega.repository.CompanyRepository;
-import com.example.ventas_bodega.repository.ProductRepository;
-import com.example.ventas_bodega.repository.RoleRepository;
-import com.example.ventas_bodega.repository.UserRepository;
+import com.example.ventas_bodega.repository.*;
 import com.example.ventas_bodega.request.SignInRequest;
 import com.example.ventas_bodega.request.SignUpRequest;
 import com.example.ventas_bodega.response.SignInResponse;
@@ -40,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final ClientRepository clientRepository;
 
 
     public AuthServiceImpl(
@@ -49,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
             JwtUtil jwtUtil,
             PasswordEncoder passwordEncoder,
             ProductRepository productRepository,
-            AuthenticationManager authenticationManager) {
+            AuthenticationManager authenticationManager, ClientRepository clientRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.companyRepository = companyRepository;
@@ -57,6 +56,7 @@ public class AuthServiceImpl implements AuthService {
         this.passwordEncoder = passwordEncoder;
         this.productRepository = productRepository;
         this.authenticationManager = authenticationManager;
+        this.clientRepository = clientRepository;
     }
 
     @Override
@@ -159,15 +159,11 @@ public class AuthServiceImpl implements AuthService {
         signInResponse.setFirstname(user.getFirstname());
         signInResponse.setLastname(user.getLastname());
 
-        List<ProductEntity> productEntityList =
-                productRepository.findByCompany_Ruc(
-                        user.getCompany().getRuc()
-                );
+        List<ProductEntity> productEntityList = productRepository.findByCompany_Ruc(user.getCompany().getRuc());
+        List<ClientEntity> clientEntityList = clientRepository.findByCompanyId(user.getCompany().getCompanyId());
 
-        signInResponse.setProducts(
-                ProductMapper.entityListToDtoList(productEntityList)
-        );
-
+        signInResponse.setProducts(ProductMapper.entityListToDtoList(productEntityList));
+        signInResponse.setClients(ClientMapper.entityListToDtoList(clientEntityList));
         signInResponse.setMessage("User logged successfully");
         signInResponse.setToken(accessToken);
         signInResponse.setStatus(200);

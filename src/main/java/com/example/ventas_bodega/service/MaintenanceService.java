@@ -18,5 +18,6 @@ public interface MaintenanceService {
     public List<MeasurementUnitDto> getMeasurementUnits();
     public MessageResponse createCompany(CompanyDto companyDto, UserDto userDto, UserEntity user, boolean isTest);
     public Page<ClientDto> getClientsByCompany(UserEntity user, String searchKey, Boolean active, String documentType, String fromDate, String toDate, int page, int size);
+    MessageResponse createClient(ClientDto clientDto, UserEntity user);
 
 }

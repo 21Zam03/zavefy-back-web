@@ -47,7 +47,12 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of(
-                            "http://192.168.1.44:5173/", "http://localhost:5173/", "https://zavefy.com", "https://www.zavefy.com", "http://172.18.141.227:5173/"
+                            "http://192.168.1.44:5173/",
+                            "http://localhost:5173/",
+                            "https://zavefy.com",
+                            "https://www.zavefy.com",
+                            "http://172.18.141.227:5173/",
+                            "http://10.93.140.227:5173/"
                     ));
                     config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS", "PATCH"));
                     config.setAllowedHeaders(List.of("*"));

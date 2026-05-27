@@ -13,11 +13,8 @@ public class ClientEntity {
     @Column(name = "id_cliente")
     private Integer clientId;
 
-    @Column(name = "nombres")
-    private String firstname;
-
-    @Column(name = "apellidos")
-    private String lastname;
+    @Column(name = "nombre_completo")
+    private String fullName;
 
     @Column(name = "correo", unique = true, length = 50, nullable = false)
     private String email;
@@ -57,6 +54,91 @@ public class ClientEntity {
         updatedDate = LocalDateTime.now();
     }
 
+    public Integer getClientId() {
+        return clientId;
+    }
 
+    public void setClientId(Integer clientId) {
+        this.clientId = clientId;
+    }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
+    }
+
+    public String getDocumentNumber() {
+        return documentNumber;
+    }
+
+    public void setDocumentNumber(String documentNumber) {
+        this.documentNumber = documentNumber;
+    }
+
+    public String getClientDocumentType() {
+        return clientDocumentType;
+    }
+
+    public void setClientDocumentType(String clientDocumentType) {
+        this.clientDocumentType = clientDocumentType;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public LocalDateTime getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(LocalDateTime updatedDate) {
+        this.updatedDate = updatedDate;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 }
