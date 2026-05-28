@@ -126,11 +126,6 @@ public class ProductServiceImpl implements ProductService {
             productCreated.setFilePath(filePath);
         }
 
-        //LOGICA DE STOCK
-        if(userEntity.getCompany().isHasStock()) {
-            inventoryService.createHistoryStock(productDto, userEntity);
-        }
-
         //ACTUALIZAR EL PRODUCTO CON LA IMAGEN Y FILEPATH query optimizada
         productRepository.updateImageInfo(productCreated.getImageUrl(), productCreated.getFilePath(), productCreated.getId(), userEntity.getCompany().getCompanyId());
 
@@ -148,6 +143,11 @@ public class ProductServiceImpl implements ProductService {
                 ProductGeneralEntity productGeneralToCreate = ProductMapper.dtoToEntityGeneral(productDto);
                 productGeneralRepository.save(productGeneralToCreate);
             }
+        }
+
+        //LOGICA DE STOCK
+        if(userEntity.getCompany().isHasStock()) {
+            inventoryService.createHistoryStock(productCreated, userEntity, "CREACION");
         }
 
         messageResponse.setMessage("El producto se ha registrado exitosamente");
