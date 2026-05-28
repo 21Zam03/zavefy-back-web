@@ -47,6 +47,12 @@ public class UserEntity {
     @Column(name = "fecha_actualizacion_contrasena")
     private LocalDateTime passwordUpdateDate;
 
+    @Column(name = "creado_por")
+    private Long createdBy;
+
+    @Column(name = "actualizado_por")
+    private Long updatedBy;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_usuarios_roles", joinColumns = @JoinColumn(name = "id_usuario"), inverseJoinColumns = @JoinColumn(name = "id_rol"))
     private Set<RoleEntity> roleList;

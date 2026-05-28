@@ -13,6 +13,7 @@ import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.rest.FoodRestTemplate;
 import com.example.ventas_bodega.service.FirebaseStorageService;
+import com.example.ventas_bodega.service.InventoryService;
 import com.example.ventas_bodega.service.ProductService;
 import com.example.ventas_bodega.util.ProductUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductGeneralRepository productGeneralRepository;
     private final CategoryRepository categoryRepository;
     private final CategoryClientRepository categoryClientRepository;
+    private final InventoryService inventoryService;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -46,7 +48,8 @@ public class ProductServiceImpl implements ProductService {
             ProductGeneralRepository productGeneralRepository,
             CategoryRepository categoryRepository,
             CategoryClientRepository categoryClientRepository,
-            JdbcTemplate jdbcTemplate) {
+            JdbcTemplate jdbcTemplate,
+            InventoryService inventoryService) {
         this.firebaseStorageService = firebaseStorageService;
         this.foodRestTemplate = foodRestTemplate;
         this.productRepository = productRepository;
@@ -54,6 +57,7 @@ public class ProductServiceImpl implements ProductService {
         this.categoryRepository = categoryRepository;
         this.categoryClientRepository = categoryClientRepository;
         this.jdbcTemplate = jdbcTemplate;
+        this.inventoryService = inventoryService;
     }
 
     @Override
@@ -122,11 +126,12 @@ public class ProductServiceImpl implements ProductService {
             productCreated.setFilePath(filePath);
         }
 
+        //LOGICA DE STOCK
+        if(userEntity.getCompany().isHasStock()) {
+            inventoryService.createHistoryStock(productDto, userEntity);
+        }
+
         //ACTUALIZAR EL PRODUCTO CON LA IMAGEN Y FILEPATH query optimizada
-        System.out.println("IMAGEN url: "+productDto.getImageUrl());
-        System.out.println("PRODUCT FILE PATH: "+productDto.getFilePath());
-        System.out.println("PRODUCT ID: "+productCreated.getId());
-        System.out.println("COMPANY: "+userEntity.getCompany().getCompanyId());
         productRepository.updateImageInfo(productCreated.getImageUrl(), productCreated.getFilePath(), productCreated.getId(), userEntity.getCompany().getCompanyId());
 
         //LOGICA PARA CREACION DE CODIGO DE BARRAS AUTOMATICO

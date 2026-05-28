@@ -61,7 +61,7 @@ public class ProductMapper {
         product.setUnitePrice(calculatePrice(productDto.getPrice()));
         product.setActive(productDto.isActive());
         product.setImageUrl(productDto.getImageUrl());
-        //product.setQuantity(productDto.getStock());
+        product.setStock(productDto.getStock());
         product.setBarcode(productDto.getBarcode());
         product.setMeasurementUnit(productDto.getMeasurementUnit());
         return product;
@@ -80,7 +80,7 @@ public class ProductMapper {
         }
         product.setActive(productEntity.isActive());
         product.setImageUrl(productEntity.getImageUrl());
-        product.setStock(productEntity.getQuantity());
+        product.setStock(productEntity.getStock());
         product.setBarcode(productEntity.getBarcode());
         product.setCategories(buildCategoriesInListStringFromEntity(productEntity.getCategoryEntityList()));
         product.setCreatedDate(formatToYearMonthDay(productEntity.getCreatedDate()));

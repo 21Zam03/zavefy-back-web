@@ -37,7 +37,7 @@ public class ProductEntity {
     private String imageUrl;
 
     @Column(name = "stock")
-    private Integer quantity;
+    private Integer stock;
 
     @Column(name = "ruta")
     private String filePath;
@@ -159,14 +159,6 @@ public class ProductEntity {
         this.company = company;
     }
 
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
     public List<CategoryEntity> getCategoryEntityList() {
         return categoryEntityList;
     }
@@ -231,6 +223,26 @@ public class ProductEntity {
         this.measurementUnit = measurementUnit;
     }
 
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
+    public CategoryEntity getCategoryEntity() {
+        return categoryEntity;
+    }
+
+    public void setCategoryEntity(CategoryEntity categoryEntity) {
+        this.categoryEntity = categoryEntity;
+    }
+
     @Override
     public String toString() {
         return "ProductEntity{" +
@@ -241,7 +253,6 @@ public class ProductEntity {
                 ", active=" + active +
                 ", barcode='" + barcode + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
-                ", quantity=" + quantity +
                 ", filePath='" + filePath + '\'' +
                 ", registerDate='" + registerDate + '\'' +
                 ", createdDate=" + createdDate +
