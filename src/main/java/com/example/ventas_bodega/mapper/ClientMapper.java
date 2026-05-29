@@ -56,7 +56,6 @@ public class ClientMapper {
         clientEntity.setClientId(clientDto.getClientId());
         clientEntity.setFullName(clientDto.getFullName());
         clientEntity.setEmail(clientDto.getEmail());
-        clientEntity.setEnabled(clientDto.isEnabled());
         clientEntity.setDocumentNumber(clientDto.getDocumentNumber());
         clientEntity.setClientDocumentType(clientDto.getDocumentType());
         clientEntity.setPhoneNumber(clientDto.getPhoneNumber());
