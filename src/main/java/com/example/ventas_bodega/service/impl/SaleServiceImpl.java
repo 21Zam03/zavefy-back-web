@@ -13,6 +13,7 @@ import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.repository.SaleDetailRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
 import com.example.ventas_bodega.response.MessageResponse;
+import com.example.ventas_bodega.service.InventoryService;
 import com.example.ventas_bodega.service.ProductService;
 import com.example.ventas_bodega.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +32,15 @@ public class SaleServiceImpl implements SaleService {
     private final SaleDetailRepository saleDetailRepository;
     private final ProductService productService;
     private final ProductRepository productRepository;
+    private final InventoryService inventoryService;
 
     @Autowired
-    public SaleServiceImpl(SaleRepository saleRepository, SaleDetailRepository saleDetailRepository, ProductService productService, ProductRepository productRepository) {
+    public SaleServiceImpl(SaleRepository saleRepository, SaleDetailRepository saleDetailRepository, ProductService productService, ProductRepository productRepository, InventoryService inventoryService) {
         this.saleRepository = saleRepository;
         this.saleDetailRepository = saleDetailRepository;
         this.productService = productService;
         this.productRepository = productRepository;
+        this.inventoryService = inventoryService;
     }
 
     @Override
@@ -76,8 +79,14 @@ public class SaleServiceImpl implements SaleService {
                 saleDetailEntity.setSaleEntity(saleCreated);
                 saleDetailRepository.save(saleDetailEntity);
             }
+
+            for (int i = 0; i<saleDto.getSaleDetails().size(); i++) {
+                saleDto.getSaleDetails().get(i).setSaleId(Long.valueOf(saleCreated.getVentaId()));;
+            }
             if(userEntity.getCompany().isHasStock()) {
-                productService.createHistoryStock(saleDto.getSaleDetails(), userEntity);
+                //productService.createHistoryStock(saleDto.getSaleDetails(), userEntity);
+                System.out.println("HISTORIAL DE STOCK");
+                inventoryService.createHistoryStock(saleDto.getSaleDetails(), userEntity, "VENTA");
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -61,7 +61,7 @@ public class DashBoardServiceImpl implements DashBoardService {
             if(!productAlert.isEmpty()) {
                 for (Object[] row : productAlert) {
                     String name = row[0].toString();
-                    Long stock = ((Number) row[1]).longValue();
+                    Long stock = row[1] == null ? null : ((Number) row[1]).longValue();
                     String stockState = row[2].toString();
                     productAlertResult.add(new ProductAlertDto(name, stock, stockState));
                 }

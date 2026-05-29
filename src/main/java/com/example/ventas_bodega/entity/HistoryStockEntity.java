@@ -10,6 +10,7 @@ public class HistoryStockEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_historial_stock")
     private Long historyStockId;
 
     @Column(name = "evento")

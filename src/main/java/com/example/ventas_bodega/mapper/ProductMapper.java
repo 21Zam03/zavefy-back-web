@@ -61,7 +61,7 @@ public class ProductMapper {
         product.setUnitePrice(calculatePrice(productDto.getPrice()));
         product.setActive(productDto.isActive());
         product.setImageUrl(productDto.getImageUrl());
-        product.setStock(productDto.getStock());
+        //product.setStock(productDto.getStock());
         product.setBarcode(productDto.getBarcode());
         product.setMeasurementUnit(productDto.getMeasurementUnit());
         return product;

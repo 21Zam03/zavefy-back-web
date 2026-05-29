@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface InventoryService {
 
-    public MessageResponse createHistoryStock(List<SaleDetailDto> saleDetailDtoList, UserEntity userEntity);
+    public MessageResponse createHistoryStock(List<SaleDetailDto> saleDetailDtoList, UserEntity userEntity, String event);
     public MessageResponse createHistoryStock(ProductEntity product, UserEntity userEntity, String event);
 
 }

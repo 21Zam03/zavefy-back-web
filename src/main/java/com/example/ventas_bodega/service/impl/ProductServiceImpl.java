@@ -103,6 +103,7 @@ public class ProductServiceImpl implements ProductService {
         productToCreate.setCompany(userEntity.getCompany());
         productToCreate.setCategoryEntityList(categoryEntityList);
         productToCreate.setActive(true);
+        productToCreate.setStock(productDto.getStock() == null? 0 : productDto.getStock());
         ProductEntity productCreated = productRepository.save(productToCreate);
 
         //LOGICA PARA IMAGEN DEL PRODUCTO

@@ -14,6 +14,7 @@ public class SaleDetailDto {
     private String measurementUnit;
     private boolean hasAutomaticSaved;
     private String notes;
+    private Long stock;
 
     public SaleDetailDto() {}
 
@@ -103,5 +104,14 @@ public class SaleDetailDto {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+
+    public Long getStock() {
+        return stock;
+    }
+
+    public void setStock(Long stock) {
+        this.stock = stock;
     }
 }
