@@ -23,5 +23,6 @@ public interface ClientDtoInter {
     LocalDateTime getCreatedDate();
     LocalDateTime getUpdatedDate();
     String getAddress();
+    String getFullName();
 
 }

@@ -113,7 +113,6 @@ public class MaintenanceController {
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate,
             @CurrentUser UserEntity user) {
-        System.out.println("ACTIVO: "+active);
         return new ResponseEntity<>(maintenanceService.getClientsByCompany(user, searchKey, active == null? null : Boolean.valueOf(active) , documentType, fromDate, toDate, page, size), HttpStatus.OK);
     }
 

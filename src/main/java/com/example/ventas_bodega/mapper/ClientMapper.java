@@ -13,8 +13,7 @@ public class ClientMapper {
         if (clientDtoInter != null) {
             ClientDto clientDto = new ClientDto();
             clientDto.setClientId(clientDtoInter.getClientId());
-            clientDto.setFirstname(clientDtoInter.getFirstname());
-            clientDto.setLastname(clientDtoInter.getLastname());
+            clientDto.setFullName(clientDtoInter.getFullName());
             clientDto.setEmail(clientDtoInter.getEmail());
             clientDto.setEnabled(clientDtoInter.getEnabled());
             clientDto.setDocumentNumber(clientDtoInter.getDocumentNumber());

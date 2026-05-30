@@ -15,8 +15,7 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Long> {
     @Query(value = """
     SELECT 
         c.id_cliente AS clientId,
-        c.nombres AS firstname,
-        c.apellidos AS lastname,
+        c.nombre_completo AS fullName,
         c.correo AS email,
         c.numero_documento AS documentNumber,
         c.tipo_documento AS documentType,
@@ -31,8 +30,7 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Long> {
 
       AND (
             :searchKey IS NULL
-            OR LOWER(c.nombres) LIKE LOWER(CONCAT('%', :searchKey, '%'))
-            OR LOWER(c.apellidos) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(c.nombre_completo) LIKE LOWER(CONCAT('%', :searchKey, '%'))
             OR LOWER(c.correo) LIKE LOWER(CONCAT('%', :searchKey, '%'))
             OR c.numero_documento LIKE CONCAT('%', :searchKey, '%')
             OR c.numero_telefono LIKE CONCAT('%', :searchKey, '%')
@@ -65,8 +63,7 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Long> {
 
       AND (
             :searchKey IS NULL
-            OR LOWER(c.nombres) LIKE LOWER(CONCAT('%', :searchKey, '%'))
-            OR LOWER(c.apellidos) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(c.nombre_completo) LIKE LOWER(CONCAT('%', :searchKey, '%'))
             OR LOWER(c.correo) LIKE LOWER(CONCAT('%', :searchKey, '%'))
             OR c.numero_documento LIKE CONCAT('%', :searchKey, '%')
             OR c.numero_telefono LIKE CONCAT('%', :searchKey, '%')

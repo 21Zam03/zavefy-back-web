@@ -191,7 +191,8 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             clientEntity = ClientMapper.dtoToEntity(clientDto);
             clientEntity.setEnabled(true);
             clientEntity.setCompanyId(user.getCompany().getCompanyId());
-            clientRepository.save(clientEntity);
+            ClientEntity clientCreated = clientRepository.save(clientEntity);
+            messageResponse.setClientDto(ClientMapper.entityToDto(clientCreated));
             messageResponse.setStatus(true);
             messageResponse.setMessage("Cliente creada con exitosamente");
         } else {

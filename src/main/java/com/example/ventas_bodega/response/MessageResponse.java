@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.response;
 
+import com.example.ventas_bodega.dto.ClientDto;
 import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.SaleDto;
 
@@ -11,6 +12,7 @@ public class MessageResponse {
     private boolean status;
     private ProductDto productDto;
     private SaleDto saleDto;
+    private ClientDto clientDto;
     private Object[] object;
 
     public MessageResponse() {
@@ -61,6 +63,14 @@ public class MessageResponse {
     }
     public void setObject(Object[] object) {
         this.object = object;
+    }
+
+    public ClientDto getClientDto() {
+        return clientDto;
+    }
+
+    public void setClientDto(ClientDto clientDto) {
+        this.clientDto = clientDto;
     }
 
     @Override
