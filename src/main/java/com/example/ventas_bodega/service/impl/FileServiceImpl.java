@@ -12,6 +12,7 @@ import com.example.ventas_bodega.repository.SaleRepository;
 import com.example.ventas_bodega.service.FileService;
 import com.example.ventas_bodega.util.DateUtil;
 import com.example.ventas_bodega.util.MoneyUtil;
+import com.example.ventas_bodega.util.QrUtil;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.util.JRLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,12 +83,14 @@ public class FileServiceImpl implements FileService {
             salePdfDto.setIgv(saleEntity.getIgv());
             salePdfDto.setTotal(saleEntity.getTotal());
             salePdfDto.setSubTotal(saleEntity.getSubTotal());
+            salePdfDto.setSubTotalFinal(saleEntity.getSubTotalFinal());
             salePdfDto.setNotes(saleEntity.getNotes());
             salePdfDto.setSaleDetailPdfDtoList(saleDetailPdfDtoList);
             salePdfDto.setImageUrl(company.getImageUrl());
             salePdfDto.setType(saleEntity.getType());
             salePdfDto.setIdentifier(saleEntity.getIdentifier());
             salePdfDto.setSeller(saleEntity.getUser().getFirstname()+" "+saleEntity.getUser().getLastname());
+            salePdfDto.setSaleLink(saleEntity.getSaleLink());
             return new ByteArrayInputStream(getByteFromPdfTicket(salePdfDto));
         } catch (Exception e) {
             e.printStackTrace();
@@ -148,10 +151,13 @@ public class FileServiceImpl implements FileService {
         params.put("descuento", String.valueOf(salePdfDto.getDiscount()));
         params.put("igv", String.valueOf(salePdfDto.getIgv()));
         params.put("subTotal", String.valueOf(salePdfDto.getSubTotal()));
+        params.put("subTotalFinal", String.valueOf(salePdfDto.getSubTotalFinal()));
         params.put("totalPagar", String.valueOf(salePdfDto.getTotal()));
         params.put("listProducts", salePdfDto.getSaleDetailPdfDtoList());
         params.put("urlImage", salePdfDto.getImageUrl());
         params.put("vendedor", salePdfDto.getSeller());
+        System.out.println("DATA: "+ salePdfDto.getSaleLink());
+        params.put("qr", new ByteArrayInputStream(QrUtil.generateQr(salePdfDto.getSaleLink(), 300,300)));
 
         String stringMoneda = salePdfDto.getMoneyType() != null ? salePdfDto.getMoneyType().equalsIgnoreCase("USD") ? "Dólares Americanos" : salePdfDto.getMoneyType().equalsIgnoreCase("EUR") ? "Euros" :"Soles" : "Soles";
 

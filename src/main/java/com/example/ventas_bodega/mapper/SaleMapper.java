@@ -13,6 +13,7 @@ public class SaleMapper {
         saleEntity.setNumber(saleDto.getNumber());
         saleEntity.setTotal(saleDto.getTotal());
         saleEntity.setSubTotal(saleDto.getSubTotal());
+        saleEntity.setSubTotalFinal(saleDto.getSubTotalFinal());
         saleEntity.setIgv(saleDto.getIgv());
         saleEntity.setMoneyType(saleDto.getMoneyType());
         saleEntity.setClientName(saleDto.getClientName());

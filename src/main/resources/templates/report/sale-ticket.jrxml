@@ -43,7 +43,8 @@
 	<parameter name="igv" class="java.lang.String"/>
 	<parameter name="totalPagar" class="java.lang.String"/>
 	<parameter name="subTotal" class="java.lang.String"/>
-	<parameter name="qr" class="java.lang.String"/>
+	<parameter name="subTotalFinal" class="java.lang.String"/>
+	<parameter name="qr" class="java.io.InputStream"/>
 	<parameter name="urlImage" class="java.lang.String"/>
 	<parameter name="gratuita" class="java.lang.String"/>
 	<parameter name="descuento" class="java.lang.String"/>
@@ -248,30 +249,30 @@
 				</jr:list>
 			</componentElement>
 		</band>
-		<band height="78" splitType="Stretch">
+		<band height="91" splitType="Stretch">
 			<textField>
-				<reportElement x="65" y="42" width="104" height="10" uuid="bfa8752a-ffcf-481a-86f3-210f1cf96c1e"/>
+				<reportElement x="65" y="52" width="104" height="10" uuid="bfa8752a-ffcf-481a-86f3-210f1cf96c1e"/>
 				<textElement textAlignment="Right" markup="none">
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA["TOTAL A PAGAR: "+($P{moneda}.equals("PEN")?"S/":"$")]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="168" y="42" width="38" height="10" uuid="b1c45c1d-fa5e-4645-b0f2-89a34854f999"/>
+				<reportElement x="168" y="52" width="38" height="10" uuid="b1c45c1d-fa5e-4645-b0f2-89a34854f999"/>
 				<textElement textAlignment="Right">
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{totalPagar}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="0" y="60" width="205" height="10" uuid="10d78bbc-c5af-4150-992b-68ff99514c38"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="70" width="205" height="10" uuid="10d78bbc-c5af-4150-992b-68ff99514c38"/>
 				<textElement markup="html">
 					<font fontName="SansSerif" size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA["<b>Son: </b>"+$P{montoLetras}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="168" y="22" width="38" height="10" uuid="072a5ffe-c409-46d3-b588-0b5e857dff06"/>
+				<reportElement x="168" y="32" width="38" height="10" uuid="072a5ffe-c409-46d3-b588-0b5e857dff06"/>
 				<textElement textAlignment="Right">
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
@@ -285,7 +286,7 @@
 				<textFieldExpression><![CDATA[$P{subTotal}==null?"0.00":$P{subTotal}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="80" y="22" width="89" height="10" uuid="e222abd6-8cfb-4adf-bc09-b98fd7600ae4"/>
+				<reportElement x="80" y="32" width="89" height="10" uuid="e222abd6-8cfb-4adf-bc09-b98fd7600ae4"/>
 				<textElement textAlignment="Right" markup="none">
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
@@ -299,7 +300,7 @@
 				<textFieldExpression><![CDATA["SUB TOTAL: "+($P{moneda}.equals("PEN")?"S/":"$")]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="80" y="12" width="89" height="10" uuid="3582e72c-c6c7-4859-b029-dade034da65e"/>
+				<reportElement x="80" y="12" width="88" height="10" uuid="3582e72c-c6c7-4859-b029-dade034da65e"/>
 				<textElement textAlignment="Right" markup="none">
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
@@ -315,6 +316,20 @@
 			<line>
 				<reportElement x="0" y="1" width="205" height="1" forecolor="#F0F0F0" uuid="92cd16a9-e72b-43ec-9ec2-b63600d39f46"/>
 			</line>
+			<textField>
+				<reportElement x="79" y="22" width="89" height="10" uuid="ae729599-4829-4dc9-a5e0-2c0f05ec7043"/>
+				<textElement textAlignment="Right" markup="none">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["SUB TOTAL FINAL: "+($P{moneda}.equals("PEN")?"S/":"$")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="168" y="22" width="38" height="10" uuid="c97e25e1-2bda-4ca7-8b01-0078607d8e8d"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{subTotalFinal}==null?"0.00":$P{subTotalFinal}]]></textFieldExpression>
+			</textField>
 		</band>
 		<band height="4">
 			<line>

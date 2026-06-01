@@ -12,6 +12,7 @@ public class SaleDto {
     private Integer number;
     private BigDecimal total;
     private BigDecimal subTotal;
+    private BigDecimal subTotalFinal;
     private BigDecimal igv;
     private LocalDateTime createdDate;
     private String registerDate;
@@ -158,5 +159,13 @@ public class SaleDto {
 
     public void setClientPhoneNumber(String clientPhoneNumber) {
         this.clientPhoneNumber = clientPhoneNumber;
+    }
+
+    public BigDecimal getSubTotalFinal() {
+        return subTotalFinal;
+    }
+
+    public void setSubTotalFinal(BigDecimal subTotalFinal) {
+        this.subTotalFinal = subTotalFinal;
     }
 }

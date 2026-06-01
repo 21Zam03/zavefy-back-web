@@ -30,6 +30,9 @@ public class SaleEntity {
     @Column(name = "sub_total")
     private BigDecimal subTotal;
 
+    @Column(name = "sub_total_final")
+    private BigDecimal subTotalFinal;
+
     @Column(name = "monto_igv")
     private BigDecimal igv;
 
@@ -71,6 +74,9 @@ public class SaleEntity {
 
     @Column(name = "descuento")
     private BigDecimal discount;
+
+    @Column(name = "venta_link")
+    private String saleLink;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
@@ -264,6 +270,22 @@ public class SaleEntity {
         this.clientPhoneNumber = clientPhoneNumber;
     }
 
+    public BigDecimal getSubTotalFinal() {
+        return subTotalFinal;
+    }
+
+    public void setSubTotalFinal(BigDecimal subTotalFinal) {
+        this.subTotalFinal = subTotalFinal;
+    }
+
+    public String getSaleLink() {
+        return saleLink;
+    }
+
+    public void setSaleLink(String saleLink) {
+        this.saleLink = saleLink;
+    }
+
     @Override
     public String toString() {
         return "SaleEntity{" +
@@ -273,6 +295,7 @@ public class SaleEntity {
                 ", number=" + number +
                 ", total=" + total +
                 ", subTotal=" + subTotal +
+                ", subTotalFinal=" + subTotalFinal +
                 ", igv=" + igv +
                 ", createdDate=" + createdDate +
                 ", registerDate='" + registerDate + '\'' +
@@ -280,6 +303,7 @@ public class SaleEntity {
                 ", clientName='" + clientName + '\'' +
                 ", clientDocumentNumber='" + clientDocumentNumber + '\'' +
                 ", clientDocumentType='" + clientDocumentType + '\'' +
+                ", clientPhoneNumber='" + clientPhoneNumber + '\'' +
                 ", clientAddress='" + clientAddress + '\'' +
                 ", paymentMethod='" + paymentMethod + '\'' +
                 ", identifier='" + identifier + '\'' +
