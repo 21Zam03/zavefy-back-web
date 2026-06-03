@@ -61,6 +61,11 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         CategoryEntity categoryEntity = new CategoryEntity();
         MessageResponse messageResponse = new MessageResponse();
         if(categoryDto != null) {
+            if(categoryRepository.existsByNameAndCompanyId(categoryDto.getName(), companyId)) {
+                messageResponse.setStatus(false);
+                messageResponse.setMessage("Ya existe una categoria con el nombre: "+categoryDto.getName());
+                return messageResponse;
+            }
             categoryEntity = CategoryMapper.mapDtoToEntity(categoryDto);
             categoryEntity.setCompanyId(companyId);
             categoryEntity.setActive(true);

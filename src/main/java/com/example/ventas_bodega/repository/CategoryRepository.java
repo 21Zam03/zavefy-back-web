@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
 
-    public boolean existsByName(String name);
+    public boolean existsByNameAndCompanyId(String name, Long companyId);
     public CategoryEntity findByName(String name);
 
     @Query(value = """

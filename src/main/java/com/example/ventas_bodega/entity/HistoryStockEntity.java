@@ -43,6 +43,9 @@ public class HistoryStockEntity {
     @Column(name = "creado_por")
     private Long createdBy;
 
+    @Column(name = "observacion")
+    private String observation;
+
     @PrePersist
     public void prePersist() {
         createDate = LocalDateTime.now();
@@ -134,6 +137,14 @@ public class HistoryStockEntity {
 
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getObservation() {
+        return observation;
+    }
+
+    public void setObservation(String observation) {
+        this.observation = observation;
     }
 
     @Override

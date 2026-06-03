@@ -33,4 +33,9 @@ public class InventoryController {
         return new ResponseEntity<>(inventoryService.getHistoryStockByCompany(user, fromDate, toDate, event, searchKey, page, size),  HttpStatus.CREATED);
     }
 
+    @PostMapping("/adjust-stock")
+    public ResponseEntity<?> adjustStock(@RequestParam Long productId, @CurrentUser UserEntity user) {
+        return new ResponseEntity<>("", HttpStatus.OK);
+    }
+
 }
