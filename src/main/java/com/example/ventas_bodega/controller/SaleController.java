@@ -3,7 +3,10 @@ package com.example.ventas_bodega.controller;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.mapper.SaleMapper;
 import com.example.ventas_bodega.request.SaleRequest;
+import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
+import com.example.ventas_bodega.service.FileService;
+import com.example.ventas_bodega.service.PrintService;
 import com.example.ventas_bodega.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,15 +20,26 @@ public class SaleController {
     public static final String API_PATH = "/api/sale";
 
     private final SaleService saleService;
+    private final PrintService printService;
+    private final FileService fileService;
 
     @Autowired
-    public  SaleController(SaleService saleService) {
+    public  SaleController(SaleService saleService, PrintService printService, FileService fileService) {
         this.saleService = saleService;
+        this.printService = printService;
+        this.fileService = fileService;
     }
 
     @PostMapping
-    public ResponseEntity<?> createSale(@RequestBody SaleRequest saleRequest, @CurrentUser UserEntity user) {
-        return new ResponseEntity<>(saleService.createSale(SaleMapper.requestToDto(saleRequest), user), HttpStatus.CREATED);
+    public ResponseEntity<?> createSale(@RequestBody SaleRequest saleRequest, @CurrentUser UserEntity user) throws Exception {
+        MessageResponse messageResponse = saleService.createSale(SaleMapper.requestToDto(saleRequest), user);
+
+        if(user.getCompany().isHasPrinter()) {
+            String ticket = fileService.getTicketToPrint(Long.valueOf(messageResponse.getSaleDto().getVentaId()));
+            printService.sendToPrint(ticket);
+        }
+
+        return new ResponseEntity<>(messageResponse, HttpStatus.CREATED);
     }
 
     @GetMapping("/all")

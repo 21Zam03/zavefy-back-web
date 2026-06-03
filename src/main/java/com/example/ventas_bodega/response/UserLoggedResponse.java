@@ -7,6 +7,7 @@ public class UserLoggedResponse {
     private String email;
     private String username;
     private Long idCompany;
+    private boolean hasPrinter;
     private boolean hasStock;
     private boolean hasBarcode;
     private boolean hasAutomaticSaved;
@@ -131,5 +132,13 @@ public class UserLoggedResponse {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public boolean isHasPrinter() {
+        return hasPrinter;
+    }
+
+    public void setHasPrinter(boolean hasPrinter) {
+        this.hasPrinter = hasPrinter;
     }
 }

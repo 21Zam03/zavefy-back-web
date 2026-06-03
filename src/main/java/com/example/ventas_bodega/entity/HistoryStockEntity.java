@@ -37,6 +37,12 @@ public class HistoryStockEntity {
     @Column(name = "compra_id")
     private Long purchaseId;
 
+    @Column(name = "empresa_id")
+    private Long companyId;
+
+    @Column(name = "creado_por")
+    private Long createdBy;
+
     @PrePersist
     public void prePersist() {
         createDate = LocalDateTime.now();
@@ -112,5 +118,38 @@ public class HistoryStockEntity {
 
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @Override
+    public String toString() {
+        return "HistoryStockEntity{" +
+                "historyStockId=" + historyStockId +
+                ", event='" + event + '\'' +
+                ", createDate=" + createDate +
+                ", stockBefore=" + stockBefore +
+                ", stockAfter=" + stockAfter +
+                ", stockVariation=" + stockVariation +
+                ", productId=" + productId +
+                ", saleId=" + saleId +
+                ", purchaseId=" + purchaseId +
+                ", companyId=" + companyId +
+                ", createdBy=" + createdBy +
+                '}';
     }
 }

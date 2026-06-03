@@ -15,6 +15,7 @@ public class SignInResponse {
     private String role;
     private boolean hasStock;
     private boolean hasBarcode;
+    private boolean hasPrinter;
     private String message;
     private String token;
     private Integer status;
@@ -136,5 +137,13 @@ public class SignInResponse {
 
     public void setClients(List<ClientDto> clients) {
         this.clients = clients;
+    }
+
+    public boolean isHasPrinter() {
+        return hasPrinter;
+    }
+
+    public void setHasPrinter(boolean hasPrinter) {
+        this.hasPrinter = hasPrinter;
     }
 }

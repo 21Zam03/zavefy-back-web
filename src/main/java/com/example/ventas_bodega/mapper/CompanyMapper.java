@@ -16,7 +16,8 @@ public class CompanyMapper {
             String phoneNumber,
             String imageUrl,
             MultipartFile file,
-            String hasBarcode
+            String hasBarcode,
+            String hasPrinter
     ) {
         CompanyDto companyDto = new CompanyDto();
         companyDto.setCompanyId(id);
@@ -29,6 +30,7 @@ public class CompanyMapper {
         companyDto.setImageUrl(imageUrl);
         companyDto.setFile(file);
         companyDto.setHasBarcode(Boolean.parseBoolean(hasBarcode));
+        companyDto.setHasPrinter(Boolean.parseBoolean(hasPrinter));
         return companyDto;
     }
 
@@ -57,6 +59,7 @@ public class CompanyMapper {
         company.setImageUrl(companyEntity.getImageUrl());
         company.setHasStock(companyEntity.isHasStock());
         company.setHasBarcode(companyEntity.isHasBarcode());
+        company.setHasPrinter(companyEntity.isHasPrinter());
         return company;
     }
 

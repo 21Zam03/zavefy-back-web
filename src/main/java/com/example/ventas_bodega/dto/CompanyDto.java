@@ -17,6 +17,7 @@ public class CompanyDto {
     private boolean hasStock;
     private boolean hasBarcode;
     private boolean isTest;
+    private boolean hasPrinter;
 
     public CompanyDto() {
     }
@@ -135,4 +136,13 @@ public class CompanyDto {
     public void setTest(boolean test) {
         isTest = test;
     }
+
+    public boolean isHasPrinter() {
+        return hasPrinter;
+    }
+
+    public void setHasPrinter(boolean hasPrinter) {
+        this.hasPrinter = hasPrinter;
+    }
+
 }

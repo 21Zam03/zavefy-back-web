@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,6 +93,59 @@ public class FileServiceImpl implements FileService {
             salePdfDto.setSeller(saleEntity.getUser().getFirstname()+" "+saleEntity.getUser().getLastname());
             salePdfDto.setSaleLink(saleEntity.getSaleLink());
             return new ByteArrayInputStream(getByteFromPdfTicket(salePdfDto));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    @Override
+    public String getTicketToPrint(Long id) throws Exception {
+        try {
+            SaleEntity saleEntity = saleRepository.findById(id).orElseThrow(() -> {
+                return new NotFoundException("SALE NOT FOUND");
+            });
+            System.out.println("SALE: " + saleEntity.toString());
+            CompanyEntity company = companyRepository.findByRuc(saleEntity.getUser().getCompany().getRuc());
+
+            List<SaleDetailDtoInter> productList = saleDetailRepository.findDetailsBySaleId(id);
+            List<SaleDetailPdfDto> saleDetailPdfDtoList = new ArrayList<>();
+            for (SaleDetailDtoInter saleDetailDtoInter : productList) {
+                SaleDetailPdfDto saleDetailPdfDto = new SaleDetailPdfDto();
+                saleDetailPdfDto.setBarcode(productList.get(0).getBarcode());
+                saleDetailPdfDto.setProductName(saleDetailDtoInter.getProductName());
+                saleDetailPdfDto.setUnitPrice(String.valueOf(saleDetailDtoInter.getUnitePrice()));
+                saleDetailPdfDto.setTotalPrice(String.valueOf(saleDetailDtoInter.getTotal()));
+                saleDetailPdfDto.setMeasurementUnit(String.valueOf(saleDetailDtoInter.getMeasurementUnit()));
+                saleDetailPdfDto.setQuantity(String.valueOf(saleDetailDtoInter.getQuantity()));
+                saleDetailPdfDtoList.add(saleDetailPdfDto);
+            }
+            SalePdfDto salePdfDto = new SalePdfDto();
+            salePdfDto.setComertialName(company.getComertialName().toUpperCase());
+            salePdfDto.setSocialReason(company.getSocialReason());
+            salePdfDto.setAddress(company.getAddress());
+            salePdfDto.setPhoneNumber(company.getPhoneNumber());
+            salePdfDto.setEmail(company.getEmail());
+            salePdfDto.setRuc(company.getRuc());
+            salePdfDto.setClientName(saleEntity.getClientName());
+            salePdfDto.setClientAddress(saleEntity.getClientAddress());
+            salePdfDto.setClientDocumentNumber(saleEntity.getClientDocumentNumber());
+            salePdfDto.setClientDocumentType(saleEntity.getClientDocumentType());
+            salePdfDto.setMoneyType(saleEntity.getMoneyType());
+            salePdfDto.setCreatedDate(saleEntity.getCreatedDate());
+            salePdfDto.setDiscount(saleEntity.getDiscount());
+            salePdfDto.setIgv(saleEntity.getIgv());
+            salePdfDto.setTotal(saleEntity.getTotal());
+            salePdfDto.setSubTotal(saleEntity.getSubTotal());
+            salePdfDto.setSubTotalFinal(saleEntity.getSubTotalFinal());
+            salePdfDto.setNotes(saleEntity.getNotes());
+            salePdfDto.setSaleDetailPdfDtoList(saleDetailPdfDtoList);
+            salePdfDto.setImageUrl(company.getImageUrl());
+            salePdfDto.setType(saleEntity.getType());
+            salePdfDto.setIdentifier(saleEntity.getIdentifier());
+            salePdfDto.setSeller(saleEntity.getUser().getFirstname()+" "+saleEntity.getUser().getLastname());
+            salePdfDto.setSaleLink(saleEntity.getSaleLink());
+            return getTicketBytes(salePdfDto);
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception(e.getMessage());
@@ -193,6 +247,88 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
             throw new RuntimeException("Error en plantilla Jasper", e);
         }
+    }
+
+    public String getTicketBytes(SalePdfDto sale) throws Exception {
+        StringBuilder ticket = new StringBuilder();
+
+        ticket.append(center(sale.getComertialName().toUpperCase()));
+        ticket.append("\n");
+
+        ticket.append(center(sale.getRuc()));
+        ticket.append("\n");
+
+        ticket.append(center(sale.getAddress()));
+        ticket.append("\n");
+
+        ticket.append("--------------------------------\n");
+
+        ticket.append("DOC: ");
+        ticket.append(getSerieAndNumber(sale.getIdentifier()));
+        ticket.append("\n");
+
+        ticket.append("CLIENTE: ");
+        ticket.append(sale.getClientName());
+        ticket.append("\n");
+
+        ticket.append("--------------------------------\n");
+
+        for (SaleDetailPdfDto item : sale.getSaleDetailPdfDtoList()) {
+
+            ticket.append(item.getProductName());
+            ticket.append("\n");
+
+            ticket.append(item.getQuantity())
+                    .append(" x ")
+                    .append(item.getUnitPrice())
+                    .append(" = ")
+                    .append(item.getTotalPrice());
+
+            ticket.append("\n");
+        }
+
+        ticket.append("--------------------------------\n");
+
+        ticket.append("SUBTOTAL: ");
+        ticket.append(sale.getSubTotal());
+        ticket.append("\n");
+
+        ticket.append("IGV: ");
+        ticket.append(sale.getIgv());
+        ticket.append("\n");
+
+        ticket.append("TOTAL: ");
+        ticket.append(sale.getTotal());
+        ticket.append("\n");
+
+        ticket.append("--------------------------------\n");
+
+        ticket.append(MoneyUtil.convertir(
+                sale.getTotal().toString(),
+                "Soles",
+                true
+        ));
+
+        ticket.append("\n");
+
+        ticket.append("GRACIAS POR SU COMPRA\n");
+
+        ticket.append("\n\n\n\n\n\n"); // espacio para que salga el ticket
+        ticket.append("\u001D\u0056\u0000"); // CUT
+
+        return ticket.toString();
+    }
+
+    private String center(String text) {
+        int width = 48;
+
+        if (text.length() >= width) {
+            return text;
+        }
+
+        int padding = (width - text.length()) / 2;
+
+        return " ".repeat(padding) + text;
     }
 
     private String getSerieAndNumber(String value) {

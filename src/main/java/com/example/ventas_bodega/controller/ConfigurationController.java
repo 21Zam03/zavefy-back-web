@@ -43,9 +43,10 @@ public class ConfigurationController {
             @RequestParam(value = "imageUrl" , required = false) String imageUrl,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam("hasBarcode") String hasBarcode,
+            @RequestParam("hasPrinter") String hasPrinter,
             @CurrentUser UserEntity user
     ) throws Exception {
-        CompanyDto companyDto = CompanyMapper.buildCompanyDtoFromController(Long.valueOf(id), ruc, socialReason, comertialName, address, email, phoneNumber, imageUrl, file, hasBarcode);
+        CompanyDto companyDto = CompanyMapper.buildCompanyDtoFromController(Long.valueOf(id), ruc, socialReason, comertialName, address, email, phoneNumber, imageUrl, file, hasBarcode, hasPrinter);
 
         MessageResponse messageResponse = configurationService.updateBussiness(companyDto, user);
 

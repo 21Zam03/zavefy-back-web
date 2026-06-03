@@ -187,6 +187,7 @@ public class AuthServiceImpl implements AuthService {
         userLoggedResponse.setRuc(user.getCompany().getRuc());
         userLoggedResponse.setComertialName(user.getCompany().getComertialName());
         userLoggedResponse.setSocialReason(user.getCompany().getSocialReason());
+        userLoggedResponse.setHasPrinter(user.getCompany().isHasPrinter());
         userLoggedResponse.setHasBarcode(user.getCompany().isHasBarcode());
         userLoggedResponse.setHasStock(user.getCompany().isHasStock());
         userLoggedResponse.setHasAutomaticSaved(user.getCompany().isHasAutomaticSaved());

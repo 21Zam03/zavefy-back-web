@@ -1,19 +1,26 @@
 package com.example.ventas_bodega.service.impl;
 
-import com.example.ventas_bodega.dto.ProductDto;
+import com.example.ventas_bodega.dto.HistoryStockDto;
 import com.example.ventas_bodega.dto.SaleDetailDto;
+import com.example.ventas_bodega.dto.interfaces.HistoryStockDtoInter;
 import com.example.ventas_bodega.entity.HistoryStockEntity;
 import com.example.ventas_bodega.entity.ProductEntity;
 import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.mapper.HistoryStockMapper;
 import com.example.ventas_bodega.repository.HistoryStockRepository;
 import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,10 +41,10 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public MessageResponse createHistoryStock(List<SaleDetailDto> saleDetailDtoList, UserEntity userEntity, String event) {
+        System.out.println("SIZE: "+saleDetailDtoList.size());
         MessageResponse messageResponse = new MessageResponse();
         try {
             for (SaleDetailDto saleDetailDto : saleDetailDtoList) {
-                System.out.println("INICIO");
                 HistoryStockEntity historyStockEntity = new HistoryStockEntity();
                 historyStockEntity.setEvent(event);
                 historyStockEntity.setStockBefore(saleDetailDto.getStock());
@@ -45,8 +52,10 @@ public class InventoryServiceImpl implements InventoryService {
                 historyStockEntity.setStockVariation(historyStockEntity.getStockAfter() - historyStockEntity.getStockBefore());
                 historyStockEntity.setProductId(saleDetailDto.getProductId());
                 historyStockEntity.setSaleId(saleDetailDto.getSaleId());
-                historyStockRepository.save(historyStockEntity);
-                System.out.println("guardo");
+                historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
+                historyStockEntity.setCompanyId(userEntity.getCompany().getCompanyId());
+                HistoryStockEntity historyStock = historyStockRepository.save(historyStockEntity);
+                System.out.println("HISTORY CREATED: "+historyStock.toString());
             }
 
             // Convertimos a batch args (forma más estable en Spring Boot 4)
@@ -95,6 +104,8 @@ public class InventoryServiceImpl implements InventoryService {
             historyStockEntity.setStockAfter(Long.valueOf(product.getStock()));
             historyStockEntity.setStockVariation(historyStockEntity.getStockAfter() - historyStockEntity.getStockBefore());
             historyStockEntity.setProductId(product.getId());
+            historyStockEntity.setCompanyId(userEntity.getCompany().getCompanyId());
+            historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
             historyStockRepository.save(historyStockEntity);
             messageResponse.setMessage("Se creo el historial de forma exitosa");
             messageResponse.setStatus(true);
@@ -104,6 +115,17 @@ public class InventoryServiceImpl implements InventoryService {
             messageResponse.setStatus(false);
             return messageResponse;
         }
+    }
+
+    @Override
+    public Page<HistoryStockDto> getHistoryStockByCompany(UserEntity userEntity, String fromDate, String toDate, String event, String searchKey, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<HistoryStockDtoInter> historyStock = historyStockRepository.findHistoryStockByFilters(userEntity.getCompany().getCompanyId(), searchKey, event, fromDate, toDate, pageable);
+        List<HistoryStockDto> data = new ArrayList<>();
+        for (int i = 0; i<historyStock.getContent().size(); i++) {
+            data.add(HistoryStockMapper.interfaceToDto(historyStock.getContent().get(i)));
+        }
+        return new PageImpl<>(data, pageable, historyStock.getTotalElements());
     }
 
 }

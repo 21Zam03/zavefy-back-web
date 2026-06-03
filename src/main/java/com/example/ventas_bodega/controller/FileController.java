@@ -4,6 +4,7 @@ import com.example.ventas_bodega.service.FileService;
 import com.google.common.io.ByteStreams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,12 @@ public class FileController {
         ByteArrayResource resource = new ByteArrayResource(targetArray);
         return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/pdf"))
                 .body(resource);
+    }
+
+    @GetMapping("/print-ticket/{id}")
+    public ResponseEntity<?> printTicket(@PathVariable Long id) throws Exception {
+        String ticket = fileService.getTicketToPrint(id);
+        return new ResponseEntity<>(ticket, HttpStatus.OK);
     }
 
 }

@@ -9,11 +9,9 @@ import com.example.ventas_bodega.repository.CompanyRepository;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.ConfigurationService;
 import com.example.ventas_bodega.service.FirebaseStorageService;
-import com.example.ventas_bodega.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
 import java.util.Optional;
 
 @Service
@@ -79,7 +77,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
 
             companyToUpdate.setHasBarcode(companyDto.isHasBarcode());
-
+            companyToUpdate.setHasPrinter(companyDto.isHasPrinter());
             companyRepository.save(companyToUpdate);
 
             messageResponse.setStatus(true);

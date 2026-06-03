@@ -47,6 +47,7 @@ public class SaleServiceImpl implements SaleService {
     @Transactional
     public MessageResponse createSale(SaleDto saleDto, UserEntity userEntity) {
         MessageResponse messageResponse = new MessageResponse();
+        SaleEntity saleCreated = new SaleEntity();
 
         if(saleDto == null) {
             messageResponse.setMessage("Informacion de la venta es nula");
@@ -60,7 +61,10 @@ public class SaleServiceImpl implements SaleService {
         try {
             SaleEntity saleToCreate = SaleMapper.dtoToEntity(saleDto);
             saleToCreate.setUser(userEntity);
-            SaleEntity saleCreated = saleRepository.save(saleToCreate);
+            saleToCreate.setIssuerRuc(userEntity.getCompany().getRuc());
+            saleToCreate.setSaleLink("https://www.zavefy.com/comprobantes/"+userEntity.getCompany().getRuc()+"-"+saleDto.getSerial()+"-"+saleDto.getNumber());
+
+            saleCreated = saleRepository.save(saleToCreate);
             for (int i=0; i<saleDto.getSaleDetails().size(); i++) {
                 //Ha largo plazo modificar este metodo en una cola para optimizar el tiempo del proceso
                 if (saleDto.getSaleDetails().get(i).getProductId() == null && saleDto.getSaleDetails().get(i).isHasAutomaticSaved() && !userEntity.getCompany().isHasStock()) {
@@ -94,6 +98,7 @@ public class SaleServiceImpl implements SaleService {
             messageResponse.setStatus(false);
             return messageResponse;
         }
+        messageResponse.setSaleDto(SaleMapper.entityToDto(saleCreated));
         messageResponse.setMessage("Venta con éxito");
         messageResponse.setStatus(true);
         return messageResponse;

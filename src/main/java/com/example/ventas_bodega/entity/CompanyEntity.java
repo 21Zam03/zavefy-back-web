@@ -47,6 +47,9 @@ public class CompanyEntity {
     @Column(name = "es_prueba")
     private boolean isTest;
 
+    @Column(name = "tiene_impresora")
+    private boolean hasPrinter;
+
     public CompanyEntity() {}
 
     public CompanyEntity(Long companyId, String comertialName, String ruc) {
@@ -157,6 +160,14 @@ public class CompanyEntity {
 
     public void setTest(boolean test) {
         isTest = test;
+    }
+
+    public boolean isHasPrinter() {
+        return hasPrinter;
+    }
+
+    public void setHasPrinter(boolean hasPrinter) {
+        this.hasPrinter = hasPrinter;
     }
 
     @Override
