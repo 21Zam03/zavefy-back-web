@@ -47,6 +47,9 @@ public class UserEntity {
     @Column(name = "fecha_actualizacion_contrasena")
     private LocalDateTime passwordUpdateDate;
 
+    @Column(name = "tiene_impresora")
+    private boolean hasPrinter;
+
     @Column(name = "creado_por")
     private Long createdBy;
 
@@ -186,6 +189,22 @@ public class UserEntity {
 
     public void setPasswordUpdateDate(LocalDateTime passwordUpdateDate) {
         this.passwordUpdateDate = passwordUpdateDate;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Long getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Long updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     @Override

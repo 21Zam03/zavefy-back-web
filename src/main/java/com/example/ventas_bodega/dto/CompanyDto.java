@@ -15,6 +15,7 @@ public class CompanyDto {
     private MultipartFile file;
     private String filePath;
     private boolean hasStock;
+    private boolean hasAutomaticSaved;
     private boolean hasBarcode;
     private boolean isTest;
     private boolean hasPrinter;
@@ -145,4 +146,11 @@ public class CompanyDto {
         this.hasPrinter = hasPrinter;
     }
 
+    public boolean isHasAutomaticSaved() {
+        return hasAutomaticSaved;
+    }
+
+    public void setHasAutomaticSaved(boolean hasAutomaticSaved) {
+        this.hasAutomaticSaved = hasAutomaticSaved;
+    }
 }

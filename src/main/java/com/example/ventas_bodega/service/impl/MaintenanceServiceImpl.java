@@ -18,9 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class MaintenanceServiceImpl implements MaintenanceService {
@@ -160,7 +158,16 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             CompanyEntity companyCreated = companyRepository.save(companyEntity);
 
             UserEntity userEntity = UserMapper.dtoToEntity(userDto);
+            PermissionEntity permissionEntity = new  PermissionEntity();
+            Set<PermissionEntity> permissionList = new HashSet<>();
+
+
+            RoleEntity role = new RoleEntity();
+            Set<RoleEntity> roleList = new HashSet<>();
+
+
             userEntity.setCompany(companyCreated);
+            userEntity.setCreatedBy(Long.valueOf(user.getUserId()));
             userEntity.setEnabled(true);
             userEntity.setAccountExpired(false);
             userEntity.setAccountLocked(false);

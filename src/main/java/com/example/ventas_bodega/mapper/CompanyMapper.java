@@ -44,6 +44,11 @@ public class CompanyMapper {
         company.setEmail(companyDto.getEmail());
         company.setPhoneNumber(companyDto.getPhoneNumber());
         company.setImageUrl(companyDto.getImageUrl());
+        company.setHasStock(companyDto.isHasStock());
+        company.setHasBarcode(companyDto.isHasBarcode());
+        company.setHasAutomaticSaved(companyDto.isHasAutomaticSaved());
+        company.setTest(companyDto.isTest());
+
         return company;
     }
 

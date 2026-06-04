@@ -16,6 +16,13 @@ public class RoleEntity {
     @Column(name = "nombre")
     private String name;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_empresa")
+    private CompanyEntity companyEntity;
+
+    @Column(name = "es_sistema_rol")
+    private Boolean isSystemRole;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_roles_permisos", joinColumns = @JoinColumn(name = "id_rol"), inverseJoinColumns = @JoinColumn(name = "id_permiso"))
     private Set<PermissionEntity> permissionList;

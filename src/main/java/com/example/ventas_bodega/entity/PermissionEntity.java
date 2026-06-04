@@ -14,8 +14,10 @@ public class PermissionEntity {
     @Column(name = "nombre")
     private String name;
 
-    public PermissionEntity() {
+    @Column(name = "id_modulo")
+    private Integer moduleId;
 
+    public PermissionEntity() {
     }
 
     public PermissionEntity(Integer id, String name) {
