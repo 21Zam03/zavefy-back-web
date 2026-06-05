@@ -32,6 +32,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     private MeasurementUnitRepository measurementUnitRepository;
     private CompanyRepository companyRepository;
     private ClientRepository clientRepository;
+    private PermissionRepository permissionRepository;
 
     @Autowired
     public MaintenanceServiceImpl(
@@ -150,7 +151,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     @Override
     @Transactional
-    public MessageResponse createCompany(CompanyDto companyDto, UserDto userDto, UserEntity user, boolean isTest) {
+    public MessageResponse createCompany(CompanyDto companyDto, UserDto userDto, UserEntity user, boolean isTest, String role) {
         MessageResponse messageResponse = new MessageResponse();
         try {
 
@@ -159,10 +160,10 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
             UserEntity userEntity = UserMapper.dtoToEntity(userDto);
             PermissionEntity permissionEntity = new  PermissionEntity();
-            Set<PermissionEntity> permissionList = new HashSet<>();
+            //Set<PermissionEntity> permissionList = permissionRepository.findAll();
 
 
-            RoleEntity role = new RoleEntity();
+            RoleEntity roleEntity = new RoleEntity();
             Set<RoleEntity> roleList = new HashSet<>();
 
 

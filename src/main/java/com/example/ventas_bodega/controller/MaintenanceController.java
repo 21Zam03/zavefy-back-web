@@ -97,11 +97,12 @@ public class MaintenanceController {
             @RequestParam("userPhoneNumber") String userPhoneNumber,
             @RequestParam("isTest") String isTest,
             @RequestParam("hasPrinter") String hasPrinter,
+            @RequestParam("role") String role,
             @CurrentUser UserEntity user
     ) {
         CompanyDto companyDto = CompanyMapper.buildCompanyDtoFromController(null, ruc, socialReason, comertialName, address, email, phoneNumber, imageUrl, file, hasBarcode, hasPrinter);
         UserDto userDto = UserMapper.buildCompanyDtoFromController(username, password, firstName, lastName, userEmail, userPhoneNumber);
-        return new ResponseEntity<>(maintenanceService.createCompany(companyDto, userDto, user, Boolean.parseBoolean(isTest)), HttpStatus.CREATED);
+        return new ResponseEntity<>(maintenanceService.createCompany(companyDto, userDto, user, Boolean.parseBoolean(isTest), role), HttpStatus.CREATED);
     }
 
 
