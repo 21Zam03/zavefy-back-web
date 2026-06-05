@@ -47,9 +47,6 @@ public class UserEntity {
     @Column(name = "fecha_actualizacion_contrasena")
     private LocalDateTime passwordUpdateDate;
 
-    @Column(name = "tiene_impresora")
-    private boolean hasPrinter;
-
     @Column(name = "creado_por")
     private Long createdBy;
 

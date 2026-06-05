@@ -16,10 +16,6 @@ public class RoleEntity {
     @Column(name = "nombre")
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_empresa")
-    private CompanyEntity companyEntity;
-
     @Column(name = "es_sistema_rol")
     private Boolean isSystemRole;
 

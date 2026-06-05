@@ -11,10 +11,22 @@ public class ModuleEntity {
     @Column(name = "id_modulo")
     private Integer moduleId;
 
+    @Column(name = "id_modulo_padre")
+    private Integer fatherModuleId;
+
     @Column(name = "nombre")
     private String name;
 
     @Column(name = "codigo")
     private String code;
+
+    @Column(name = "icono")
+    private String icon;
+
+    @Column(name = "orden")
+    private Integer order;
+
+    @Column(name = "es_activo")
+    private boolean isActive;
 
 }
