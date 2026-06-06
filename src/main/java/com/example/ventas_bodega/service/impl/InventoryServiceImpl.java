@@ -1,12 +1,16 @@
 package com.example.ventas_bodega.service.impl;
 
+import com.example.ventas_bodega.dto.AdjustmentStockDto;
 import com.example.ventas_bodega.dto.HistoryStockDto;
 import com.example.ventas_bodega.dto.SaleDetailDto;
 import com.example.ventas_bodega.dto.interfaces.HistoryStockDtoInter;
+import com.example.ventas_bodega.entity.AdjustmentStockEntity;
 import com.example.ventas_bodega.entity.HistoryStockEntity;
 import com.example.ventas_bodega.entity.ProductEntity;
 import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.mapper.AdjustmentStockMapper;
 import com.example.ventas_bodega.mapper.HistoryStockMapper;
+import com.example.ventas_bodega.repository.AdjustmentStockRepository;
 import com.example.ventas_bodega.repository.HistoryStockRepository;
 import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.response.MessageResponse;
@@ -28,14 +32,20 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final ProductRepository productRepository;
     private final HistoryStockRepository historyStockRepository;
+    private final AdjustmentStockRepository adjustmentStockRepository;
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public InventoryServiceImpl(HistoryStockRepository historyStockRepository, ProductRepository productRepository, JdbcTemplate jdbcTemplate) {
+    public InventoryServiceImpl(
+            HistoryStockRepository historyStockRepository,
+            ProductRepository productRepository,
+            AdjustmentStockRepository adjustmentStockRepository,
+            JdbcTemplate jdbcTemplate) {
         this.historyStockRepository = historyStockRepository;
         this.productRepository = productRepository;
         this.jdbcTemplate = jdbcTemplate;
+        this.adjustmentStockRepository = adjustmentStockRepository;
     }
 
     @Override
@@ -118,6 +128,37 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    public MessageResponse createHistoryStock(AdjustmentStockEntity adjustmentStockEntity, UserEntity userEntity, String event) {
+        MessageResponse messageResponse = new MessageResponse();
+        try {
+            HistoryStockEntity historyStockEntity = new HistoryStockEntity();
+
+            historyStockEntity.setEvent(event);
+            historyStockEntity.setStockBefore(Long.valueOf(adjustmentStockEntity.getCurrentStock()));
+            historyStockEntity.setStockAfter(Long.valueOf(adjustmentStockEntity.getNewStock()));
+            historyStockEntity.setStockVariation(historyStockEntity.getStockAfter() - historyStockEntity.getStockBefore());
+            historyStockEntity.setProductId(adjustmentStockEntity.getProductId());
+            historyStockEntity.setCompanyId(userEntity.getCompany().getCompanyId());
+            historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
+            historyStockRepository.save(historyStockEntity);
+
+            int rowsAffected = jdbcTemplate.update(
+                    "UPDATE tb_producto SET stock = ? WHERE id_producto = ?",
+                    historyStockEntity.getStockAfter(),
+                    historyStockEntity.getProductId()
+            );
+
+            messageResponse.setMessage("Se creo el historial de forma exitosa");
+            messageResponse.setStatus(true);
+            return messageResponse;
+        } catch (Exception e) {
+            messageResponse.setMessage(e.getMessage());
+            messageResponse.setStatus(false);
+            return messageResponse;
+        }
+    }
+
+    @Override
     public Page<HistoryStockDto> getHistoryStockByCompany(UserEntity userEntity, String fromDate, String toDate, String event, String searchKey, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<HistoryStockDtoInter> historyStock = historyStockRepository.findHistoryStockByFilters(userEntity.getCompany().getCompanyId(), searchKey, event, fromDate, toDate, pageable);
@@ -126,6 +167,25 @@ public class InventoryServiceImpl implements InventoryService {
             data.add(HistoryStockMapper.interfaceToDto(historyStock.getContent().get(i)));
         }
         return new PageImpl<>(data, pageable, historyStock.getTotalElements());
+    }
+
+    @Override
+    public MessageResponse createAdjustmentStock(AdjustmentStockDto adjustmentStockDto, UserEntity userEntity) {
+        MessageResponse messageResponse = new MessageResponse();
+        try {
+            AdjustmentStockEntity adjustmentStockEntity = AdjustmentStockMapper.dtoToEntity(adjustmentStockDto);
+            adjustmentStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
+            AdjustmentStockEntity adjustmentStockCreated = adjustmentStockRepository.save(adjustmentStockEntity);
+
+            createHistoryStock(adjustmentStockCreated, userEntity, "AJUSTE");
+            messageResponse.setMessage("Se creo el ajuste de stock de manera exitosa");
+            messageResponse.setStatus(true);
+            return messageResponse;
+        } catch (Exception e) {
+            messageResponse.setMessage(e.getMessage());
+            messageResponse.setStatus(false);
+            return messageResponse;
+        }
     }
 
 }

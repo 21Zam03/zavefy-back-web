@@ -52,7 +52,7 @@ public class SecurityConfig {
                             "https://zavefy.com",
                             "https://www.zavefy.com",
                             "http://172.18.141.227:5173/",
-                            "http://10.93.140.227:5173/"
+                            "http://10.189.19.227:5173/"
                     ));
                     config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS", "PATCH"));
                     config.setAllowedHeaders(List.of("*"));

@@ -1,8 +1,10 @@
 package com.example.ventas_bodega.service;
 
+import com.example.ventas_bodega.dto.AdjustmentStockDto;
 import com.example.ventas_bodega.dto.HistoryStockDto;
 import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.SaleDetailDto;
+import com.example.ventas_bodega.entity.AdjustmentStockEntity;
 import com.example.ventas_bodega.entity.ProductEntity;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.response.MessageResponse;
@@ -14,6 +16,8 @@ public interface InventoryService {
 
     public MessageResponse createHistoryStock(List<SaleDetailDto> saleDetailDtoList, UserEntity userEntity, String event);
     public MessageResponse createHistoryStock(ProductEntity product, UserEntity userEntity, String event);
+    public MessageResponse createHistoryStock(AdjustmentStockEntity adjustmentStockEntity, UserEntity userEntity, String event);
     public Page<HistoryStockDto> getHistoryStockByCompany(UserEntity userEntity, String fromDate, String toDate, String event, String searchKey, int page, int size);
+    public MessageResponse createAdjustmentStock(AdjustmentStockDto adjustmentStockDto, UserEntity userEntity);
 
 }

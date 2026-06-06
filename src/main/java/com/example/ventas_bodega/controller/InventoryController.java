@@ -1,6 +1,9 @@
 package com.example.ventas_bodega.controller;
 
+import com.example.ventas_bodega.dto.AdjustmentStockDto;
 import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.mapper.AdjustmentStockMapper;
+import com.example.ventas_bodega.request.AdjustmentStockRequest;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +37,9 @@ public class InventoryController {
     }
 
     @PostMapping("/adjust-stock")
-    public ResponseEntity<?> adjustStock(@RequestParam Long productId, @CurrentUser UserEntity user) {
-        return new ResponseEntity<>("", HttpStatus.OK);
+    public ResponseEntity<?> adjustStock(@RequestBody AdjustmentStockRequest adjustmentStockRequest, @CurrentUser UserEntity user) {
+        AdjustmentStockDto adjustmentStockDto = AdjustmentStockMapper.requestToDto(adjustmentStockRequest);
+        return new ResponseEntity<>(inventoryService.createAdjustmentStock(adjustmentStockDto, user), HttpStatus.OK);
     }
 
 }
