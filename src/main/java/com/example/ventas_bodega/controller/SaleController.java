@@ -6,7 +6,7 @@ import com.example.ventas_bodega.request.SaleRequest;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.FileService;
-import com.example.ventas_bodega.service.PrintService;
+import com.example.ventas_bodega.service.AgentService;
 import com.example.ventas_bodega.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,13 +20,13 @@ public class SaleController {
     public static final String API_PATH = "/api/sale";
 
     private final SaleService saleService;
-    private final PrintService printService;
+    private final AgentService agentService;
     private final FileService fileService;
 
     @Autowired
-    public  SaleController(SaleService saleService, PrintService printService, FileService fileService) {
+    public  SaleController(SaleService saleService, AgentService agentService, FileService fileService) {
         this.saleService = saleService;
-        this.printService = printService;
+        this.agentService = agentService;
         this.fileService = fileService;
     }
 
@@ -36,7 +36,7 @@ public class SaleController {
 
         if(user.getCompany().isHasPrinter()) {
             String ticket = fileService.getTicketToPrint(Long.valueOf(messageResponse.getSaleDto().getVentaId()));
-            printService.sendToPrint(ticket);
+            agentService.createPrintJob(user.getCompany().getCompanyId(), user.getCompany().getDefaultAgentId(), ticket);
         }
 
         return new ResponseEntity<>(messageResponse, HttpStatus.CREATED);

@@ -50,6 +50,9 @@ public class CompanyEntity {
     @Column(name = "tiene_impresora")
     private boolean hasPrinter;
 
+    @Column(name = "id_agente_pordefecto")
+    private Long defaultAgentId;
+
     public CompanyEntity() {}
 
     public CompanyEntity(Long companyId, String comertialName, String ruc) {
@@ -168,6 +171,14 @@ public class CompanyEntity {
 
     public void setHasPrinter(boolean hasPrinter) {
         this.hasPrinter = hasPrinter;
+    }
+
+    public Long getDefaultAgentId() {
+        return defaultAgentId;
+    }
+
+    public void setDefaultAgentId(Long defaultAgentId) {
+        this.defaultAgentId = defaultAgentId;
     }
 
     @Override

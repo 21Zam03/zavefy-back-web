@@ -71,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/product/**").permitAll()
                         .requestMatchers("/api/loan/**").hasAnyRole("ASESOR", "ADMIN")
                         //.requestMatchers("/api/maintenance/**").hasAuthority("PERMISSION_MAINTENANCE")
+                        .requestMatchers("/api/print-jobs/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
