@@ -10,10 +10,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
 
     public boolean existsByNameAndCompanyId(String name, Long companyId);
     public CategoryEntity findByName(String name);
+    public List<CategoryEntity> findAllByCompanyId(Long companyId);
 
     @Query(value = """
         SELECT c.id_categoria, c.nombre

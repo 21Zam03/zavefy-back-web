@@ -51,8 +51,8 @@ public class SecurityConfig {
                             "http://localhost:5173/",
                             "https://zavefy.com",
                             "https://www.zavefy.com",
-                            "http://172.18.141.227:5173/",
-                            "http://10.189.19.227:5173/"
+                            "http://192.168.18.21:5173/",
+                            "http://10.215.173.227:5173/"
                     ));
                     config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS", "PATCH"));
                     config.setAllowedHeaders(List.of("*"));
@@ -72,6 +72,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/loan/**").hasAnyRole("ASESOR", "ADMIN")
                         //.requestMatchers("/api/maintenance/**").hasAuthority("PERMISSION_MAINTENANCE")
                         .requestMatchers("/api/print-jobs/**").permitAll()
+                        .requestMatchers("/api/catalog/**").permitAll()
+                        .requestMatchers("/api/option/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
