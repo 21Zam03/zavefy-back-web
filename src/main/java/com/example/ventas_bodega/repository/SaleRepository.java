@@ -33,6 +33,25 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
     );
 
     @Query("""
+        SELECT s
+           FROM SaleEntity s
+            WHERE s.user.company.ruc = :ruc
+            AND (:type IS NULL OR s.type = :type)
+            AND (:serial IS NULL OR s.serial = :serial)
+            AND (:number IS NULL OR s.number = :number)
+            AND (:fromDate IS NULL OR s.registerDate >= :fromDate)
+            AND (:toDate IS NULL OR s.registerDate <= :toDate)
+        """)
+    List<SaleEntity> findSalesByCompany(
+            @Param("ruc") String ruc,
+            @Param("type") String type,
+            @Param("serial") String serial,
+            @Param("number") Integer number,
+            @Param("fromDate")String fromDate,
+            @Param("toDate") String toDate
+    );
+
+    @Query("""
             SELECT MAX(s.number)
             FROM SaleEntity s
             WHERE s.type = :type

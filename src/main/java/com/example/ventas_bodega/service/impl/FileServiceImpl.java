@@ -10,11 +10,21 @@ import com.example.ventas_bodega.repository.CompanyRepository;
 import com.example.ventas_bodega.repository.SaleDetailRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
 import com.example.ventas_bodega.service.FileService;
+import com.example.ventas_bodega.service.SaleService;
 import com.example.ventas_bodega.util.DateUtil;
 import com.example.ventas_bodega.util.MoneyUtil;
 import com.example.ventas_bodega.util.QrUtil;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.util.JRLoader;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -22,10 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,11 +46,14 @@ public class FileServiceImpl implements FileService {
     private final CompanyRepository companyRepository;
     private final SaleDetailRepository saleDetailRepository;
 
+    private final SaleService saleService;
+
     @Autowired
-    public FileServiceImpl(SaleRepository saleRepository, CompanyRepository companyRepository, SaleDetailRepository saleDetailRepository) {
+    public FileServiceImpl(SaleRepository saleRepository, CompanyRepository companyRepository, SaleDetailRepository saleDetailRepository, SaleService saleService) {
         this.saleRepository = saleRepository;
         this.companyRepository = companyRepository;
         this.saleDetailRepository = saleDetailRepository;
+        this.saleService = saleService;
     }
 
     @Override
@@ -105,7 +116,6 @@ public class FileServiceImpl implements FileService {
             SaleEntity saleEntity = saleRepository.findById(id).orElseThrow(() -> {
                 return new NotFoundException("SALE NOT FOUND");
             });
-            System.out.println("SALE: " + saleEntity.toString());
             CompanyEntity company = companyRepository.findByRuc(saleEntity.getUser().getCompany().getRuc());
 
             List<SaleDetailDtoInter> productList = saleDetailRepository.findDetailsBySaleId(id);
@@ -149,6 +159,208 @@ public class FileServiceImpl implements FileService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception(e.getMessage());
+        }
+    }
+
+    @Override
+    public ByteArrayInputStream getExcelSaleReport(String ruc, String type, String serial, Integer number, String fromDate, String toDate) throws Exception {
+        try {
+           List<SaleEntity> sales = saleRepository.findSalesByCompany(ruc, type, serial, number, fromDate, toDate);
+            return new ByteArrayInputStream(getByteFromSaleList(sales));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    @Override
+    public ByteArrayInputStream getPdfSaleReport(String ruc, String type, String serial, Integer number, String fromDate, String toDate) throws Exception {
+        try {
+            List<SaleEntity> sales = saleRepository.findSalesByCompany(ruc, type, serial, number, fromDate, toDate);
+            return new ByteArrayInputStream(getByteFromSaleListForPDF(sales));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public byte[] getByteFromSaleList(List<SaleEntity> sales) {
+        try (
+                Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()
+        ) {
+
+            Sheet sheet = workbook.createSheet("Ventas");
+
+            // Header
+            Row headerRow = sheet.createRow(0);
+
+            String[] columns = {
+                    "Tipo",
+                    "Serie",
+                    "Número",
+                    "Cliente",
+                    "Documento",
+                    "Método Pago",
+                    "Moneda",
+                    "Subtotal",
+                    "IGV",
+                    "Total",
+                    "Fecha"
+            };
+
+            CellStyle headerStyle = workbook.createCellStyle();
+
+            Font font = workbook.createFont();
+            font.setBold(true);
+
+            headerStyle.setFont(font);
+
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+            int rowNum = 1;
+
+            for (SaleEntity sale : sales) {
+
+                Row row = sheet.createRow(rowNum++);
+
+                row.createCell(0).setCellValue(
+                        sale.getType() != null ? sale.getType() : "");
+
+                row.createCell(1).setCellValue(
+                        sale.getSerial() != null ? sale.getSerial() : "");
+
+                row.createCell(2).setCellValue(
+                        sale.getNumber() != null ? sale.getNumber() : 0);
+
+                row.createCell(3).setCellValue(
+                        sale.getClientName() != null ? sale.getClientName() : "");
+
+                row.createCell(4).setCellValue(
+                        sale.getClientDocumentNumber() != null
+                                ? sale.getClientDocumentNumber()
+                                : "");
+
+                row.createCell(5).setCellValue(
+                        sale.getPaymentMethod() != null
+                                ? sale.getPaymentMethod()
+                                : "");
+
+                row.createCell(6).setCellValue(
+                        sale.getMoneyType() != null
+                                ? sale.getMoneyType()
+                                : "");
+
+                row.createCell(7).setCellValue(
+                        sale.getSubTotal() != null
+                                ? sale.getSubTotal().doubleValue()
+                                : 0);
+
+                row.createCell(8).setCellValue(
+                        sale.getIgv() != null
+                                ? sale.getIgv().doubleValue()
+                                : 0);
+
+                row.createCell(9).setCellValue(
+                        sale.getTotal() != null
+                                ? sale.getTotal().doubleValue()
+                                : 0);
+
+                row.createCell(10).setCellValue(
+                        sale.getRegisterDate() != null
+                                ? sale.getRegisterDate()
+                                : "");
+            }
+
+            // Autoajustar columnas
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            workbook.write(out);
+
+            return out.toByteArray();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error generando Excel", e);
+        }
+    }
+
+    public byte[] getByteFromSaleListForPDF(List<SaleEntity> sales) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            Document document = new Document(PageSize.A4.rotate()); // horizontal tipo Excel
+            PdfWriter.getInstance(document, out);
+
+            document.open();
+
+            // Título
+            com.lowagie.text.Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14);
+            Paragraph title = new Paragraph("REPORTE DE VENTAS", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+
+            document.add(new Paragraph(" ")); // espacio
+
+            // Tabla con columnas
+            PdfPTable table = new PdfPTable(10);
+            table.setWidthPercentage(100);
+
+            float[] widths = {2f, 2f, 2f, 4f, 3f, 2f, 2f, 2f, 2f, 3f};
+            table.setWidths(widths);
+
+            // Header
+            com.lowagie.text.Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9);
+
+            String[] headers = {
+                    "Tipo", "Serie", "Número", "Cliente", "Documento",
+                    "Moneda", "Subtotal", "IGV", "Total", "Fecha"
+            };
+
+            for (String h : headers) {
+                PdfPCell cell = new PdfPCell(new Phrase(h, headerFont));
+                cell.setBackgroundColor(new java.awt.Color(0, 102, 204)); // azul
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setPadding(5);
+                table.addCell(cell);
+            }
+
+            // Body
+            com.lowagie.text.Font bodyFont = FontFactory.getFont(FontFactory.HELVETICA, 8);
+
+            for (SaleEntity s : sales) {
+
+                table.addCell(new Phrase(s.getType(), bodyFont));
+                table.addCell(new Phrase(s.getSerial(), bodyFont));
+                table.addCell(new Phrase(String.valueOf(s.getNumber()), bodyFont));
+                table.addCell(new Phrase(s.getClientName(), bodyFont));
+                table.addCell(new Phrase(s.getClientDocumentNumber(), bodyFont));
+                table.addCell(new Phrase(s.getMoneyType(), bodyFont));
+
+                table.addCell(new Phrase(
+                        String.valueOf(s.getSubTotal()), bodyFont));
+
+                table.addCell(new Phrase(
+                        String.valueOf(s.getIgv()), bodyFont));
+
+                table.addCell(new Phrase(
+                        String.valueOf(s.getTotal()), bodyFont));
+
+                table.addCell(new Phrase(
+                        String.valueOf(s.getRegisterDate()), bodyFont));
+            }
+
+            document.add(table);
+            document.close();
+
+            return out.toByteArray();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error generando PDF", e);
         }
     }
 

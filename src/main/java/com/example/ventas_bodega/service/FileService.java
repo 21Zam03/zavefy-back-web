@@ -6,5 +6,7 @@ public interface FileService {
 
     public ByteArrayInputStream getPdfTicket(Long id) throws Exception;
     public String getTicketToPrint(Long id) throws Exception;
+    public ByteArrayInputStream getExcelSaleReport(String ruc, String type, String serial, Integer number, String fromDate, String toDate) throws Exception;
+    public ByteArrayInputStream getPdfSaleReport(String ruc, String type, String serial, Integer number, String fromDate, String toDate) throws Exception;
 
 }
