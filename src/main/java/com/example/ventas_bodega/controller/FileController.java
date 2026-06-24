@@ -39,7 +39,7 @@ public class FileController {
     }
 
     @GetMapping("/sale/excel-report")
-    public ResponseEntity<?> getExcelReport(
+    public ResponseEntity<?> getExcelReportSale(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String serial,
             @RequestParam(required = false) Integer number,
@@ -54,7 +54,7 @@ public class FileController {
     }
 
     @GetMapping("/sale/pdf-report")
-    public ResponseEntity<?> getPdfReport(
+    public ResponseEntity<?> getPdfReportSale(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String serial,
             @RequestParam(required = false) Integer number,
@@ -63,6 +63,49 @@ public class FileController {
             @CurrentUser UserEntity user
     ) throws Exception {
         byte[] targetArray = ByteStreams.toByteArray(fileService.getPdfSaleReport(user.getCompany().getRuc(), type, serial, number, fromDate, toDate));
+        ByteArrayResource resource = new ByteArrayResource(targetArray);
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=reporte-ventas.pdf"
+                )
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(resource);
+    }
+
+    @GetMapping("/product/excel-report")
+    public ResponseEntity<?> getExcelReportProduct(
+            @RequestParam(required = false) String barcode,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String stockStatus,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) String categoryId,
+            @CurrentUser UserEntity user
+    ) throws Exception {
+        Long id = null;
+        if(categoryId != null) {
+            id = Long.valueOf(categoryId);
+        }
+        byte[] targetArray = ByteStreams.toByteArray(fileService.getExcelProductReport(user.getCompany().getCompanyId(), barcode, name, stockStatus, active, id));
+        ByteArrayResource resource = new ByteArrayResource(targetArray);
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(resource);
+    }
+
+    @GetMapping("/product/pdf-report")
+    public ResponseEntity<?> getPdfReportProduct(
+            @RequestParam(required = false) String barcode,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String stockStatus,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) String categoryId,
+            @CurrentUser UserEntity user
+    ) throws Exception {
+        Long id = null;
+        if(categoryId != null) {
+            id = Long.valueOf(categoryId);
+        }
+        byte[] targetArray = ByteStreams.toByteArray(fileService.getPdfProductReport(user.getCompany().getCompanyId(), barcode, name, stockStatus, active, id));
         ByteArrayResource resource = new ByteArrayResource(targetArray);
         return ResponseEntity.ok()
                 .header(

@@ -4,9 +4,11 @@ import com.example.ventas_bodega.dto.SaleDetailPdfDto;
 import com.example.ventas_bodega.dto.SalePdfDto;
 import com.example.ventas_bodega.dto.interfaces.SaleDetailDtoInter;
 import com.example.ventas_bodega.entity.CompanyEntity;
+import com.example.ventas_bodega.entity.ProductEntity;
 import com.example.ventas_bodega.entity.SaleEntity;
 import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.repository.CompanyRepository;
+import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.repository.SaleDetailRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
 import com.example.ventas_bodega.service.FileService;
@@ -47,13 +49,15 @@ public class FileServiceImpl implements FileService {
     private final SaleDetailRepository saleDetailRepository;
 
     private final SaleService saleService;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public FileServiceImpl(SaleRepository saleRepository, CompanyRepository companyRepository, SaleDetailRepository saleDetailRepository, SaleService saleService) {
+    public FileServiceImpl(SaleRepository saleRepository, CompanyRepository companyRepository, SaleDetailRepository saleDetailRepository, SaleService saleService, ProductRepository productRepository) {
         this.saleRepository = saleRepository;
         this.companyRepository = companyRepository;
         this.saleDetailRepository = saleDetailRepository;
         this.saleService = saleService;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -181,6 +185,301 @@ public class FileServiceImpl implements FileService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception(e.getMessage());
+        }
+    }
+
+    @Override
+    public ByteArrayInputStream getExcelProductReport(Long companyId, String barcode, String name, String stockStatus, Boolean active, Long categoryId) throws Exception {
+        try {
+            List<ProductEntity> products = productRepository.findProductsFromCompanyId(companyId, barcode, name, stockStatus, active, categoryId);
+            return new ByteArrayInputStream(getByteFromProductListForEXCEL(products));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    @Override
+    public ByteArrayInputStream getPdfProductReport(Long companyId, String barcode, String name, String stockStatus, Boolean active, Long categoryId) throws Exception {
+        try {
+            List<ProductEntity> products = productRepository.findProductsFromCompanyId(companyId, barcode, name, stockStatus, active, categoryId);
+            return new ByteArrayInputStream(getByteFromProductListForPDF(products));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public byte[] getByteFromProductListForPDF(List<ProductEntity> products) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            Document document = new Document(PageSize.A4.rotate());
+            PdfWriter.getInstance(document, out);
+
+            document.open();
+
+            // ===== TÍTULO =====
+            com.lowagie.text.Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14);
+
+            Paragraph title = new Paragraph("REPORTE DE PRODUCTOS", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+
+            document.add(title);
+            document.add(new Paragraph(" "));
+
+            // ===== TABLA =====
+            PdfPTable table = new PdfPTable(7);
+            table.setWidthPercentage(100);
+
+            float[] widths = {3f, 5f, 2f, 2f, 2f, 3f, 2f};
+            table.setWidths(widths);
+
+            // ===== HEADER STYLE =====
+            com.lowagie.text.Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9);
+
+            String[] headers = {
+                    "Código",
+                    "Nombre",
+                    "Stock",
+                    "Precio Unitario",
+                    "Precio Venta",
+                    "Categoría",
+                    "Estado"
+            };
+
+            for (String h : headers) {
+
+                PdfPCell cell = new PdfPCell(new Phrase(h, headerFont));
+
+                cell.setBackgroundColor(new java.awt.Color(0, 102, 204)); // azul
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setPadding(5);
+
+                table.addCell(cell);
+            }
+
+            // ===== BODY =====
+            com.lowagie.text.Font bodyFont = FontFactory.getFont(FontFactory.HELVETICA, 8);
+
+            for (ProductEntity p : products) {
+
+                table.addCell(new Phrase(
+                        p.getBarcode() != null ? p.getBarcode() : "",
+                        bodyFont
+                ));
+
+                table.addCell(new Phrase(
+                        p.getName() != null ? p.getName() : "",
+                        bodyFont
+                ));
+
+                table.addCell(new Phrase(
+                        p.getStock() != null ? String.valueOf(p.getStock()) : "0",
+                        bodyFont
+                ));
+
+                table.addCell(new Phrase(
+                        p.getUnitPrice() != null ? p.getUnitPrice().toString() : "0",
+                        bodyFont
+                ));
+
+                table.addCell(new Phrase(
+                        p.getPrice() != null ? p.getPrice().toString() : "0",
+                        bodyFont
+                ));
+
+                table.addCell(new Phrase(
+                        p.getCategoryEntity() != null
+                                ? p.getCategoryEntity().getName()
+                                : "",
+                        bodyFont
+                ));
+
+                table.addCell(new Phrase(
+                        p.isActive() ? "ACTIVO" : "INACTIVO",
+                        bodyFont
+                ));
+            }
+
+            document.add(table);
+
+            document.close();
+
+            return out.toByteArray();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error generando PDF de productos", e);
+        }
+    }
+
+    public byte[] getByteFromProductListForEXCEL(List<ProductEntity> products){
+        try (
+                Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()
+        ) {
+
+            Sheet sheet = workbook.createSheet("Productos");
+
+            // ===== ESTILO HEADER =====
+
+            CellStyle headerStyle = workbook.createCellStyle();
+
+            headerStyle.setFillForegroundColor(
+                    IndexedColors.BLUE.getIndex()
+            );
+
+            headerStyle.setFillPattern(
+                    FillPatternType.SOLID_FOREGROUND
+            );
+
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setColor(
+                    IndexedColors.WHITE.getIndex()
+            );
+
+            headerStyle.setFont(headerFont);
+
+            headerStyle.setAlignment(
+                    HorizontalAlignment.CENTER
+            );
+
+            // ===== FORMATO MONEDA =====
+
+            CellStyle moneyStyle = workbook.createCellStyle();
+
+            DataFormat dataFormat = workbook.createDataFormat();
+
+            moneyStyle.setDataFormat(
+                    dataFormat.getFormat("#,##0.00")
+            );
+
+            // ===== HEADERS =====
+
+            String[] columns = {
+                    "Código Barras",
+                    "Nombre",
+                    "Descripción",
+                    "Unidad Medida",
+                    "Precio Unitario",
+                    "Precio Venta",
+                    "Stock",
+                    "Estado Stock",
+                    "Categoría",
+                    "Activo",
+                    "Fecha Registro"
+            };
+
+            Row headerRow = sheet.createRow(0);
+
+            for (int i = 0; i < columns.length; i++) {
+
+                Cell cell = headerRow.createCell(i);
+
+                cell.setCellValue(columns[i]);
+
+                cell.setCellStyle(headerStyle);
+            }
+
+            // ===== DATA =====
+
+            int rowNum = 1;
+
+            for (ProductEntity product : products) {
+
+                Row row = sheet.createRow(rowNum++);
+
+                row.createCell(0).setCellValue(
+                        product.getBarcode() != null
+                                ? product.getBarcode()
+                                : ""
+                );
+
+                row.createCell(1).setCellValue(
+                        product.getName() != null
+                                ? product.getName()
+                                : ""
+                );
+
+                row.createCell(2).setCellValue(
+                        product.getDescription() != null
+                                ? product.getDescription()
+                                : ""
+                );
+
+                row.createCell(3).setCellValue(
+                        product.getMeasurementUnit() != null
+                                ? product.getMeasurementUnit()
+                                : ""
+                );
+
+                Cell unitPriceCell = row.createCell(4);
+
+                unitPriceCell.setCellValue(
+                        product.getUnitPrice() != null
+                                ? product.getUnitPrice().doubleValue()
+                                : 0
+                );
+
+                unitPriceCell.setCellStyle(moneyStyle);
+
+                Cell salePriceCell = row.createCell(5);
+
+                salePriceCell.setCellValue(
+                        product.getPrice() != null
+                                ? product.getPrice().doubleValue()
+                                : 0
+                );
+
+                salePriceCell.setCellStyle(moneyStyle);
+
+                row.createCell(6).setCellValue(
+                        product.getStock() != null
+                                ? product.getStock()
+                                : 0
+                );
+
+                row.createCell(7).setCellValue(
+                        getStockStatus(product.getStock())
+                );
+
+                row.createCell(8).setCellValue(
+                        product.getCategoryEntity() != null
+                                ? product.getCategoryEntity().getName()
+                                : ""
+                );
+
+                row.createCell(9).setCellValue(
+                        product.isActive()
+                                ? "ACTIVO"
+                                : "INACTIVO"
+                );
+
+                row.createCell(10).setCellValue(
+                        product.getRegisterDate() != null
+                                ? product.getRegisterDate()
+                                : ""
+                );
+            }
+
+            // ===== AJUSTAR COLUMNAS =====
+
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            // Congelar header
+            sheet.createFreezePane(0, 1);
+
+            workbook.write(out);
+
+            return out.toByteArray();
+
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Error generando Excel de productos",
+                    e
+            );
         }
     }
 
@@ -557,4 +856,22 @@ public class FileServiceImpl implements FileService {
 
         return parts[1] + "-" + parts[2];
     }
+
+    private String getStockStatus(Integer stock) {
+
+        if (stock == null || stock == 0) {
+            return "SIN STOCK";
+        }
+
+        if (stock <= 10) {
+            return "BAJO STOCK";
+        }
+
+        if (stock <= 50) {
+            return "STOCK MODERADO";
+        }
+
+        return "STOCK SUFICIENTE";
+    }
+
 }

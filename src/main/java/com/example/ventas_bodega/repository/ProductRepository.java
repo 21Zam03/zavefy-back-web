@@ -115,6 +115,36 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             Pageable pageable
     );
 
+    @Query(value = """
+    SELECT DISTINCT p.*
+    FROM tb_producto p
+    INNER JOIN tb_empresa e ON p.id_empresa = e.id_empresa
+    LEFT JOIN tb_categorias_productos cp ON cp.id_producto = p.id_producto
+    WHERE e.id_empresa = :id
+    AND (:barcode IS NULL OR p.codigo_barras = :barcode)
+    AND (:name IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :name, '%')))
+    AND (:category IS NULL OR cp.id_categoria = :category)
+    AND (
+        :stockStatus IS NULL
+        OR (:stockStatus = 'SIN_STOCK' AND p.stock = 0)
+        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND 10)
+        OR (:stockStatus = 'STOCK_MODERADO' AND p.stock BETWEEN 11 AND 50)
+        OR (:stockStatus = 'STOCK_SUFICIENTE' AND p.stock > 50)
+    )
+    AND (:active IS NULL OR p.activo = :active)
+    ORDER BY p.fecha_actualizacion DESC
+    """,
+            nativeQuery = true
+    )
+    List<ProductEntity> findProductsFromCompanyId(
+            @Param("id") Long id,
+            @Param("barcode") String barcode,
+            @Param("name") String name,
+            @Param("stockStatus") String stockStatus,
+            @Param("active") Boolean active,
+            @Param("category") Long categoryId
+    );
+
     @Query(
             value = """
         SELECT DISTINCT p.*
