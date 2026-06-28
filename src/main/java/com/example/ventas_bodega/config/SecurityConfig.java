@@ -51,7 +51,7 @@ public class SecurityConfig {
                             "http://localhost:5173/",
                             "https://zavefy.com",
                             "https://www.zavefy.com",
-                            "http://192.168.18.21:5173/",
+                            "http://10.189.235.227:5173/",
                             "http://10.189.235.88:5173/"
                     ));
                     config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS", "PATCH"));
