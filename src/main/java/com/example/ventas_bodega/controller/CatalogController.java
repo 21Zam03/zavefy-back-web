@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.controller;
 
+import com.example.ventas_bodega.mapper.CartMapper;
 import com.example.ventas_bodega.request.CartRequest;
 import com.example.ventas_bodega.service.CatalogService;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class CatalogController {
 
     @PostMapping("/cart")
     public ResponseEntity<?> saveCart(@RequestBody CartRequest cartRequest) {
-        return new ResponseEntity<>("", HttpStatus.OK);
+        return new ResponseEntity<>(catalogService.saveCart(CartMapper.requestToDto(cartRequest)), HttpStatus.OK);
     }
 
 }

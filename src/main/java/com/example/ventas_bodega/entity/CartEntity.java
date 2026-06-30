@@ -13,7 +13,9 @@ public class CartEntity {
     @Column(name = "id_carrito")
     private Long id;
 
-    //private UserEntity customer;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_empresa", nullable = false)
+    private CompanyEntity companyEntity;
 
     @Column(name = "numero_contacto")
     private String customerPhoneNumber;
@@ -76,5 +78,13 @@ public class CartEntity {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public CompanyEntity getCompanyEntity() {
+        return companyEntity;
+    }
+
+    public void setCompanyEntity(CompanyEntity companyEntity) {
+        this.companyEntity = companyEntity;
     }
 }

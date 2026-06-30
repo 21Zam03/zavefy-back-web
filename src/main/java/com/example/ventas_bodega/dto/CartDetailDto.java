@@ -1,36 +1,16 @@
-package com.example.ventas_bodega.entity;
-
-import jakarta.persistence.*;
+package com.example.ventas_bodega.dto;
 
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "tb_detalle_carrito")
-public class CartDetailEntity {
+public class CartDetailDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_detalle_carrito")
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_carrito")
-    private CartEntity cartEntity;
-
-    @Column(name = "cantidad")
+    private Long cartId;
     private Integer quantity;
-
-    @Column(name = "precio")
     private BigDecimal price;
-
-    @Column(name = "total")
     private BigDecimal total;
-
-    @Column(name = "nombre_producto")
-    private String productName;
-
-    @Column(name = "id_producto")
     private Long productId;
+    private String productName;
 
     public Long getId() {
         return id;
@@ -40,12 +20,12 @@ public class CartDetailEntity {
         this.id = id;
     }
 
-    public CartEntity getCartEntity() {
-        return cartEntity;
+    public Long getCartId() {
+        return cartId;
     }
 
-    public void setCartEntity(CartEntity cartEntity) {
-        this.cartEntity = cartEntity;
+    public void setCartId(Long cartId) {
+        this.cartId = cartId;
     }
 
     public Integer getQuantity() {
@@ -87,5 +67,4 @@ public class CartDetailEntity {
     public void setProductName(String productName) {
         this.productName = productName;
     }
-
 }

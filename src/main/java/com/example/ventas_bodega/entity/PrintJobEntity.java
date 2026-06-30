@@ -19,8 +19,7 @@ public class PrintJobEntity {
     @Column(name = "id_agente", nullable = false)
     private Long agentId;
 
-    @Lob
-    @Column(name = "contenido", nullable = false)
+    @Column(name = "contenido", columnDefinition = "TEXT", nullable = false)
     private String content;
 
     @Enumerated(EnumType.STRING)

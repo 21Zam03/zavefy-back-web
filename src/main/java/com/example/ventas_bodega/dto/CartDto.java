@@ -1,15 +1,18 @@
 package com.example.ventas_bodega.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class CartDto {
 
     private Long id;
+    private Long companyId;
     private String customerPhoneNumber;
     private String customerName;
     private String subject;
     private String status;
     private LocalDateTime createdAt;
+    private List<CartDetailDto> cartDetails;
 
     public Long getId() {
         return id;
@@ -58,4 +61,21 @@ public class CartDto {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public List<CartDetailDto> getCartDetails() {
+        return cartDetails;
+    }
+
+    public void setCartDetails(List<CartDetailDto> cartDetails) {
+        this.cartDetails = cartDetails;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
+    }
+
 }
