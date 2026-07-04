@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ProductDto {
 
-    private Long id;
+    private Long productId;
     private String barcode;
     private String name;
     private String description;
@@ -29,7 +29,7 @@ public class ProductDto {
     }
 
     public ProductDto(Long id, String barcode, String name, String description, BigDecimal price, List<String> categories, boolean active, String imageUrl, String filePaht) {
-        this.id = id;
+        this.productId = id;
         this.barcode = barcode;
         this.name = name;
         this.description = description;
@@ -40,12 +40,12 @@ public class ProductDto {
         this.filePath = filePaht;
     }
 
-    public Long getId() {
-        return id;
+    public Long getProductId() {
+        return productId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
     public String getName() {
@@ -179,7 +179,7 @@ public class ProductDto {
     @Override
     public String toString() {
         return "ProductDto{" +
-                "id=" + id +
+                "id=" + productId +
                 ", barcode='" + barcode + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

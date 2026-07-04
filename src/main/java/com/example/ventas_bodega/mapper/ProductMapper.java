@@ -26,7 +26,7 @@ public class ProductMapper {
         ProductDto product = new ProductDto();
 
         // Id
-        product.setId(null);
+        product.setProductId(null);
 
         // Barcode
         product.setBarcode(external.getId());
@@ -69,7 +69,7 @@ public class ProductMapper {
 
     public static ProductDto entityToDto(ProductEntity productEntity) {
         ProductDto product = new ProductDto();
-        product.setId(productEntity.getId());
+        product.setProductId(productEntity.getId());
         product.setName(productEntity.getName());
         product.setDescription(productEntity.getDescription());
         product.setPrice(productEntity.getPrice());
@@ -134,7 +134,7 @@ public class ProductMapper {
             String measurementUnit
     ) {
         ProductDto productDto = new ProductDto();
-        productDto.setId(id);
+        productDto.setProductId(id);
         productDto.setName(name);
         productDto.setDescription(description);
         productDto.setPrice(BigDecimal.valueOf(Double.parseDouble(price)));

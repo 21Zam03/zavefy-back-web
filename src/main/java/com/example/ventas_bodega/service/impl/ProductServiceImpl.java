@@ -207,7 +207,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public MessageResponse updateProduct(ProductDto productDto, UserEntity userEntity) throws Exception {
         MessageResponse messageResponse = new MessageResponse();
-        if(productDto.getId() == null) {
+        if(productDto.getProductId() == null) {
             messageResponse.setStatus(false);
             messageResponse.setMessage("El id del producto a actualizar no existe en el sistema");
             return messageResponse;

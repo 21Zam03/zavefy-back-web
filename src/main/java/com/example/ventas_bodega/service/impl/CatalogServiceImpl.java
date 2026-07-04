@@ -34,11 +34,18 @@ public class CatalogServiceImpl implements CatalogService {
     private final OpportunityRepository opportunityRepository;
 
     @Autowired
-    public CatalogServiceImpl(ProductRepository productRepository, CartRepository cartRepository, CartDetailRepository cartDetailRepository, CompanyRepository companyRepository) {
+    public CatalogServiceImpl(
+            ProductRepository productRepository,
+            CartRepository cartRepository,
+            CartDetailRepository cartDetailRepository,
+            CompanyRepository companyRepository,
+            OpportunityRepository opportunityRepository
+    ) {
         this.productRepository = productRepository;
         this.cartRepository = cartRepository;
         this.cartDetailRepository = cartDetailRepository;
         this.companyRepository = companyRepository;
+        this.opportunityRepository = opportunityRepository;
     }
 
 

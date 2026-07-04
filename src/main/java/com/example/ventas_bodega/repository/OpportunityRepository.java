@@ -1,6 +1,9 @@
 package com.example.ventas_bodega.repository;
 
-public interface OpportunityRepository {
+import com.example.ventas_bodega.entity.OpportunityEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface OpportunityRepository extends JpaRepository<OpportunityEntity, Long> {
 
 
 
