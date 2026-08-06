@@ -70,6 +70,7 @@ public class CatalogServiceImpl implements CatalogService {
             CompanyEntity companyEntity = companyRepository.findById(cartDto.getCompanyId()).get();
             cartToCreate.setCompanyEntity(companyEntity);
             cartToCreate.setCreatedAt(LocalDateTime.now());
+            cartToCreate.setStatus("PENDING");
             cartCreated = cartRepository.save(cartToCreate);
             for (int i=0; i<cartDto.getCartDetails().size(); i++) {
                 CartDetailEntity cartDetailEntity = CartDetailMapper.dtoToEntity(cartDto.getCartDetails().get(i));

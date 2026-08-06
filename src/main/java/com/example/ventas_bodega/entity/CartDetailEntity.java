@@ -13,7 +13,7 @@ public class CartDetailEntity {
     @Column(name = "id_detalle_carrito")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_carrito")
     private CartEntity cartEntity;
 

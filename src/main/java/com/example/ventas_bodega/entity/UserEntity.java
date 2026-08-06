@@ -57,7 +57,7 @@ public class UserEntity {
     @JoinTable(name = "tb_usuarios_roles", joinColumns = @JoinColumn(name = "id_usuario"), inverseJoinColumns = @JoinColumn(name = "id_rol"))
     private Set<RoleEntity> roleList;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_empresa")
     private CompanyEntity company;
 

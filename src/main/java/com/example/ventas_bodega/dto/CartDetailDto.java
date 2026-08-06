@@ -1,5 +1,7 @@
 package com.example.ventas_bodega.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 
 public class CartDetailDto {
@@ -10,6 +12,8 @@ public class CartDetailDto {
     private BigDecimal price;
     private BigDecimal total;
     private Long productId;
+
+    @JsonProperty("name")
     private String productName;
 
     public Long getId() {

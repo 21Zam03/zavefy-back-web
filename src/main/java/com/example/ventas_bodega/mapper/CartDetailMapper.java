@@ -15,6 +15,4 @@ public class CartDetailMapper {
         return cartDetailEntity;
     }
 
-
-
 }

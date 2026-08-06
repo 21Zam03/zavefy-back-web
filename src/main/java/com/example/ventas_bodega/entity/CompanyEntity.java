@@ -2,6 +2,9 @@ package com.example.ventas_bodega.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "tb_empresa")
 public class CompanyEntity {
@@ -52,6 +55,13 @@ public class CompanyEntity {
 
     @Column(name = "id_agente_pordefecto")
     private Long defaultAgentId;
+
+    @OneToMany(
+            mappedBy = "company",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<UserEntity> users = new ArrayList<>();
 
     public CompanyEntity() {}
 
@@ -179,6 +189,14 @@ public class CompanyEntity {
 
     public void setDefaultAgentId(Long defaultAgentId) {
         this.defaultAgentId = defaultAgentId;
+    }
+
+    public List<UserEntity> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<UserEntity> users) {
+        this.users = users;
     }
 
     @Override

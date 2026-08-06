@@ -3,6 +3,8 @@ package com.example.ventas_bodega.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tb_carrito")
@@ -31,6 +33,9 @@ public class CartEntity {
 
     @Column(name = "fecha_creacion")
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "cartEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<CartDetailEntity> cartDetails = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -86,5 +91,13 @@ public class CartEntity {
 
     public void setCompanyEntity(CompanyEntity companyEntity) {
         this.companyEntity = companyEntity;
+    }
+
+    public List<CartDetailEntity> getCartDetails() {
+        return cartDetails;
+    }
+
+    public void setCartDetails(List<CartDetailEntity> cartDetails) {
+        this.cartDetails = cartDetails;
     }
 }

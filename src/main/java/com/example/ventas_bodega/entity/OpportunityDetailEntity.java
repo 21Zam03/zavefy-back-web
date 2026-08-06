@@ -13,7 +13,7 @@ public class OpportunityDetailEntity {
     @Column(name = "id_detalle_oportunidad")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_oportunidad")
     private OpportunityEntity opportunityEntity;
 
@@ -26,4 +26,43 @@ public class OpportunityDetailEntity {
     @Column(name = "precio_en_momento")
     private BigDecimal priceAtMoment;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public OpportunityEntity getOpportunityEntity() {
+        return opportunityEntity;
+    }
+
+    public void setOpportunityEntity(OpportunityEntity opportunityEntity) {
+        this.opportunityEntity = opportunityEntity;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public BigDecimal getPriceAtMoment() {
+        return priceAtMoment;
+    }
+
+    public void setPriceAtMoment(BigDecimal priceAtMoment) {
+        this.priceAtMoment = priceAtMoment;
+    }
 }

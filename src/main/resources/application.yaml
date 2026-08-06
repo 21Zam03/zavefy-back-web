@@ -37,6 +37,8 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+          batch_size: 100
+
     hibernate:
       ddl-auto: update
 
