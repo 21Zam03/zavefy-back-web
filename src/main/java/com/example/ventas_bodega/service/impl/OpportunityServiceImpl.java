@@ -1,11 +1,8 @@
 package com.example.ventas_bodega.service.impl;
 
-import com.example.ventas_bodega.dto.ClientDto;
 import com.example.ventas_bodega.dto.OpportunityDto;
-import com.example.ventas_bodega.dto.interfaces.ClientDtoInter;
 import com.example.ventas_bodega.entity.*;
 import com.example.ventas_bodega.enums.*;
-import com.example.ventas_bodega.mapper.ClientMapper;
 import com.example.ventas_bodega.mapper.OpportunityMapper;
 import com.example.ventas_bodega.repository.CartRepository;
 import com.example.ventas_bodega.repository.CompanyRepository;
