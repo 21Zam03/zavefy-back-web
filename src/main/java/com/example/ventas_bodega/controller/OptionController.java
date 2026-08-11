@@ -13,10 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(OptionController.API_PATH)
 public class OptionController {
 
-
     public static final String API_PATH = "/api/option";
-
-    private OptionService optionService;
+    private final OptionService optionService;
 
     @Autowired
     public OptionController(OptionService optionService) {
@@ -28,5 +26,9 @@ public class OptionController {
         return new ResponseEntity<>(optionService.getCategories(companyId), HttpStatus.OK);
     }
 
+    @GetMapping("/stock")
+    public ResponseEntity<Boolean> getStockAvailability(@RequestParam Long companyId) {
+        return new ResponseEntity<>(optionService.getStockAvailability(companyId), HttpStatus.OK);
+    }
 
 }

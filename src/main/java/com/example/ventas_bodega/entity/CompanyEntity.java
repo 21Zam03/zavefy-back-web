@@ -56,6 +56,12 @@ public class CompanyEntity {
     @Column(name = "id_agente_pordefecto")
     private Long defaultAgentId;
 
+    @Column(name = "igv_incluido")
+    private boolean priceWithIgv;
+
+    @Column(name = "impuesto_visible")
+    private boolean isTaxVisible;
+
     @OneToMany(
             mappedBy = "company",
             cascade = CascadeType.ALL,
@@ -197,6 +203,22 @@ public class CompanyEntity {
 
     public void setUsers(List<UserEntity> users) {
         this.users = users;
+    }
+
+    public boolean isPriceWithIgv() {
+        return priceWithIgv;
+    }
+
+    public void setPriceWithIgv(boolean priceWithIgv) {
+        this.priceWithIgv = priceWithIgv;
+    }
+
+    public boolean isTaxVisible() {
+        return isTaxVisible;
+    }
+
+    public void setTaxVisible(boolean taxVisible) {
+        isTaxVisible = taxVisible;
     }
 
     @Override

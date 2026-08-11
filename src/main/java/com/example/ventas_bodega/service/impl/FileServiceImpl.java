@@ -675,8 +675,10 @@ public class FileServiceImpl implements FileService {
         String saleName = "";
         if(salePdfDto.getType().equals("03")) {
             saleName = "BOLETA DE VENTA ELECTRONICA";
-        } else {
+        } else if(salePdfDto.getType().equals("01")) {
             saleName = "FACTURA DE VENTA ELECTRÓNICA";
+        } else {
+            saleName = "NOTA DE VENTA";
         }
         params.put("nombreComprobante", saleName);
         params.put("serieCorrelativo" , getSerieAndNumber(salePdfDto.getIdentifier()));

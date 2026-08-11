@@ -316,7 +316,8 @@
 			<line>
 				<reportElement x="0" y="1" width="205" height="1" forecolor="#F0F0F0" uuid="92cd16a9-e72b-43ec-9ec2-b63600d39f46"/>
 			</line>
-			<textField>
+			<!--
+			    <textField>
 				<reportElement x="79" y="22" width="89" height="10" uuid="ae729599-4829-4dc9-a5e0-2c0f05ec7043"/>
 				<textElement textAlignment="Right" markup="none">
 					<font fontName="SansSerif" size="8"/>
@@ -330,6 +331,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$P{subTotalFinal}==null?"0.00":$P{subTotalFinal}]]></textFieldExpression>
 			</textField>
+			-->
 		</band>
 		<band height="4">
 			<line>
@@ -384,25 +386,30 @@
 				<text><![CDATA[Depositar a nuestras Ctas Bancarias:]]></text>
 			</staticText>
 		</band>
-		<band height="141">
-			<staticText>
-				<reportElement x="0" y="102" width="205" height="18" uuid="5d328b21-94e3-4f20-af65-84f1a916d686"/>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="SansSerif" size="7"/>
-				</textElement>
-				<text><![CDATA[Puede consultar este documento en    https://www.zavefy.com/consulta-comprobantes/]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="0" y="88" width="205" height="14" uuid="a8e7cdb5-160a-4f68-8264-327d0baa6e6c"/>
-				<textElement textAlignment="Center">
-					<font fontName="SansSerif" size="6"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Representación impresa de la "+$P{nombreComprobante}+", autorizado mediante resolución de intendencia  N° 032-005-0001724/SUNAT."]]></textFieldExpression>
-			</textField>
-			<image>
-				<reportElement x="59" y="3" width="84" height="84" uuid="9d9e6695-00ca-4f39-94ee-6df4e5bc6550"/>
-				<imageExpression><![CDATA[$P{qr}]]></imageExpression>
-			</image>
-		</band>
+        <band height="141">
+            <!-- Oculta el QR si es Nota de Venta (o manténlo si usas un QR de consulta interna) -->
+            <image>
+                <reportElement x="59" y="3" width="84" height="84" uuid="9d9e6695-00ca-4f39-94ee-6df4e5bc6550"/>
+                <imageExpression><![CDATA[$P{qr}]]></imageExpression>
+            </image>
+
+            <!-- Leyenda Legal o Interna -->
+            <textField>
+                <reportElement x="0" y="88" width="205" height="14" uuid="a8e7cdb5-160a-4f68-8264-327d0baa6e6c"/>
+                <textElement textAlignment="Center">
+                    <font fontName="SansSerif" size="6"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{nombreComprobante}.equalsIgnoreCase("NOTA DE VENTA") ? "Documento de control interno sin valor tributario." : "Representación impresa de la "+$P{nombreComprobante}+", autorizado mediante resolución de intendencia N° 032-005-0001724/SUNAT."]]></textFieldExpression>
+            </textField>
+
+            <!-- Enlace de consulta adaptado -->
+            <textField>
+                <reportElement x="0" y="102" width="205" height="18" uuid="5d328b21-94e3-4f20-af65-84f1a916d686"/>
+                <textElement textAlignment="Center" verticalAlignment="Top">
+                    <font fontName="SansSerif" size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Puede consultar este documento en\nhttps://www.zavefy.com/consulta-comprobantes/"]]></textFieldExpression>
+            </textField>
+        </band>
 	</detail>
 </jasperReport>
