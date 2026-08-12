@@ -104,8 +104,8 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     }
 
     @Override
-    public List<CategoryDto> getCategories(Long userId) {
-        List<CategoryDtoInter> categories = categoryClientRepository.findCategoriesByUser(userId);
+    public List<CategoryDto> getCategories(Long companyId) {
+        List<CategoryDtoInter> categories = categoryClientRepository.findCategoriesByUser(companyId);
         return CategoryMapper.mapInterfaceListToDtoList(categories);
     }
 

@@ -14,11 +14,11 @@ public interface CategoryClientRepository extends JpaRepository<CategoryClientEn
 
     @Query(value = """
         SELECT c.id_categoria, c.nombre
-        FROM tb_categoria_cliente cc
-        JOIN tb_categoria c ON c.id_categoria = cc.id_categoria
-        WHERE cc.id_cliente = :userId
+        FROM tb_categoria c
+        WHERE c.id_empresa = :companyId
+          AND c.activo = true
         """, nativeQuery = true)
-    List<CategoryDtoInter> findCategoriesByUser(@Param("userId") Long userId);
+    List<CategoryDtoInter> findCategoriesByUser(@Param("companyId") Long companyId);
 
     @Query(value = """
         SELECT c.id_categoria, c.nombre

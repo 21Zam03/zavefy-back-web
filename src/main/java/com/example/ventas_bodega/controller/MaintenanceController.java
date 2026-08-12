@@ -31,7 +31,7 @@ public class MaintenanceController {
 
     @GetMapping("/options")
     public ResponseEntity<?> getCategories(@CurrentUser UserEntity user) {
-        return new ResponseEntity<>(maintenanceService.getCategories(Long.valueOf(user.getUserId())), HttpStatus.OK);
+        return new ResponseEntity<>(maintenanceService.getCategories(user.getCompany().getCompanyId()), HttpStatus.OK);
     }
 
     @GetMapping("/categories")
