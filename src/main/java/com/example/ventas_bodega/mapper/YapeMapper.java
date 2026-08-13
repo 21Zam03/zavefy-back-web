@@ -16,6 +16,7 @@ public class YapeMapper {
         yapeEntity.setPhoneNumber(yapeDto.getPhoneNumber());
         yapeEntity.setImageQr(yapeDto.getImageQr());
         yapeEntity.setDefault(yapeDto.isDefault());
+        yapeEntity.setAliasName(yapeDto.getAliasName());
         return yapeEntity;
     }
 
@@ -26,6 +27,7 @@ public class YapeMapper {
         yapeDto.setImageQr(yapeEntity.getImageQr());
         yapeDto.setDefault(yapeEntity.isDefault());
         yapeDto.setCompanyId(yapeEntity.getCompany().getCompanyId());
+        yapeDto.setAliasName(yapeEntity.getAliasName());
         return yapeDto;
     }
 

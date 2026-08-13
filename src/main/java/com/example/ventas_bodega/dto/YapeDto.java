@@ -3,6 +3,7 @@ package com.example.ventas_bodega.dto;
 public class YapeDto {
 
     private Integer yapeId;
+    private String aliasName;
     private String phoneNumber;
     private String imageQr;
     private boolean isDefault;
@@ -56,5 +57,13 @@ public class YapeDto {
 
     public void setCompanyId(Long companyId) {
         this.companyId = companyId;
+    }
+
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
     }
 }

@@ -46,4 +46,5 @@ public class PrintJobController {
         printJobService.markError(id, message);
         return ResponseEntity.ok().build();
     }
+
 }

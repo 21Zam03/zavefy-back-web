@@ -13,9 +13,7 @@ import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.repository.SaleDetailRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
 import com.example.ventas_bodega.response.MessageResponse;
-import com.example.ventas_bodega.service.InventoryService;
-import com.example.ventas_bodega.service.ProductService;
-import com.example.ventas_bodega.service.SaleService;
+import com.example.ventas_bodega.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -30,77 +28,103 @@ public class SaleServiceImpl implements SaleService {
 
     private final SaleRepository saleRepository;
     private final SaleDetailRepository saleDetailRepository;
-    private final ProductService productService;
     private final ProductRepository productRepository;
+
+    private final ProductService productService;
     private final InventoryService inventoryService;
+    private final FileService fileService;
+    private final AgentService agentService;
 
     @Autowired
-    public SaleServiceImpl(SaleRepository saleRepository, SaleDetailRepository saleDetailRepository, ProductService productService, ProductRepository productRepository, InventoryService inventoryService) {
+    public SaleServiceImpl(
+            SaleRepository saleRepository,
+            SaleDetailRepository saleDetailRepository,
+            ProductService productService,
+            ProductRepository productRepository,
+            InventoryService inventoryService,
+            FileService fileService,
+            AgentService agentService) {
         this.saleRepository = saleRepository;
         this.saleDetailRepository = saleDetailRepository;
         this.productService = productService;
         this.productRepository = productRepository;
         this.inventoryService = inventoryService;
+        this.fileService = fileService;
+        this.agentService = agentService;
     }
 
     @Override
     @Transactional
-    public MessageResponse createSale(SaleDto saleDto, UserEntity userEntity) {
-        MessageResponse messageResponse = new MessageResponse();
-        SaleEntity saleCreated = new SaleEntity();
-
-        if(saleDto == null) {
-            messageResponse.setMessage("Informacion de la venta es nula");
-            messageResponse.setStatus(false);
-            return messageResponse;
+    public MessageResponse createSale(SaleDto saleDto, UserEntity userEntity) throws Exception {
+        if (saleDto == null) {
+            throw new IllegalArgumentException("Información de la venta es nula");
+        }
+        if (saleDto.getSaleDetails() == null || saleDto.getSaleDetails().isEmpty()) {
+            throw new IllegalArgumentException("La venta no tiene productos");
         }
 
         validateDataOfSaleDto(saleDto);
-        //Hacer una validacion en el backend para validar si los productos de una venta ya no tienen stock
 
-        try {
-            SaleEntity saleToCreate = SaleMapper.dtoToEntity(saleDto);
-            saleToCreate.setUser(userEntity);
-            saleToCreate.setIssuerRuc(userEntity.getCompany().getRuc());
-            saleToCreate.setSaleLink("https://www.zavefy.com/comprobantes/"+userEntity.getCompany().getRuc()+"-"+saleDto.getSerial()+"-"+saleDto.getNumber());
+        SaleEntity saleToCreate = SaleMapper.dtoToEntity(saleDto);
+        saleToCreate.setUser(userEntity);
+        saleToCreate.setIssuerRuc(userEntity.getCompany().getRuc());
+        saleToCreate.setSaleLink("https://www.zavefy.com/comprobantes/" + userEntity.getCompany().getRuc()
+                + "-" + saleDto.getSerial() + "-" + saleDto.getNumber());
 
-            saleCreated = saleRepository.save(saleToCreate);
-            for (int i=0; i<saleDto.getSaleDetails().size(); i++) {
-                //Ha largo plazo modificar este metodo en una cola para optimizar el tiempo del proceso
-                if (saleDto.getSaleDetails().get(i).getProductId() == null && saleDto.getSaleDetails().get(i).isHasAutomaticSaved() && !userEntity.getCompany().isHasStock()) {
-                    ProductDto productDto = new ProductDto();
-                    productDto.setPrice(saleDto.getSaleDetails().get(0).getUnitePrice());
-                    productDto.setName(saleDto.getSaleDetails().get(0).getName());
-                    productDto.setMeasurementUnit(saleDto.getSaleDetails().get(0).getMeasurementUnit());
-                    productDto.setNotes("Producto creado de forma automatica");
-                    productDto.setActive(true);
-                    Object[] productCreated = productService.createProduct(productDto, userEntity).getObject();
+        SaleEntity saleCreated = saleRepository.save(saleToCreate);
 
-                    saleDto.getSaleDetails().get(i).setProductId(Long.parseLong(productCreated[0].toString()));
-                    saleDto.getSaleDetails().get(i).setNotes(productCreated[4].toString());
-                }
-                SaleDetailEntity saleDetailEntity = SaleDetailMapper.dtoToEntity(saleDto.getSaleDetails().get(i));
-                saleDetailEntity.setSaleEntity(saleCreated);
-                saleDetailRepository.save(saleDetailEntity);
+        for (int i = 0; i < saleDto.getSaleDetails().size(); i++) {
+            SaleDetailDto detail = saleDto.getSaleDetails().get(i);
+
+            if (detail.getProductId() == null && detail.isHasAutomaticSaved() && !userEntity.getCompany().isHasStock()) {
+                ProductDto productDto = new ProductDto();
+                productDto.setPrice(detail.getUnitePrice());
+                productDto.setName(detail.getName());
+                productDto.setMeasurementUnit(detail.getMeasurementUnit());
+                productDto.setNotes("Producto creado de forma automatica");
+                productDto.setActive(true);
+
+                Object[] productCreated = productService.createProduct(productDto, userEntity).getObject();
+                detail.setProductId(Long.parseLong(productCreated[0].toString()));
+                detail.setNotes(productCreated[4].toString());
             }
 
-            for (int i = 0; i<saleDto.getSaleDetails().size(); i++) {
-                saleDto.getSaleDetails().get(i).setSaleId(Long.valueOf(saleCreated.getVentaId()));;
-            }
-            if(userEntity.getCompany().isHasStock()) {
-                //productService.createHistoryStock(saleDto.getSaleDetails(), userEntity);
-                System.out.println("HISTORIAL DE STOCK");
-                inventoryService.createHistoryStock(saleDto.getSaleDetails(), userEntity, "VENTA");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            messageResponse.setMessage("ERROR: "+e.getMessage());
-            messageResponse.setStatus(false);
-            return messageResponse;
+            SaleDetailEntity saleDetailEntity = SaleDetailMapper.dtoToEntity(detail);
+            saleDetailEntity.setSaleEntity(saleCreated);
+            saleDetailRepository.save(saleDetailEntity);
+            detail.setSaleId(Long.valueOf(saleCreated.getVentaId()));
         }
+
+        if (userEntity.getCompany().isHasStock()) {
+            MessageResponse stockResponse = inventoryService.createHistoryStock(saleDto.getSaleDetails(), userEntity, "VENTA");
+            if (!stockResponse.isStatus()) {
+                // Fuerza el rollback de TODA la venta (cabecera + detalles), no solo del stock
+                throw new IllegalStateException(stockResponse.getMessage());
+            }
+        }
+
+        String message = "Venta con éxito";
+        if(userEntity.getCompany().isHasPrinter()) {
+            Long companyId = userEntity.getCompany().getCompanyId();
+            Long agentId = userEntity.getCompany().getDefaultAgentId();
+
+            if (agentService.isAgentConnected(agentId)) {
+                String ticket = fileService.getTicketToPrint(Long.valueOf(saleCreated.getVentaId()));
+                agentService.createPrintJob(
+                        companyId,
+                        agentId,
+                        ticket
+                );
+            } else {
+                message = "Venta registrada correctamente, pero no se pudo imprimir porque el agente de impresión no está conectado.";
+            }
+        }
+
+        MessageResponse messageResponse = new MessageResponse();
         messageResponse.setSaleDto(SaleMapper.entityToDto(saleCreated));
-        messageResponse.setMessage("Venta con éxito");
+        messageResponse.setMessage(message);
         messageResponse.setStatus(true);
+
         return messageResponse;
     }
 

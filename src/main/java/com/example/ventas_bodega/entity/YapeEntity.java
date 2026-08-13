@@ -11,6 +11,9 @@ public class YapeEntity {
     @Column(name = "id_yape")
     private Integer yapeId;
 
+    @Column(name = "alias")
+    private String aliasName;
+
     @Column(name = "numero_telefono")
     private String phoneNumber;
 
@@ -62,5 +65,13 @@ public class YapeEntity {
 
     public void setCompany(CompanyEntity company) {
         this.company = company;
+    }
+
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
     }
 }

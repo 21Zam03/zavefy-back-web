@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface SaleService {
 
-    public MessageResponse createSale(SaleDto saleDto, UserEntity userEntity);
+    public MessageResponse createSale(SaleDto saleDto, UserEntity userEntity) throws Exception;
     Page<SaleDto> getSalesByCompany(String ruc, String type, String serial, Integer number, String fromDate, String toDate, int page, int size);
     Integer getNextNumber(UserEntity user, String type, String serial);
     List<SaleDetailDto> getDetailsOfSale(UserEntity user, Long id);

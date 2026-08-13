@@ -18,6 +18,11 @@ public class MessageResponse {
     public MessageResponse() {
     }
 
+    public MessageResponse(String message, boolean status) {
+        this.message = message;
+        this.status = status;
+    }
+
     public MessageResponse(String message, boolean status, ProductDto productDto) {
 
     }

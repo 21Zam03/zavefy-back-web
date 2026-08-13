@@ -48,15 +48,13 @@ public class FileServiceImpl implements FileService {
     private final CompanyRepository companyRepository;
     private final SaleDetailRepository saleDetailRepository;
 
-    private final SaleService saleService;
     private final ProductRepository productRepository;
 
     @Autowired
-    public FileServiceImpl(SaleRepository saleRepository, CompanyRepository companyRepository, SaleDetailRepository saleDetailRepository, SaleService saleService, ProductRepository productRepository) {
+    public FileServiceImpl(SaleRepository saleRepository, CompanyRepository companyRepository, SaleDetailRepository saleDetailRepository, ProductRepository productRepository) {
         this.saleRepository = saleRepository;
         this.companyRepository = companyRepository;
         this.saleDetailRepository = saleDetailRepository;
-        this.saleService = saleService;
         this.productRepository = productRepository;
     }
 

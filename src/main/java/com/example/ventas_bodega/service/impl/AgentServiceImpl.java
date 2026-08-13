@@ -9,6 +9,8 @@ import com.example.ventas_bodega.repository.PrintJobRepository;
 import com.example.ventas_bodega.service.AgentService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class AgentServiceImpl implements AgentService {
 
@@ -38,5 +40,31 @@ public class AgentServiceImpl implements AgentService {
 
         printJobRepository.save(job);
     }
+
+    @Override
+    public void updateLastConnected(Long agentId) {
+        int result = agentRepository.updateLastSeen(agentId);
+
+        if (result == 0) {
+            throw new RuntimeException(
+                    "No se encontró el agente con ID: " + agentId
+            );
+        }
+    }
+
+    @Override
+    public boolean isAgentConnected(Long agentId) {
+        LocalDateTime lastSeen =
+                agentRepository.findLastSeenById(agentId);
+
+        if (lastSeen == null) {
+            return false;
+        }
+
+        return lastSeen.isAfter(
+                LocalDateTime.now().minusSeconds(60)
+        );
+    }
+
 
 }

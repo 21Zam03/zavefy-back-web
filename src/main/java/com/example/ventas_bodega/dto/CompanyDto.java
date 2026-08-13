@@ -1,6 +1,10 @@
 package com.example.ventas_bodega.dto;
 
+import com.example.ventas_bodega.entity.YapeEntity;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CompanyDto {
 
@@ -19,6 +23,7 @@ public class CompanyDto {
     private boolean hasBarcode;
     private boolean isTest;
     private boolean hasPrinter;
+    private List<YapeDto> yapes = new ArrayList<>();
 
     public CompanyDto() {
     }
@@ -153,4 +158,13 @@ public class CompanyDto {
     public void setHasAutomaticSaved(boolean hasAutomaticSaved) {
         this.hasAutomaticSaved = hasAutomaticSaved;
     }
+
+    public List<YapeDto> getYapes() {
+        return yapes;
+    }
+
+    public void setYapes(List<YapeDto> yapes) {
+        this.yapes = yapes;
+    }
+
 }

@@ -69,6 +69,13 @@ public class CompanyEntity {
     )
     private List<UserEntity> users = new ArrayList<>();
 
+    @OneToMany(
+            mappedBy = "company",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<YapeEntity> yapes = new ArrayList<>();
+
     public CompanyEntity() {}
 
     public CompanyEntity(Long companyId, String comertialName, String ruc) {
@@ -219,6 +226,14 @@ public class CompanyEntity {
 
     public void setTaxVisible(boolean taxVisible) {
         isTaxVisible = taxVisible;
+    }
+
+    public List<YapeEntity> getYapes() {
+        return yapes;
+    }
+
+    public void setYapes(List<YapeEntity> yapes) {
+        this.yapes = yapes;
     }
 
     @Override

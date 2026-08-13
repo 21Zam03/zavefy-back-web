@@ -5,8 +5,6 @@ import com.example.ventas_bodega.mapper.SaleMapper;
 import com.example.ventas_bodega.request.SaleRequest;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
-import com.example.ventas_bodega.service.FileService;
-import com.example.ventas_bodega.service.AgentService;
 import com.example.ventas_bodega.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,25 +18,15 @@ public class SaleController {
     public static final String API_PATH = "/api/sale";
 
     private final SaleService saleService;
-    private final AgentService agentService;
-    private final FileService fileService;
 
     @Autowired
-    public  SaleController(SaleService saleService, AgentService agentService, FileService fileService) {
+    public  SaleController(SaleService saleService) {
         this.saleService = saleService;
-        this.agentService = agentService;
-        this.fileService = fileService;
     }
 
     @PostMapping
     public ResponseEntity<?> createSale(@RequestBody SaleRequest saleRequest, @CurrentUser UserEntity user) throws Exception {
         MessageResponse messageResponse = saleService.createSale(SaleMapper.requestToDto(saleRequest), user);
-
-        if(user.getCompany().isHasPrinter()) {
-            String ticket = fileService.getTicketToPrint(Long.valueOf(messageResponse.getSaleDto().getVentaId()));
-            agentService.createPrintJob(user.getCompany().getCompanyId(), user.getCompany().getDefaultAgentId(), ticket);
-        }
-
         return new ResponseEntity<>(messageResponse, HttpStatus.CREATED);
     }
 
