@@ -9,6 +9,8 @@ import com.example.ventas_bodega.mapper.ProductMapper;
 import com.example.ventas_bodega.repository.*;
 import com.example.ventas_bodega.request.SignInRequest;
 import com.example.ventas_bodega.request.SignUpRequest;
+import com.example.ventas_bodega.request.UpdatePasswordRequest;
+import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.response.SignInResponse;
 import com.example.ventas_bodega.response.SignUpResponse;
 import com.example.ventas_bodega.response.UserLoggedResponse;
@@ -158,6 +160,7 @@ public class AuthServiceImpl implements AuthService {
         signInResponse.setUsername(user.getUsername());
         signInResponse.setFirstname(user.getFirstname());
         signInResponse.setLastname(user.getLastname());
+        signInResponse.setPasswordReset(user.isPasswordReset());
 
         List<ProductEntity> productEntityList = productRepository.findByCompany_Ruc(user.getCompany().getRuc());
         List<ClientEntity> clientEntityList = clientRepository.findByCompanyId(user.getCompany().getCompanyId());
@@ -176,11 +179,11 @@ public class AuthServiceImpl implements AuthService {
         DecodedJWT decodedJWT = jwtUtil.verifyToken(token);
         String username = jwtUtil.extractUsername(decodedJWT);
         UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
-        List<RoleEntity> list = new ArrayList<>(user.getRoleList());
+        List<RoleEntity> roles = new ArrayList<>(user.getRoleList());
 
         UserLoggedResponse userLoggedResponse = new UserLoggedResponse();
         userLoggedResponse.setEmail(user.getEmail());
-        userLoggedResponse.setType(list.get(0).getName());
+        userLoggedResponse.setType(roles.get(0).getName());
         userLoggedResponse.setIdCompany(user.getCompany().getCompanyId());
         userLoggedResponse.setFirstName(user.getFirstname());
         userLoggedResponse.setLastName(user.getLastname());
@@ -192,7 +195,80 @@ public class AuthServiceImpl implements AuthService {
         userLoggedResponse.setHasStock(user.getCompany().isHasStock());
         userLoggedResponse.setHasAutomaticSaved(user.getCompany().isHasAutomaticSaved());
         userLoggedResponse.setUsername(user.getUsername());
-        return userLoggedResponse;
+        userLoggedResponse.setPasswordUpdateDate(user.getPasswordUpdateDate());
+        userLoggedResponse.setPasswordReset(user.isPasswordReset());
+        List<String> roleNames = roles.stream()
+                .map(RoleEntity::getName)
+                .toList();
 
+        userLoggedResponse.setRoles(roleNames);
+        List<String> permissions = roles.stream()
+                .flatMap(role -> role.getPermissionList().stream())
+                .map(PermissionEntity::getName)
+                .distinct()
+                .toList();
+        userLoggedResponse.setPermissions(permissions);
+        return userLoggedResponse;
+    }
+
+    @Override
+    public MessageResponse updatePassword(UpdatePasswordRequest request, UserEntity user) {
+        // 1. Validar que la contraseña actual sea correcta
+        if (!passwordEncoder.matches(
+                request.getCurrentPassword(),
+                user.getPassword()
+        )) {
+
+            return new MessageResponse(
+                    "La contraseña actual es incorrecta",
+                    false
+            );
+        }
+
+        // 2. Validar nueva contraseña
+        if (!request.getNewPassword()
+                .equals(request.getConfirmPassword())) {
+
+            return new MessageResponse(
+                    "Las nuevas contraseñas no coinciden",
+                    false
+            );
+        }
+
+        // 3. Validar que no sea igual a la anterior
+        if (passwordEncoder.matches(
+                request.getNewPassword(),
+                user.getPassword()
+        )) {
+
+            return new MessageResponse(
+                    "La nueva contraseña debe ser diferente a la actual",
+                    false
+            );
+        }
+
+        // 4. Encriptar nueva contraseña
+        String encodedPassword =
+                passwordEncoder.encode(request.getNewPassword());
+
+        // 5. Actualizar
+        int result = userRepository.updatePassword(
+                user.getUserId(),
+                encodedPassword,
+                user.getUserId().longValue()
+        );
+
+        if (result == 1) {
+
+            return new MessageResponse(
+                    "Contraseña actualizada correctamente",
+                    true
+            );
+        }
+
+        return new MessageResponse(
+                "No se pudo actualizar la contraseña",
+                false
+        );
     }
 }

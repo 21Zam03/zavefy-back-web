@@ -1,11 +1,12 @@
 package com.example.ventas_bodega.controller;
 
-import com.example.ventas_bodega.request.ChangePasswordRequest;
+import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.request.UpdatePasswordRequest;
 import com.example.ventas_bodega.request.SignInRequest;
-import com.example.ventas_bodega.request.SignUpRequest;
+import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.response.SignInResponse;
-import com.example.ventas_bodega.response.SignUpResponse;
 import com.example.ventas_bodega.response.UserLoggedResponse;
+import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.AuthService;
 import com.example.ventas_bodega.util.CookieUtil;
 import jakarta.servlet.http.Cookie;
@@ -15,7 +16,6 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -99,9 +99,13 @@ public class AuthController {
         return new ResponseEntity<>(userLoggedResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/change")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
-        return new ResponseEntity<>("", HttpStatus.OK);
+    @PutMapping("/account/password")
+    public ResponseEntity<?> updatePassword(
+            @RequestBody UpdatePasswordRequest request,
+            @CurrentUser UserEntity user
+    ) {
+        MessageResponse response = authService.updatePassword(request, user);
+        return ResponseEntity.ok(response);
     }
 
     private String extractTokenFromCookie(HttpServletRequest request) {

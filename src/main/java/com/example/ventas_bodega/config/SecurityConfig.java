@@ -70,7 +70,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/product/**").permitAll()
-                        .requestMatchers("/api/loan/**").hasAnyRole("ASESOR", "ADMIN")
+                        //.requestMatchers("/api/loan/**").hasAnyRole("ASESOR", "ADMIN")
                         //.requestMatchers("/api/maintenance/**").hasAuthority("PERMISSION_MAINTENANCE")
                         .requestMatchers("/api/print-jobs/**").permitAll()
                         .requestMatchers("/api/catalog/**").permitAll()

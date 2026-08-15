@@ -7,6 +7,7 @@ import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.entity.YapeEntity;
 import com.example.ventas_bodega.mapper.CompanyMapper;
 import com.example.ventas_bodega.repository.CompanyRepository;
+import com.example.ventas_bodega.repository.UserRepository;
 import com.example.ventas_bodega.repository.YapeRepository;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.ConfigurationService;
@@ -23,16 +24,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private final CompanyRepository companyRepository;
     private final YapeRepository yapeRepository;
     private final FirebaseStorageService firebaseStorageService;
+    private final UserRepository userRepository;
 
     @Autowired
     public ConfigurationServiceImpl(
             CompanyRepository companyRepository,
             FirebaseStorageService firebaseStorageService,
-            YapeRepository yapeRepository
+            YapeRepository yapeRepository,
+            UserRepository userRepository
     ) {
         this.companyRepository = companyRepository;
         this.firebaseStorageService = firebaseStorageService;
         this.yapeRepository = yapeRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -331,6 +335,39 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return new MessageResponse(
                 "Yape eliminado correctamente",
                 true
+        );
+    }
+
+    @Override
+    public MessageResponse updateAccountInfo(String firstname, String lastname, String email, UserEntity userEntity) {
+        Optional<UserEntity> existingUser =
+                userRepository.findByEmail(email);
+        if (existingUser.isPresent()
+                && !existingUser.get().getUserId().equals(userEntity.getUserId())) {
+            return new MessageResponse(
+                    "El correo electrónico ya está registrado",
+                    false
+            );
+        }
+
+        int result = userRepository.updateAccountInfo(
+                userEntity.getUserId(),
+                firstname,
+                lastname,
+                email,
+                userEntity.getUserId().longValue()
+        );
+
+        if (result == 1) {
+            return new MessageResponse(
+                    "Información de cuenta actualizada correctamente",
+                    true
+            );
+        }
+
+        return new MessageResponse(
+                "No se pudo actualizar la información de la cuenta",
+                false
         );
     }
 

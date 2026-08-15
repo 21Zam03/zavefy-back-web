@@ -78,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
         if(productDto.getCategories() != null) {
             CategoryEntity categoryEntity = new CategoryEntity();
             for (int i=0; i<productDto.getCategories().size(); i++) {
-                categoryEntity = categoryRepository.findByName(productDto.getCategories().get(i));
+                categoryEntity = categoryRepository.findByNameAndCompanyId(productDto.getCategories().get(i), userEntity.getCompany().getCompanyId()).get();
                 if(categoryEntity != null) {
                    categoryEntityList.add(categoryEntity);
                 }
@@ -262,7 +262,7 @@ public class ProductServiceImpl implements ProductService {
                     CategoryEntity categoryEntity = new CategoryEntity();
                     for (int i=0; i<productDto.getCategories().size(); i++) {
                         //categoryClientRepository.findCategoriesByUser()
-                        categoryEntity = categoryRepository.findByName(productDto.getCategories().get(i));
+                        categoryEntity = categoryRepository.findByNameAndCompanyId(productDto.getCategories().get(i), userEntity.getCompany().getCompanyId()).get();
                         if(categoryEntity != null) {
                             list.add(categoryEntity);
                         }

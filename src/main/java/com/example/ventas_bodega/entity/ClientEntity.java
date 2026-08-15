@@ -16,7 +16,7 @@ public class ClientEntity {
     @Column(name = "nombre_completo")
     private String fullName;
 
-    @Column(name = "correo", unique = true, length = 50, nullable = true)
+    @Column(name = "correo", length = 50, nullable = true)
     private String email;
 
     @Column(name= "activo")

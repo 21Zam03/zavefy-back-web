@@ -90,18 +90,18 @@ public class ProductController {
     * */
 
     @PatchMapping("/deactivate")
-    public ResponseEntity<?> deactivateProduct(@RequestParam Long id, @CurrentUser UserEntity user) throws Exception {
-        return new ResponseEntity<>(productService.deactivateProduct(id, user), HttpStatus.OK);
+    public ResponseEntity<?> deactivateProduct(@RequestParam Long productId, @CurrentUser UserEntity user) throws Exception {
+        return new ResponseEntity<>(productService.deactivateProduct(productId, user), HttpStatus.OK);
     }
 
     @PatchMapping("/activate")
-    public ResponseEntity<?> activateProduct(@RequestParam Long id, @CurrentUser UserEntity user) throws Exception {
-        return new ResponseEntity<>(productService.activateProduct(id, user), HttpStatus.OK);
+    public ResponseEntity<?> activateProduct(@RequestParam Long productId, @CurrentUser UserEntity user) throws Exception {
+        return new ResponseEntity<>(productService.activateProduct(productId, user), HttpStatus.OK);
     }
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateProduct(
-            @RequestParam("id") String id,
+            @RequestParam("productId") String productId,
             @RequestParam("name") String name,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam("price") String price,
@@ -114,7 +114,7 @@ public class ProductController {
             @CurrentUser UserEntity user
     ) throws Exception {
         System.out.println("MEASUREMENT UNIT+ "+measurementUnit);
-        ProductDto productDto = ProductMapper.buildProductDtoFromController(Long.valueOf(id), name, description, price, categories, imageUrl, stock, barcode, file, measurementUnit);
+        ProductDto productDto = ProductMapper.buildProductDtoFromController(Long.valueOf(productId), name, description, price, categories, imageUrl, stock, barcode, file, measurementUnit);
 
         MessageResponse messageResponse = productService.updateProduct(productDto, user);
 

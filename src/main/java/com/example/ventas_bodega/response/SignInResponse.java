@@ -16,6 +16,7 @@ public class SignInResponse {
     private boolean hasStock;
     private boolean hasBarcode;
     private boolean hasPrinter;
+    private boolean passwordReset;
     private String message;
     private String token;
     private Integer status;
@@ -145,5 +146,13 @@ public class SignInResponse {
 
     public void setHasPrinter(boolean hasPrinter) {
         this.hasPrinter = hasPrinter;
+    }
+
+    public boolean isPasswordReset() {
+        return passwordReset;
+    }
+
+    public void setPasswordReset(boolean passwordReset) {
+        this.passwordReset = passwordReset;
     }
 }

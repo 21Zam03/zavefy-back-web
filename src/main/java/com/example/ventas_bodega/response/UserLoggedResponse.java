@@ -1,5 +1,8 @@
 package com.example.ventas_bodega.response;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 public class UserLoggedResponse {
 
     private String firstName;
@@ -11,11 +14,15 @@ public class UserLoggedResponse {
     private boolean hasStock;
     private boolean hasBarcode;
     private boolean hasAutomaticSaved;
+    private List<String> roles;
+    private List<String> permissions;
     private String role;
     private String type;
     private String ruc;
     private String socialReason;
     private String comertialName;
+    private LocalDateTime passwordUpdateDate;
+    private boolean passwordReset;
 
     public UserLoggedResponse() {
     }
@@ -140,5 +147,37 @@ public class UserLoggedResponse {
 
     public void setHasPrinter(boolean hasPrinter) {
         this.hasPrinter = hasPrinter;
+    }
+
+    public LocalDateTime getPasswordUpdateDate() {
+        return passwordUpdateDate;
+    }
+
+    public void setPasswordUpdateDate(LocalDateTime passwordUpdateDate) {
+        this.passwordUpdateDate = passwordUpdateDate;
+    }
+
+    public boolean isPasswordReset() {
+        return passwordReset;
+    }
+
+    public void setPasswordReset(boolean passwordReset) {
+        this.passwordReset = passwordReset;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
+    }
+
+    public List<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(List<String> permissions) {
+        this.permissions = permissions;
     }
 }

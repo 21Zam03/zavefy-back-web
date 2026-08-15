@@ -16,5 +16,6 @@ public interface ConfigurationService {
     MessageResponse createBusinessYape(String aliasName, String phoneNumber, boolean isDefault, MultipartFile file, UserEntity userEntity) throws Exception;
     MessageResponse updateBusinessYape(Integer yapeId, String aliasName, String phoneNumber, boolean isDefault, MultipartFile qrFile, UserEntity user) throws Exception;
     MessageResponse deleteBusinessYape(Integer yapeId, UserEntity user);
+    MessageResponse updateAccountInfo(String firstname, String lastname, String email, UserEntity userEntity);
 
 }

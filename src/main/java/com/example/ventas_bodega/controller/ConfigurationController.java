@@ -158,5 +158,14 @@ public class ConfigurationController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping(value = "/account/personal")
+    public ResponseEntity<?> updateAccountInfo(
+            @RequestParam("firstname") String firstname,
+            @RequestParam("lastname") String lastname,
+            @RequestParam("email") String email,
+            @CurrentUser UserEntity user
+    ) {
+        return ResponseEntity.ok(configurationService.updateAccountInfo(firstname, lastname, email, user));
+    }
 
 }
