@@ -11,14 +11,11 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductRequest {
+public class ProductUpdateRequest {
 
-    @Pattern(
-            regexp = "^\\d{1,20}$",
-            message = "El código de barras debe contener máximo 20 dígitos"
-    )
-    @NotBlank(message = "El codigo de barras no puede ser nulo")
-    private String barcode;
+    @NotNull(message = "El productId es obligatorio")
+    @Positive(message = "El productId debe ser mayor que 0")
+    private Long productId;
 
     @NotBlank(message = "El nombre del producto es obligatorio")
     @Size(max = 150, message = "El nombre no puede superar los 150 caracteres")
@@ -34,10 +31,8 @@ public class ProductRequest {
     @NotBlank(message = "La categoria del producto es obligatorio")
     private String category;
 
-    private String imageUrl;
-
-    @Min(value = 0, message = "El stock no puede ser negativo")
-    private Integer stock;
+    @NotNull(message = "El valor de remover imagen es oblitagorio")
+    private boolean removeImage;
 
     @NotNull(message = "La unidad de medida es obligatoria")
     private MeasurementUnitEnum measurementUnit;

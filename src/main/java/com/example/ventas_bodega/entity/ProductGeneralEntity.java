@@ -5,7 +5,15 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "tb_producto_general")
+@Table(
+        name = "tb_producto_general",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_producto_general_codigo_barras",
+                        columnNames = "codigo_barras"
+                )
+        }
+)
 public class ProductGeneralEntity {
 
     @Id

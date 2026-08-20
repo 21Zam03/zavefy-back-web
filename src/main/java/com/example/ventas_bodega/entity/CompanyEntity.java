@@ -62,6 +62,9 @@ public class CompanyEntity {
     @Column(name = "impuesto_visible")
     private boolean isTaxVisible;
 
+    @Column(name = "es_activa")
+    private boolean isActive;
+
     @OneToMany(
             mappedBy = "company",
             cascade = CascadeType.ALL,
@@ -234,6 +237,14 @@ public class CompanyEntity {
 
     public void setYapes(List<YapeEntity> yapes) {
         this.yapes = yapes;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     @Override

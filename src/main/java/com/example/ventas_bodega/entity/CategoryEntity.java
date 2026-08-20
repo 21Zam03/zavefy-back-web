@@ -5,7 +5,15 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tb_categoria")
+@Table(
+        name = "tb_categoria",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_categoria_empresa_nombre",
+                        columnNames = {"id_empresa", "nombre"}
+                )
+        }
+)
 public class CategoryEntity {
 
     @Id

@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
 
     public boolean existsByNameAndCompanyId(String name, Long companyId);
-    Optional<CategoryEntity> findByNameAndCompanyId(String name, Long companyId);
+    Optional<CategoryEntity> findByNameIgnoreCaseAndCompanyId(String name, Long companyId);
     public List<CategoryEntity> findAllByCompanyId(Long companyId);
 
     @Query(value = """

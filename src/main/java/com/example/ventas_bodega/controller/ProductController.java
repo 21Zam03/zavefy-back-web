@@ -3,9 +3,12 @@ package com.example.ventas_bodega.controller;
 import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.mapper.ProductMapper;
+import com.example.ventas_bodega.request.ProductRequest;
+import com.example.ventas_bodega.request.ProductUpdateRequest;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.ProductService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,20 @@ public class ProductController {
         logger.info("Intento de crear producto para usuario: {}", user.getEmail());
 
         ProductDto productDto = ProductMapper.buildProductDtoFromController(null, name, description, price, categories, imageUrl, stock, barcode, file, measurementUnit);
+
+        MessageResponse messageResponse = productService.createProduct(productDto, user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(messageResponse);
+    }
+
+    @PostMapping(value ="/v2", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> crearProductoV2(
+            @Valid @RequestPart("product") ProductRequest productRequest,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @CurrentUser UserEntity user
+    ) throws Exception {
+
+        ProductDto productDto = ProductMapper.buildProductDtoFromProductRequest(productRequest, file);
 
         MessageResponse messageResponse = productService.createProduct(productDto, user);
 
@@ -115,6 +132,20 @@ public class ProductController {
     ) throws Exception {
         System.out.println("MEASUREMENT UNIT+ "+measurementUnit);
         ProductDto productDto = ProductMapper.buildProductDtoFromController(Long.valueOf(productId), name, description, price, categories, imageUrl, stock, barcode, file, measurementUnit);
+
+        MessageResponse messageResponse = productService.updateProduct(productDto, user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(messageResponse);
+    }
+
+    @PutMapping(value ="/v2", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateProduct2(
+            @Valid @RequestPart("product") ProductUpdateRequest productUpdateRequest,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @CurrentUser UserEntity user
+    ) throws Exception {
+
+        ProductDto productDto = ProductMapper.buildProductDtoFromProductUpdateRequest(productUpdateRequest, file);
 
         MessageResponse messageResponse = productService.updateProduct(productDto, user);
 

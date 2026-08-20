@@ -11,23 +11,24 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     ProductEntity findByBarcodeAndCompany_RucAndActive(String barcode, String ruc, boolean active);
     boolean existsByBarcodeAndCompany_Ruc(String barcode, String ruc);
+    boolean existsByBarcodeAndCompany_CompanyId(String barcode, Long companyId);
     Page<ProductEntity> findByCompany_Ruc(String ruc, Pageable pageable);
     List<ProductEntity> findByCompany_Ruc(String ruc);
 
     @Query(value = """
-    SELECT DISTINCT p.*
+    SELECT p.*
     FROM tb_producto p
     INNER JOIN tb_empresa e ON p.id_empresa = e.id_empresa
-    LEFT JOIN tb_categorias_productos cp ON cp.id_producto = p.id_producto
     WHERE e.ruc = :ruc
     AND (:barcode IS NULL OR p.codigo_barras = :barcode)
     AND (:name IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :name, '%')))
-    AND (:category IS NULL OR cp.id_categoria = :category)
+    AND (:category IS NULL OR p.id_categoria = :category)
     AND (
         :stockStatus IS NULL
         OR (:stockStatus = 'SIN_STOCK' AND p.stock = 0)
@@ -39,14 +40,13 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     ORDER BY p.fecha_actualizacion DESC
     """,
             countQuery = """
-    SELECT COUNT(DISTINCT p.id_producto)
+    SELECT COUNT(p.id_producto)
     FROM tb_producto p
     INNER JOIN tb_empresa e ON p.id_empresa = e.id_empresa
-    LEFT JOIN tb_categorias_productos cp ON cp.id_producto = p.id_producto
     WHERE e.ruc = :ruc
     AND (:barcode IS NULL OR p.codigo_barras = :barcode)
     AND (:name IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :name, '%')))
-    AND (:category IS NULL OR cp.id_categoria = :category)
+    AND (:category IS NULL OR p.id_categoria = :category)
     AND (
         :stockStatus IS NULL
         OR (:stockStatus = 'SIN_STOCK' AND p.stock = 0)
@@ -55,7 +55,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
         OR (:stockStatus = 'STOCK_SUFICIENTE' AND p.stock > 50)
     )
     AND (:active IS NULL OR p.activo = :active)
-    """, nativeQuery = true
+    """,
+            nativeQuery = true
     )
     Page<ProductEntity> findProductsByCompanyAndBarcode(
             @Param("ruc") String ruc,
@@ -239,6 +240,10 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             @Param("categoryId") Long categoryId,
             @Param("companyId") Long companyId
     );
+
+    boolean existsByBarcodeAndCompany_CompanyIdAndIdNot(String barcode, Long companyCompanyId, Long productId);
+
+    Optional<ProductEntity> findByIdAndCompany_CompanyId(Long productId, Long companyId);
 
 }
 

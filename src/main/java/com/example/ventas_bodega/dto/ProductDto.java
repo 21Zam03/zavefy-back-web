@@ -14,6 +14,7 @@ public class ProductDto {
     private BigDecimal price;
     private BigDecimal unitPrice;
     private List<String> categories;
+    private String category;
     private boolean active;
     private String imageUrl;
     private Integer stock;
@@ -24,6 +25,7 @@ public class ProductDto {
     private String measurementUnit;
     private boolean automaticSaved;
     private String notes;
+    private boolean removeImage;
 
     public ProductDto() {
     }
@@ -174,6 +176,22 @@ public class ProductDto {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public boolean isRemoveImage() {
+        return removeImage;
+    }
+
+    public void setRemoveImage(boolean removeImage) {
+        this.removeImage = removeImage;
     }
 
     @Override

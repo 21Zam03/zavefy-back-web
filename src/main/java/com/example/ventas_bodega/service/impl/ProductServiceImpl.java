@@ -1,26 +1,24 @@
 package com.example.ventas_bodega.service.impl;
 
-import com.example.ventas_bodega.dto.FileDto;
-import com.example.ventas_bodega.dto.ProductDto;
-import com.example.ventas_bodega.dto.ProductFoodDto;
-import com.example.ventas_bodega.dto.SaleDetailDto;
+import com.example.ventas_bodega.dto.*;
 import com.example.ventas_bodega.entity.*;
+import com.example.ventas_bodega.enums.StockMovementTypeEnum;
+import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.mapper.ProductMapper;
-import com.example.ventas_bodega.repository.CategoryClientRepository;
-import com.example.ventas_bodega.repository.CategoryRepository;
-import com.example.ventas_bodega.repository.ProductGeneralRepository;
 import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.rest.FoodRestTemplate;
-import com.example.ventas_bodega.service.FirebaseStorageService;
-import com.example.ventas_bodega.service.InventoryService;
-import com.example.ventas_bodega.service.ProductService;
+import com.example.ventas_bodega.service.*;
 import com.example.ventas_bodega.util.ProductUtil;
+import com.example.ventas_bodega.validators.ProductValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -30,139 +28,150 @@ import java.util.List;
 @Service
 public class ProductServiceImpl implements ProductService {
 
+    private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
+
     private final FirebaseStorageService firebaseStorageService;
     private final FoodRestTemplate foodRestTemplate;
     private final ProductRepository productRepository;
-    private final ProductGeneralRepository productGeneralRepository;
-    private final CategoryRepository categoryRepository;
-    private final CategoryClientRepository categoryClientRepository;
     private final InventoryService inventoryService;
+    private final CategoryService categoryService;
+    private final ProductGeneralService productGeneralService;
+
+    private final ProductValidator productValidator;
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public ProductServiceImpl(
             FirebaseStorageService firebaseStorageService,
+            CategoryService categoryService,
             FoodRestTemplate foodRestTemplate,
             ProductRepository productRepository,
-            ProductGeneralRepository productGeneralRepository,
-            CategoryRepository categoryRepository,
-            CategoryClientRepository categoryClientRepository,
             JdbcTemplate jdbcTemplate,
-            InventoryService inventoryService) {
+            InventoryService inventoryService,
+            ProductValidator productValidator,
+            ProductGeneralService productGeneralService) {
         this.firebaseStorageService = firebaseStorageService;
         this.foodRestTemplate = foodRestTemplate;
         this.productRepository = productRepository;
-        this.productGeneralRepository = productGeneralRepository;
-        this.categoryRepository = categoryRepository;
-        this.categoryClientRepository = categoryClientRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.inventoryService = inventoryService;
+        this.productValidator = productValidator;
+        this.categoryService = categoryService;
+        this.productGeneralService = productGeneralService;
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public MessageResponse createProduct(ProductDto productDto, UserEntity userEntity) throws Exception {
-        MessageResponse messageResponse = new MessageResponse();
+        String uploadedFilePath = null;
+        try {
 
-        boolean productExist = productRepository.existsByBarcodeAndCompany_Ruc(productDto.getBarcode(), userEntity.getCompany().getRuc());
-        if(productExist) {
-            messageResponse.setMessage("El producto a registrar ya esta registrado en su inventario");
-            messageResponse.setStatus(false);
-            messageResponse.setProductDto(null);
-            return messageResponse;
-        }
+            // 1. FASE DE VALIDACIONES DE NEGOCIO
+            productValidator.validateForCreation(productDto, userEntity);
 
-        //LOGICA PARA CATEGORIAS
-        List<CategoryEntity> categoryEntityList = new ArrayList<>();
-        if(productDto.getCategories() != null) {
-            CategoryEntity categoryEntity = new CategoryEntity();
-            for (int i=0; i<productDto.getCategories().size(); i++) {
-                categoryEntity = categoryRepository.findByNameAndCompanyId(productDto.getCategories().get(i), userEntity.getCompany().getCompanyId()).get();
-                if(categoryEntity != null) {
-                   categoryEntityList.add(categoryEntity);
-                }
-                /*
-                    else {
-                    categoryEntity = new CategoryEntity();
-                    categoryEntity.setName(productDto.getCategories().get(i));
-                    CategoryEntity categoryCreated = categoryRepository.save(categoryEntity);
+            // 2. LOGICA DE NEGOCIO EN CATEGORIAS
+            CategoryEntity categoryCreated = categoryService.getOrCreate(productDto.getCategory(), userEntity.getCompany());
 
-                    CategoryClientEntity categoryClientEntity = new CategoryClientEntity();
-                    categoryClientEntity.setCategoryId(categoryCreated.getId());
-                    categoryClientEntity.setClientId(Long.valueOf(userEntity.getUserId()));
-                    categoryClientRepository.save(categoryClientEntity);
+            // 3. CREACION DEL PRODUCTO A BD
+            ProductEntity productToCreate = ProductMapper.dtoToEntity(productDto);
+            productToCreate.setCategoryEntity(categoryCreated);
+            productToCreate.setCompany(userEntity.getCompany());
+            productToCreate.setActive(true);
+            productToCreate.setStock(productDto.getStock() == null ? 0 : productDto.getStock());
+            ProductEntity productCreated = productRepository.save(productToCreate);
 
-                    categoryEntityList.add(categoryCreated);
-                }
-                */
+            // 4. PROCESAR IMAGEN
+            uploadedFilePath = processProductImage(productDto, productCreated, userEntity.getCompany());
+
+            // 5. GENERAR CÓDIGO DE BARRAS
+            if (productCreated.getBarcode() == null || productCreated.getBarcode().isBlank()) {
+                String barcodeGenerated = ProductUtil.generarCodigoInterno(productCreated.getId());
+                productCreated.setBarcode(barcodeGenerated);
+                productRepository.save(productCreated);
             }
+
+            // 6. SINCRONIZAR PRODUCTO CON CATÁLOGO GENERAL
+            productGeneralService.createIfNotExists(productCreated);
+
+            // 7. REGISTRAR HISTORIAL DE STOCK
+            if (userEntity.getCompany().isHasStock()) {
+                inventoryService.createHistoryStock(productCreated, userEntity, StockMovementTypeEnum.CREACION.name());
+            }
+
+            // 8. CONSTRUIR RESPUESTA
+            return buildProductCreatedResponse(productCreated);
+
+        } catch (Exception e) {
+            //e.printStackTrace();
+            // 9. COMPENSAR FIREBASE
+            if (uploadedFilePath != null) {
+                try {
+                    firebaseStorageService.deleteFile(uploadedFilePath);
+                } catch (Exception deleteException) {
+                    log.error("No se pudo eliminar el archivo de Firebase: {}", uploadedFilePath, deleteException);
+                    deleteException.printStackTrace();
+                }
+            }
+            // Permite que @Transactional haga rollback
+            throw e;
+        }
+    }
+
+    private MessageResponse buildProductUpdatedResponse(ProductEntity product) {
+        MessageResponse response = new MessageResponse();
+        response.setMessage("El producto se ha actualizado correctamente");
+        response.setStatus(true);
+        response.setProductDto(ProductMapper.entityToDto(product));
+        response.setObject(ProductMapper.entityToObject(product));
+        return response;
+    }
+
+    private MessageResponse buildProductCreatedResponse(ProductEntity product) {
+        MessageResponse response = new MessageResponse();
+        response.setMessage("El producto se ha registrado exitosamente");
+        response.setStatus(true);
+        response.setProductDto(ProductMapper.entityToDto(product));
+        response.setObject(ProductMapper.entityToObject(product));
+        return response;
+    }
+
+    private String buildProductImagePath(String ruc, Long productId) {
+        return "bodega-sistemas/clients/"
+                + ruc
+                + "/products/"
+                + productId;
+    }
+
+    private String processProductImage(ProductDto productDto, ProductEntity productCreated, CompanyEntity company) throws Exception {
+        if ((productDto.getFile() == null || productDto.getFile().isEmpty())
+                && (productDto.getImageUrl() == null || productDto.getImageUrl().isBlank())) {
+            return null;
         }
 
-        ProductEntity productToCreate = ProductMapper.dtoToEntity(productDto);
-        productToCreate.setCompany(userEntity.getCompany());
-        productToCreate.setCategoryEntityList(categoryEntityList);
-        productToCreate.setActive(true);
-        productToCreate.setStock(productDto.getStock() == null? 0 : productDto.getStock());
-        ProductEntity productCreated = productRepository.save(productToCreate);
+        String filePath = buildProductImagePath(company.getRuc(), productCreated.getId());
+        FileDto fileDto;
 
-        //LOGICA PARA IMAGEN DEL PRODUCTO
-        //Si file es nulo es porque el usuario ha escogido una imagen de su escritorio
-        if(productDto.getFile() == null) {
-            if(productDto.getImageUrl() != null) {
-                //Cuando el producto ya viene con una url para descargar la imagen
-                String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+productCreated.getId();
-                InputStream inputStream = downloadImage(productDto.getImageUrl());
-                FileDto fileDto = firebaseStorageService.uploadFileFromUrl(inputStream, "/image/jpg", filePath);
-                productCreated.setImageUrl(fileDto.getUrl());
-                productCreated.setFilePath(filePath);
+        if (productDto.getFile() == null) {
+            try (InputStream inputStream = downloadImage(productDto.getImageUrl())) {
+                fileDto = firebaseStorageService.uploadFileFromUrl(
+                        inputStream,
+                        "image/jpeg",
+                        filePath
+                );
             }
         } else {
-            //Cuando el cliente sube una imagen de su escritorio
-            System.out.println("FILE SUBIDA POR EL CLIENTE MANUALMENTE: "+productDto.getFile());
-            String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+"product-"+productCreated.getId();
-            FileDto fileDto = firebaseStorageService.uploadFile(productDto.getFile(), filePath);
-            System.out.println("ARCHIVO subido: "+fileDto.toString());
-            productCreated.setImageUrl(fileDto.getUrl());
-            productCreated.setFilePath(filePath);
+            fileDto = firebaseStorageService.uploadFile(productDto.getFile(), filePath);
         }
 
-        //ACTUALIZAR EL PRODUCTO CON LA IMAGEN Y FILEPATH query optimizada
-        productRepository.updateImageInfo(productCreated.getImageUrl(), productCreated.getFilePath(), productCreated.getId(), userEntity.getCompany().getCompanyId());
-
-        //LOGICA PARA CREACION DE CODIGO DE BARRAS AUTOMATICO
-        if(productCreated.getBarcode() == null) {
-            String barcodeGenerated = ProductUtil.generarCodigoEAN13(productCreated.getId());
-            productRepository.updateBarcodeById(productCreated.getId(), barcodeGenerated);
-            productCreated.setBarcode(barcodeGenerated);
-        }
-
-        //LOGICA PARA REGISTRO DE PRODUCTO A LA TABLA PRODUCT GENERAL
-        if(productCreated.getBarcode() != null) {
-            boolean exists = productGeneralRepository.existsByBarcode(productCreated.getBarcode());
-            if(!exists){
-                ProductGeneralEntity productGeneralToCreate = ProductMapper.dtoToEntityGeneral(productDto);
-                productGeneralRepository.save(productGeneralToCreate);
-            }
-        }
-
-        //LOGICA DE STOCK
-        if(userEntity.getCompany().isHasStock()) {
-            inventoryService.createHistoryStock(productCreated, userEntity, "CREACION");
-        }
-
-        messageResponse.setMessage("El producto se ha registrado exitosamente");
-        messageResponse.setStatus(true);
-        messageResponse.setProductDto(ProductMapper.entityToDto(productCreated));
-        messageResponse.setObject(ProductMapper.entityToObject(productCreated));
-
-        System.out.println("RESPONSE: "+messageResponse.toString());
-        return messageResponse;
+        productCreated.setImageUrl(fileDto.getUrl());
+        productCreated.setFilePath(fileDto.getFileName());
+        return fileDto.getFileName();
     }
 
     @Override
     public ProductDto searchProduct(String barcode) {
-        ProductGeneralEntity productGeneralEntity = productGeneralRepository.findByBarcode(barcode);
+        ProductGeneralEntity productGeneralEntity = productGeneralService.findProductByBarcode(barcode);
         if(productGeneralEntity == null){
             ProductFoodDto p = foodRestTemplate.getProductByBarcode(barcode);
             if(p != null) {
@@ -204,95 +213,45 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public MessageResponse updateProduct(ProductDto productDto, UserEntity userEntity) throws Exception {
-        MessageResponse messageResponse = new MessageResponse();
-        if(productDto.getProductId() == null) {
-            messageResponse.setStatus(false);
-            messageResponse.setMessage("El id del producto a actualizar no existe en el sistema");
-            return messageResponse;
-        }
+        String uploadedFilePath = null;
+        String oldFilePath = null;
+        ProductEntity productToUpdate = productRepository.findByIdAndCompany_CompanyId(productDto.getProductId(), userEntity.getCompany().getCompanyId())
+                .orElseThrow(() ->
+                                new BusinessException(
+                                        "El producto no existe en su inventario"
+                                )
+                        );
+        productValidator.validateForUpdate(productDto, productToUpdate, userEntity);
 
         try {
-            ProductEntity productToupdate = productRepository.findByBarcodeAndCompany_RucAndActive(productDto.getBarcode(), userEntity.getCompany().getRuc(), true);
+            oldFilePath = productToUpdate.getFilePath();
+            uploadedFilePath = processProductImageForUpdate(productDto.getFile(), productDto.isRemoveImage(), productToUpdate, userEntity.getCompany());
 
-            if(productDto.getFile() == null) {
-                if(productDto.getImageUrl() != null) {
-                    //Cuando el producto ya viene con una url para descargar la imagen
-                    System.out.println("FILE: "+productDto.getImageUrl());
-                    String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+productToupdate.getId();
-                    InputStream inputStream = downloadImage(productDto.getImageUrl());
-                    FileDto fileDto = firebaseStorageService.uploadFileFromUrl(inputStream, "/image/jpg", filePath);
-                    productToupdate.setImageUrl(fileDto.getUrl());
-                    productToupdate.setFilePath(filePath);
-                }
-            } else {
-                //Cuando el cliente sube una imagen de su escritorio
-                System.out.println("FILE SUBIDA POR EL CLIENTE MANUALMENTE: "+productDto.getFile());
-                String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/products/"+"product-"+productToupdate.getId();
-                FileDto fileDto = firebaseStorageService.uploadFile(productDto.getFile(), filePath);
-                productToupdate.setImageUrl(fileDto.getUrl());
-                productToupdate.setFilePath(filePath);
-            }
+            CategoryEntity category = categoryService.getOrCreate(productDto.getCategory(), userEntity.getCompany());
 
+            productToUpdate.setName(productDto.getName());
+            productToUpdate.setDescription(productDto.getDescription());
+            productToUpdate.setPrice(productDto.getPrice());
+            productToUpdate.setMeasurementUnit(productDto.getMeasurementUnit());
+            productToUpdate.setCategoryEntity(category);
+            ProductEntity productUpdated = productRepository.save(productToUpdate);
 
-            if(productDto.getBarcode() != null) {
-                productToupdate.setBarcode(productDto.getBarcode());
-            }
-
-            if(productDto.getName() != null) {
-                productToupdate.setName(productDto.getName());
-            }
-
-            if(productDto.getDescription() != null) {
-                productToupdate.setDescription(productDto.getDescription());
-            }
-
-            if(productDto.getPrice() != null) {
-                productToupdate.setPrice(productDto.getPrice());
-            }
-
-            if(productDto.getMeasurementUnit() != null) {
-                productToupdate.setMeasurementUnit(productDto.getMeasurementUnit());
-            }
-
-            if(productToupdate.getCategoryEntityList() != null) {
-                List<CategoryEntity> list = new ArrayList<>();
-                if(productDto.getCategories() != null) {
-                    CategoryEntity categoryEntity = new CategoryEntity();
-                    for (int i=0; i<productDto.getCategories().size(); i++) {
-                        //categoryClientRepository.findCategoriesByUser()
-                        categoryEntity = categoryRepository.findByNameAndCompanyId(productDto.getCategories().get(i), userEntity.getCompany().getCompanyId()).get();
-                        if(categoryEntity != null) {
-                            list.add(categoryEntity);
-                        }
-                        /*
-                        else {
-                            categoryEntity = new CategoryEntity();
-                            categoryEntity.setName(productDto.getCategories().get(i));
-                            CategoryEntity categoryCreated = categoryRepository.save(categoryEntity);
-                            list.add(categoryCreated);
-                        }
-                        * */
-                    }
-                }
-                productToupdate.setCategoryEntityList(list);
-            }
-
-            productToupdate.setActive(true);
-            productRepository.save(productToupdate);
-
-            messageResponse.setStatus(true);
-            messageResponse.setMessage("Producto Actualizado exitosamente");
-            return messageResponse;
+            return buildProductUpdatedResponse(productUpdated);
         } catch (Exception e) {
-            System.out.println("ERROR: "+e.getMessage());
-            e.printStackTrace();
-            messageResponse.setStatus(false);
-            messageResponse.setMessage("Error al actualizar el producto: "+e.getMessage());
+            // 9. COMPENSAR FIREBASE
+            if (uploadedFilePath != null) {
+                try {
+                    firebaseStorageService.deleteFile(uploadedFilePath);
+                } catch (Exception deleteException) {
+                    log.error("No se pudo eliminar el archivo de Firebase: {}", uploadedFilePath, deleteException);
+                    deleteException.printStackTrace();
+                }
+            }
+            // Permite que @Transactional haga rollback
+            throw e;
         }
-
-        return messageResponse;
     }
 
     @Override
@@ -360,6 +319,30 @@ public class ProductServiceImpl implements ProductService {
         MessageResponse messageResponse = new MessageResponse();
         messageResponse.setStatus(true);
         return messageResponse;
+    }
+
+    private String processProductImageForUpdate(MultipartFile file, boolean removeImage, ProductEntity product, CompanyEntity company) throws Exception {
+
+        // 1. El usuario quiere eliminar la imagen
+        if (removeImage) {
+            product.setImageUrl(null);
+            product.setFilePath(null);
+            return null;
+        }
+
+        // 2. El usuario subió una imagen
+        if (file != null && !file.isEmpty()) {
+            String filePath = "bodega-sistemas/clients/" + company.getRuc() + "/products/product-" + product.getId();
+            FileDto fileDto = firebaseStorageService.uploadFile(file, filePath);
+
+            product.setImageUrl(fileDto.getUrl());
+            product.setFilePath(filePath);
+
+            return filePath;
+        }
+
+        // 3. No se solicitó ningún cambio de imagen
+        return null;
     }
 
     public InputStream downloadImage(String imageUrl) throws Exception {

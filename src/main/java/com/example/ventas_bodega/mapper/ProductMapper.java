@@ -1,10 +1,13 @@
 package com.example.ventas_bodega.mapper;
 
+import com.example.ventas_bodega.dto.CategoryDto;
 import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.ProductFoodDto;
 import com.example.ventas_bodega.entity.CategoryEntity;
 import com.example.ventas_bodega.entity.ProductEntity;
 import com.example.ventas_bodega.entity.ProductGeneralEntity;
+import com.example.ventas_bodega.request.ProductRequest;
+import com.example.ventas_bodega.request.ProductUpdateRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
@@ -14,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProductMapper {
 
@@ -82,7 +86,9 @@ public class ProductMapper {
         product.setImageUrl(productEntity.getImageUrl());
         product.setStock(productEntity.getStock());
         product.setBarcode(productEntity.getBarcode());
-        product.setCategories(buildCategoriesInListStringFromEntity(productEntity.getCategoryEntityList()));
+        //product.setCategories(buildCategoriesInListStringFromEntity(productEntity.getCategoryEntityList()));
+        System.out.println("CATEGORIA: "+productEntity.getCategoryEntity().toString());
+        product.setCategory(productEntity.getCategoryEntity().getName());
         product.setCreatedDate(formatToYearMonthDay(productEntity.getCreatedDate()));
         product.setUpdatedDate(formatToYearMonthDay(productEntity.getUpdatedDate()));
         product.setMeasurementUnit(productEntity.getMeasurementUnit());
@@ -106,6 +112,18 @@ public class ProductMapper {
         product.setCategories(buildCategoriesInString(productDto.getCategories()));
         product.setImageUrl(productDto.getImageUrl());
         product.setBarcode(productDto.getBarcode());
+        product.setCategories(buildCategoriesInString(productDto.getCategories()));
+        return product;
+    }
+
+    public static ProductGeneralEntity entityToEntityGeneral(ProductEntity productEntity) {
+        ProductGeneralEntity product = new ProductGeneralEntity();
+        product.setName(productEntity.getName());
+        product.setDescription(productEntity.getDescription());
+        product.setPrice(productEntity.getPrice());
+        //product.setCategories(buildCategoriesInString(productEntity.getCategoryEntityList()));
+        product.setImageUrl(productEntity.getImageUrl());
+        product.setBarcode(productEntity.getBarcode());
         return product;
     }
 
@@ -147,6 +165,33 @@ public class ProductMapper {
         return productDto;
     }
 
+    public static ProductDto buildProductDtoFromProductRequest(ProductRequest productRequest, MultipartFile file) {
+        ProductDto productDto = new ProductDto();
+        productDto.setName(productRequest.getName());
+        productDto.setDescription(productRequest.getDescription());
+        productDto.setPrice(productRequest.getPrice());
+        productDto.setCategory(productRequest.getCategory());
+        productDto.setStock(productRequest.getStock());
+        productDto.setBarcode(productRequest.getBarcode());
+        productDto.setImageUrl(productRequest.getImageUrl());
+        productDto.setFile(file);
+        productDto.setMeasurementUnit(productRequest.getMeasurementUnit().toString());
+        return productDto;
+    }
+
+    public static ProductDto buildProductDtoFromProductUpdateRequest(ProductUpdateRequest productUpdateRequest, MultipartFile file) {
+        ProductDto productDto = new ProductDto();
+        productDto.setProductId(productUpdateRequest.getProductId());
+        productDto.setName(productUpdateRequest.getName());
+        productDto.setDescription(productUpdateRequest.getDescription());
+        productDto.setPrice(productUpdateRequest.getPrice());
+        productDto.setCategory(productUpdateRequest.getCategory());
+        productDto.setFile(file);
+        productDto.setRemoveImage(productUpdateRequest.isRemoveImage());
+        productDto.setMeasurementUnit(productUpdateRequest.getMeasurementUnit().toString());
+        return productDto;
+    }
+
     private static String buildCategoriesInString(List<String> categories) {
         return String.join(",", categories);
     }
@@ -179,11 +224,15 @@ public class ProductMapper {
     }
 
     private static List<String> buildCategoriesInListStringFromEntity(List<CategoryEntity> categories) {
-        List<String> list = new ArrayList<>();
-        for (CategoryEntity categoryEntity : categories) {
-            list.add(categoryEntity.getName());
+        if(categories != null) {
+            List<String> list = new ArrayList<>();
+            for (CategoryEntity categoryEntity : categories) {
+                list.add(categoryEntity.getName());
+            }
+            return list;
+        } else {
+            return null;
         }
-        return list;
     }
 
     public static String formatToYearMonthDay(LocalDateTime dateTime) {
@@ -214,4 +263,6 @@ public class ProductMapper {
             };
         }
     }
+
+
 }

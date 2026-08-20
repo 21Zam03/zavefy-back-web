@@ -1,31 +1,16 @@
 package com.example.ventas_bodega.response;
 
+import com.example.ventas_bodega.dto.ProductDto;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProductResponse {
 
     private String message;
-    private boolean success;
+    private ProductDto product;
 
-    public ProductResponse() {
-    }
-
-    public ProductResponse(String message, boolean success) {
-        this.message = message;
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
 }

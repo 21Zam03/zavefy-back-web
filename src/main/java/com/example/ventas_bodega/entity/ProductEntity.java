@@ -7,7 +7,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "tb_producto")
+@Table(
+        name = "tb_producto",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_producto_empresa_codigo_barras",
+                        columnNames = {
+                                "id_empresa",
+                                "codigo_barras"
+                        }
+                )
+        }
+)
 public class ProductEntity {
 
     @Id
@@ -32,6 +43,9 @@ public class ProductEntity {
 
     @Column(name = "codigo_barras")
     private String barcode;
+
+    @Column(name = "codigo_barras_interno")
+    private String internalCode;
 
     @Column(name = "image_url")
     private String imageUrl;
