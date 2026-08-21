@@ -39,6 +39,9 @@ public class ProductGeneralEntity {
     @Column(name = "imagen_url")
     private String imageUrl;
 
+    @Column(name = "categoria")
+    private String category;
+
     public ProductGeneralEntity() {}
 
     public ProductGeneralEntity(Long id, String name, String description, BigDecimal price, String categories, String imageUrl) {
@@ -106,4 +109,24 @@ public class ProductGeneralEntity {
         this.barcode = barcode;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    @Override
+    public String toString() {
+        return "ProductGeneralEntity{" +
+                "id=" + id +
+                ", barcode='" + barcode + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", categories='" + categories + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                '}';
+    }
 }

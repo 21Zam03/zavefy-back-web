@@ -17,7 +17,6 @@ public class ProductRequest {
             regexp = "^\\d{1,20}$",
             message = "El código de barras debe contener máximo 20 dígitos"
     )
-    @NotBlank(message = "El codigo de barras no puede ser nulo")
     private String barcode;
 
     @NotBlank(message = "El nombre del producto es obligatorio")

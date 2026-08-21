@@ -92,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
             }
 
             // 6. SINCRONIZAR PRODUCTO CON CATÁLOGO GENERAL
-            productGeneralService.createIfNotExists(productCreated);
+            productGeneralService.createIfNotExists(productDto.getBarcode(), productCreated);
 
             // 7. REGISTRAR HISTORIAL DE STOCK
             if (userEntity.getCompany().isHasStock()) {
@@ -172,6 +172,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto searchProduct(String barcode) {
         ProductGeneralEntity productGeneralEntity = productGeneralService.findProductByBarcode(barcode);
+        System.out.println("PRODUCTO ENCONTRADO: "+productGeneralEntity);
         if(productGeneralEntity == null){
             ProductFoodDto p = foodRestTemplate.getProductByBarcode(barcode);
             if(p != null) {

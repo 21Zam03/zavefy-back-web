@@ -15,8 +15,8 @@ public class ProductGeneralServiceImpl implements ProductGeneralService {
     private final ProductGeneralRepository productGeneralRepository;
 
     @Override
-    public void createIfNotExists(ProductEntity product) {
-        if (product.getBarcode() == null || product.getBarcode().isBlank()) {
+    public void createIfNotExists(String barcodeOriginalFromDto, ProductEntity product) {
+        if (barcodeOriginalFromDto == null || barcodeOriginalFromDto.isBlank()) {
             return;
         }
 

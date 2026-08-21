@@ -5,7 +5,7 @@ import com.example.ventas_bodega.entity.ProductGeneralEntity;
 
 public interface ProductGeneralService {
 
-    public void createIfNotExists(ProductEntity product);
+    public void createIfNotExists(String barcodeOriginalFromDto, ProductEntity product);
     public ProductGeneralEntity findProductByBarcode(String barcode);
 
 }

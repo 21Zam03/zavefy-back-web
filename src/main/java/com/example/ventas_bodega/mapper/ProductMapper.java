@@ -87,7 +87,6 @@ public class ProductMapper {
         product.setStock(productEntity.getStock());
         product.setBarcode(productEntity.getBarcode());
         //product.setCategories(buildCategoriesInListStringFromEntity(productEntity.getCategoryEntityList()));
-        System.out.println("CATEGORIA: "+productEntity.getCategoryEntity().toString());
         product.setCategory(productEntity.getCategoryEntity().getName());
         product.setCreatedDate(formatToYearMonthDay(productEntity.getCreatedDate()));
         product.setUpdatedDate(formatToYearMonthDay(productEntity.getUpdatedDate()));
@@ -136,6 +135,7 @@ public class ProductMapper {
         product.setImageUrl(productGeneralEntity.getImageUrl());
         product.setBarcode(productGeneralEntity.getBarcode());
         product.setCategories(buildCategoriesInList(productGeneralEntity.getCategories()));
+        product.setCategory(productGeneralEntity.getCategory());
         return product;
     }
 
