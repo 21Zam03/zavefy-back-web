@@ -127,6 +127,7 @@ public class ProductMapper {
         product.setImageUrlMedium(productEntity.getImageUrlMedium());
         product.setImageUrlThumb(productEntity.getImageUrlThumb());
         product.setBarcode(productEntity.getBarcode());
+        product.setCategory(productEntity.getCategoryEntity().getName());
         return product;
     }
 
