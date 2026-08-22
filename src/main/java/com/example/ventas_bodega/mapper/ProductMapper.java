@@ -134,7 +134,7 @@ public class ProductMapper {
         product.setActive(true);
         product.setImageUrl(productGeneralEntity.getImageUrl());
         product.setBarcode(productGeneralEntity.getBarcode());
-        product.setCategories(buildCategoriesInList(productGeneralEntity.getCategories()));
+        //product.setCategories(buildCategoriesInList(productGeneralEntity.getCategories()));
         product.setCategory(productGeneralEntity.getCategory());
         return product;
     }

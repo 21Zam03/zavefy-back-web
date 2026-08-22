@@ -26,7 +26,7 @@ public class ProductGeneralServiceImpl implements ProductGeneralService {
                 productGeneral.getName(),
                 productGeneral.getDescription(),
                 productGeneral.getPrice(),
-                productGeneral.getCategories(),
+                productGeneral.getCategory(),
                 productGeneral.getImageUrl()
         );
     }

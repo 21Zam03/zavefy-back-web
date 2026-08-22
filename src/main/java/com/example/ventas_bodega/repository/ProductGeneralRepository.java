@@ -23,7 +23,7 @@ public interface ProductGeneralRepository extends JpaRepository<ProductGeneralEn
         nombre,
         descripcion,
         precio,
-        categorias,
+        categoria,
         imagen_url
     )
     VALUES
@@ -32,7 +32,7 @@ public interface ProductGeneralRepository extends JpaRepository<ProductGeneralEn
         :name,
         :description,
         :price,
-        :categories,
+        :category,
         :imageUrl
     )
     ON DUPLICATE KEY UPDATE
@@ -43,7 +43,7 @@ public interface ProductGeneralRepository extends JpaRepository<ProductGeneralEn
             @Param("name") String name,
             @Param("description") String description,
             @Param("price") BigDecimal price,
-            @Param("categories") String categories,
+            @Param("category") String category,
             @Param("imageUrl") String imageUrl
     );
 }

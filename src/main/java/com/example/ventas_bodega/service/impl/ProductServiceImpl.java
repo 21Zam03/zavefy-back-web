@@ -172,7 +172,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto searchProduct(String barcode) {
         ProductGeneralEntity productGeneralEntity = productGeneralService.findProductByBarcode(barcode);
-        System.out.println("PRODUCTO ENCONTRADO: "+productGeneralEntity);
+        //System.out.println("PRODUCTO ENCONTRADO: "+productGeneralEntity);
         if(productGeneralEntity == null){
             ProductFoodDto p = foodRestTemplate.getProductByBarcode(barcode);
             if(p != null) {
