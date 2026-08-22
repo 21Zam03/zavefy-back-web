@@ -84,6 +84,8 @@ public class ProductMapper {
         }
         product.setActive(productEntity.isActive());
         product.setImageUrl(productEntity.getImageUrl());
+        product.setImageUrlMedium(productEntity.getImageUrlMedium());
+        product.setImageUrlThumb(productEntity.getImageUrlThumb());
         product.setStock(productEntity.getStock());
         product.setBarcode(productEntity.getBarcode());
         //product.setCategories(buildCategoriesInListStringFromEntity(productEntity.getCategoryEntityList()));
@@ -122,6 +124,8 @@ public class ProductMapper {
         product.setPrice(productEntity.getPrice());
         //product.setCategories(buildCategoriesInString(productEntity.getCategoryEntityList()));
         product.setImageUrl(productEntity.getImageUrl());
+        product.setImageUrlMedium(productEntity.getImageUrlMedium());
+        product.setImageUrlThumb(productEntity.getImageUrlThumb());
         product.setBarcode(productEntity.getBarcode());
         return product;
     }
@@ -133,6 +137,8 @@ public class ProductMapper {
         product.setPrice(productGeneralEntity.getPrice());
         product.setActive(true);
         product.setImageUrl(productGeneralEntity.getImageUrl());
+        product.setImageUrlMedium(productGeneralEntity.getImageUrlMedium());
+        product.setImageUrlThumb(productGeneralEntity.getImageUrlThumb());
         product.setBarcode(productGeneralEntity.getBarcode());
         //product.setCategories(buildCategoriesInList(productGeneralEntity.getCategories()));
         product.setCategory(productGeneralEntity.getCategory());

@@ -50,6 +50,12 @@ public class ProductEntity {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "image_url_medium")
+    private String imageUrlMedium;
+
+    @Column(name = "image_url_thumb")
+    private String imageUrlThumb;
+
     @Column(name = "stock")
     private Integer stock;
 
@@ -165,6 +171,22 @@ public class ProductEntity {
         this.imageUrl = imageUrl;
     }
 
+    public String getImageUrlMedium() {
+        return imageUrlMedium;
+    }
+
+    public void setImageUrlMedium(String imageUrlMedium) {
+        this.imageUrlMedium = imageUrlMedium;
+    }
+
+    public String getImageUrlThumb() {
+        return imageUrlThumb;
+    }
+
+    public void setImageUrlThumb(String imageUrlThumb) {
+        this.imageUrlThumb = imageUrlThumb;
+    }
+
     public CompanyEntity getCompany() {
         return company;
     }
@@ -267,6 +289,8 @@ public class ProductEntity {
                 ", active=" + active +
                 ", barcode='" + barcode + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", imageUrlMedium='" + imageUrlMedium + '\'' +
+                ", imageUrlThumb='" + imageUrlThumb + '\'' +
                 ", filePath='" + filePath + '\'' +
                 ", registerDate='" + registerDate + '\'' +
                 ", createdDate=" + createdDate +

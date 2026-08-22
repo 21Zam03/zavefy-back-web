@@ -50,7 +50,7 @@ public class SecurityConfig {
                             "http://localhost:5173/",
                             "https://zavefy.com",
                             "https://www.zavefy.com",
-                            "http://192.168.101.11:5173/",
+                            "http://192.168.101.4:5173/",
                             "http://10.74.51.227:5173/",
                             "http://192.168.18.21:5173/",
                             "http://172.16.202.25:5173/"

@@ -39,6 +39,12 @@ public class ProductGeneralEntity {
     @Column(name = "imagen_url")
     private String imageUrl;
 
+    @Column(name = "imagen_url_medium")
+    private String imageUrlMedium;
+
+    @Column(name = "imagen_url_thumb")
+    private String imageUrlThumb;
+
     @Column(name = "categoria")
     private String category;
 
@@ -101,6 +107,22 @@ public class ProductGeneralEntity {
         this.imageUrl = imageUrl;
     }
 
+    public String getImageUrlMedium() {
+        return imageUrlMedium;
+    }
+
+    public void setImageUrlMedium(String imageUrlMedium) {
+        this.imageUrlMedium = imageUrlMedium;
+    }
+
+    public String getImageUrlThumb() {
+        return imageUrlThumb;
+    }
+
+    public void setImageUrlThumb(String imageUrlThumb) {
+        this.imageUrlThumb = imageUrlThumb;
+    }
+
     public String getBarcode() {
         return barcode;
     }
@@ -127,6 +149,8 @@ public class ProductGeneralEntity {
                 ", price=" + price +
                 ", categories='" + categories + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", imageUrlMedium='" + imageUrlMedium + '\'' +
+                ", imageUrlThumb='" + imageUrlThumb + '\'' +
                 '}';
     }
 }

@@ -17,6 +17,8 @@ public class ProductDto {
     private String category;
     private boolean active;
     private String imageUrl;
+    private String imageUrlMedium;
+    private String imageUrlThumb;
     private Integer stock;
     private MultipartFile file;
     private String filePath;
@@ -104,6 +106,22 @@ public class ProductDto {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getImageUrlMedium() {
+        return imageUrlMedium;
+    }
+
+    public void setImageUrlMedium(String imageUrlMedium) {
+        this.imageUrlMedium = imageUrlMedium;
+    }
+
+    public String getImageUrlThumb() {
+        return imageUrlThumb;
+    }
+
+    public void setImageUrlThumb(String imageUrlThumb) {
+        this.imageUrlThumb = imageUrlThumb;
     }
 
     public Integer getStock() {
@@ -206,6 +224,8 @@ public class ProductDto {
                 ", categories=" + categories +
                 ", active=" + active +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", imageUrlMedium='" + imageUrlMedium + '\'' +
+                ", imageUrlThumb='" + imageUrlThumb + '\'' +
                 ", stock=" + stock +
                 ", file=" + file +
                 ", filePath='" + filePath + '\'' +

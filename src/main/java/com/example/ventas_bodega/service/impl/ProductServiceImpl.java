@@ -107,7 +107,7 @@ public class ProductServiceImpl implements ProductService {
             // 9. COMPENSAR FIREBASE
             if (uploadedFilePath != null) {
                 try {
-                    firebaseStorageService.deleteFile(uploadedFilePath);
+                    firebaseStorageService.deleteProductImages(uploadedFilePath);
                 } catch (Exception deleteException) {
                     log.error("No se pudo eliminar el archivo de Firebase: {}", uploadedFilePath, deleteException);
                     deleteException.printStackTrace();
@@ -149,24 +149,26 @@ public class ProductServiceImpl implements ProductService {
             return null;
         }
 
-        String filePath = buildProductImagePath(company.getRuc(), productCreated.getId());
-        FileDto fileDto;
+        String basePath = buildProductImagePath(company.getRuc(), productCreated.getId());
+        ProductImageSetDto imageSet;
 
         if (productDto.getFile() == null) {
             try (InputStream inputStream = downloadImage(productDto.getImageUrl())) {
-                fileDto = firebaseStorageService.uploadFileFromUrl(
+                imageSet = firebaseStorageService.uploadProductImagesFromUrl(
                         inputStream,
                         "image/jpeg",
-                        filePath
+                        basePath
                 );
             }
         } else {
-            fileDto = firebaseStorageService.uploadFile(productDto.getFile(), filePath);
+            imageSet = firebaseStorageService.uploadProductImages(productDto.getFile(), basePath);
         }
 
-        productCreated.setImageUrl(fileDto.getUrl());
-        productCreated.setFilePath(fileDto.getFileName());
-        return fileDto.getFileName();
+        productCreated.setImageUrl(imageSet.getLarge().getUrl());
+        productCreated.setImageUrlMedium(imageSet.getMedium().getUrl());
+        productCreated.setImageUrlThumb(imageSet.getThumb().getUrl());
+        productCreated.setFilePath(basePath);
+        return basePath;
     }
 
     @Override
@@ -244,7 +246,7 @@ public class ProductServiceImpl implements ProductService {
             // 9. COMPENSAR FIREBASE
             if (uploadedFilePath != null) {
                 try {
-                    firebaseStorageService.deleteFile(uploadedFilePath);
+                    firebaseStorageService.deleteProductImages(uploadedFilePath);
                 } catch (Exception deleteException) {
                     log.error("No se pudo eliminar el archivo de Firebase: {}", uploadedFilePath, deleteException);
                     deleteException.printStackTrace();
@@ -327,19 +329,23 @@ public class ProductServiceImpl implements ProductService {
         // 1. El usuario quiere eliminar la imagen
         if (removeImage) {
             product.setImageUrl(null);
+            product.setImageUrlMedium(null);
+            product.setImageUrlThumb(null);
             product.setFilePath(null);
             return null;
         }
 
         // 2. El usuario subió una imagen
         if (file != null && !file.isEmpty()) {
-            String filePath = "bodega-sistemas/clients/" + company.getRuc() + "/products/product-" + product.getId();
-            FileDto fileDto = firebaseStorageService.uploadFile(file, filePath);
+            String basePath = buildProductImagePath(company.getRuc(), product.getId());
+            ProductImageSetDto imageSet = firebaseStorageService.uploadProductImages(file, basePath);
 
-            product.setImageUrl(fileDto.getUrl());
-            product.setFilePath(filePath);
+            product.setImageUrl(imageSet.getLarge().getUrl());
+            product.setImageUrlMedium(imageSet.getMedium().getUrl());
+            product.setImageUrlThumb(imageSet.getThumb().getUrl());
+            product.setFilePath(basePath);
 
-            return filePath;
+            return basePath;
         }
 
         // 3. No se solicitó ningún cambio de imagen
