@@ -123,6 +123,7 @@ public class ProductMapper {
         //product.setCategories(buildCategoriesInString(productEntity.getCategoryEntityList()));
         product.setImageUrl(productEntity.getImageUrl());
         product.setBarcode(productEntity.getBarcode());
+        product.setCategory(productEntity.getCategoryEntity().getName());
         return product;
     }
 
