@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,8 +21,9 @@ public class PlanDto {
     private BigDecimal price;
     private String currency;
     private BillingPeriodEnum billingPeriod;
-    private Boolean active = true;
+    private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<PlanFeatureDto> featuresDto;
 
 }

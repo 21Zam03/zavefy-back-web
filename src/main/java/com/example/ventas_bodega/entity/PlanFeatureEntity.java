@@ -2,6 +2,9 @@ package com.example.ventas_bodega.entity;
 
 import com.example.ventas_bodega.enums.FeatureTypeEnum;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +18,9 @@ import java.time.LocalDateTime;
         }
 )
 @Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PlanFeatureEntity {
 
     @Id
@@ -39,6 +45,9 @@ public class PlanFeatureEntity {
 
     @Column(nullable = false, length = 100)
     private String value;
+
+    @Column(name = "descripcion")
+    private String description;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

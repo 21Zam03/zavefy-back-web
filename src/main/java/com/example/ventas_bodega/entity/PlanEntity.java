@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tb_planes")
@@ -45,6 +47,9 @@ public class PlanEntity {
 
     @Column(name = "fecha_actualizacion", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlanFeatureEntity> features = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

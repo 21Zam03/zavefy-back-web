@@ -12,14 +12,15 @@ public class PlanMapper {
     public static PlanDto entityToDto(PlanEntity planEntity) {
         PlanDto planDto = new PlanDto();
         planDto.setId(planEntity.getId());
-        planDto.setName(planDto.getName());
-        planDto.setDescription(planDto.getDescription());
-        planDto.setPrice(planDto.getPrice());
-        planDto.setCurrency(planDto.getCurrency());
+        planDto.setName(planEntity.getName());
+        planDto.setDescription(planEntity.getDescription());
+        planDto.setPrice(planEntity.getPrice());
+        planDto.setCurrency(planEntity.getCurrency());
         planDto.setBillingPeriod(planEntity.getBillingPeriod());
         planDto.setActive(planEntity.getActive());
         planDto.setCreatedAt(planEntity.getCreatedAt());
         planDto.setUpdatedAt(planEntity.getUpdatedAt());
+        planDto.setFeaturesDto(PlanFeatureMapper.entityListToDtoList(planEntity.getFeatures()));
         return planDto;
     }
 
@@ -28,7 +29,6 @@ public class PlanMapper {
             List<PlanDto> planDtoList = new ArrayList<>();
             for(PlanEntity planEntity : planEntityList) {
                 PlanDto planDto = PlanMapper.entityToDto(planEntity);
-                planEntityList.add(planEntity);
                 planDtoList.add(planDto);
             }
             return planDtoList;
