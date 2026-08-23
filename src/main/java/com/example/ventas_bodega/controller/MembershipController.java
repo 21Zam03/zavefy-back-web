@@ -22,5 +22,4 @@ public class MembershipController {
         return new ResponseEntity<>(membershipService.getAllPlans(), HttpStatus.OK);
     }
 
-
 }

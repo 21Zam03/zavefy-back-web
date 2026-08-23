@@ -1,7 +1,7 @@
 package com.example.ventas_bodega.controller;
 
 import com.example.ventas_bodega.dto.ReniecDataDto;
-import com.example.ventas_bodega.service.ReniecService;
+import com.example.ventas_bodega.service.ApisPeruService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,16 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReniecController {
 
     public static final String API_PATH = "api/reniec";
-    private ReniecService reniecService;
+    private ApisPeruService apisPeruService;
 
     @Autowired
-    public ReniecController(ReniecService reniecService) {
-        this.reniecService = reniecService;
+    public ReniecController(ApisPeruService apisPeruService) {
+        this.apisPeruService = apisPeruService;
     }
 
     @GetMapping("/{dni}")
     ResponseEntity<ReniecDataDto> getInfoByDni(@PathVariable String dni) throws Exception {
-        return new ResponseEntity<>(reniecService.getClienTDataByDni(dni), HttpStatus.OK);
+        return new ResponseEntity<>(apisPeruService.getClienTDataByDni(dni), HttpStatus.OK);
     }
 
 }
