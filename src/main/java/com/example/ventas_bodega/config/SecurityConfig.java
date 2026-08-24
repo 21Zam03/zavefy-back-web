@@ -40,10 +40,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
                 .csrf(csrf -> csrf.disable())
-
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of(
@@ -60,12 +58,10 @@ public class SecurityConfig {
                     config.setAllowCredentials(true);
                     return config;
                 }))
-
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
@@ -75,11 +71,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/print-jobs/**").permitAll()
                         .requestMatchers("/api/catalog/**").permitAll()
                         .requestMatchers("/api/option/**").permitAll()
+                        .requestMatchers("/api/membership/**").permitAll()
                         .anyRequest().authenticated()
                 )
-
                 .addFilterBefore(jwtCookieTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 

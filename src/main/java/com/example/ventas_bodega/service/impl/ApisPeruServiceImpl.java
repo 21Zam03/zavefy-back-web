@@ -25,6 +25,7 @@ public class ApisPeruServiceImpl implements ApisPeruService {
 
     @Override
     public ApisPeruDataDto getInfoByRuc(String ruc) {
-        return null;
+        ApisPeruDataDto apisPeruDataDto = apisPeruRestTemplate.getInfoByRuc(ruc);
+        return apisPeruDataDto;
     }
 }
