@@ -1,6 +1,7 @@
 package com.example.ventas_bodega.config;
 
 import com.example.ventas_bodega.exceptions.BusinessException;
+import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.response.ErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,19 @@ public class GlobalExceptionConfig {
                 .body(new ErrorResponse(
                         400,
                         "Error de negocio",
+                        ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<?> handleNotFoundException(
+            NotFoundException ex
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(
+                        404,
+                        "Recurso no encontrado",
                         ex.getMessage()
                 ));
     }
