@@ -73,6 +73,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/catalog/**").permitAll()
                         .requestMatchers("/api/option/**").permitAll()
                         .requestMatchers("/api/membership/**").permitAll()
+                        .requestMatchers("/api/yolo/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtCookieTokenFilter, UsernamePasswordAuthenticationFilter.class);

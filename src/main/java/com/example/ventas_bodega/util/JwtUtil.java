@@ -23,6 +23,9 @@ public class JwtUtil {
     @Value("${security.jwt.user.generator}")
     private String userGenerator;
 
+    @Value("${security.jwt.expiration}")
+    private Long expiration;
+
     public String createToken(String userName, List<String> roles, List<String> permissions) {
         Algorithm algorithm = Algorithm.HMAC256(this.privateKey);
         return JWT.create()
@@ -31,7 +34,7 @@ public class JwtUtil {
                 .withClaim("roles", roles)
                 .withClaim("permissions", permissions)
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1800000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
                 .withJWTId(UUID.randomUUID().toString())
                 .withNotBefore(new Date(System.currentTimeMillis()))
                 .sign(algorithm);

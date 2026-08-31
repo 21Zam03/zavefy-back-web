@@ -54,10 +54,15 @@ security:
       private: mi_clave_super_secreta_123456
     user:
       generator: ventas-bodega-app
+    expiration: 28800000
+
+yolo:
+  service:
+    url: http://localhost:8000
 
 parameters:
   cookie_is_secure: false
-  cookie_max_age: 1800
+  cookie_max_age: 28800
   cookie_name: auth_token
   cookie_http_only: true
   cookie_path: /
