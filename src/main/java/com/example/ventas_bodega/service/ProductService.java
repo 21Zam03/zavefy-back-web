@@ -2,6 +2,7 @@ package com.example.ventas_bodega.service;
 
 import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.SaleDetailDto;
+import com.example.ventas_bodega.dto.interfaces.TopSellingProductDtoInter;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.response.MessageResponse;
 import org.springframework.data.domain.Page;
@@ -11,9 +12,11 @@ import java.util.List;
 public interface ProductService {
 
     public MessageResponse createProduct(ProductDto productDto, UserEntity userEntity) throws Exception;
-    public ProductDto searchProduct(String barcode);
+    public ProductDto searchProduct(String barcode, String ruc);
     public Page<ProductDto> getProductsByCompany(String ruc, String barcode, String name, String stockStatus, Boolean active, Long categoryId, int page, int size);
     public ProductDto searchProductsInSaleModule(String ruc, String search);
+    public List<ProductDto> getProductSuggestions(String ruc, String search);
+    public List<TopSellingProductDtoInter> getTopSellingProducts(String ruc);
     public ProductDto getProductByUserLogged(String barcode, String ruc);
     public MessageResponse updateProduct(ProductDto productDto, UserEntity userEntity) throws Exception;
     public MessageResponse deactivateProduct(Long id, UserEntity userEntity) throws Exception;

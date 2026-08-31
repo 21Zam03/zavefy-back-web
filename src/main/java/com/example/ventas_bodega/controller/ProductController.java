@@ -69,8 +69,21 @@ public class ProductController {
     }
 
     @GetMapping("/{barcode}")
-    public ResponseEntity<?> getProduct(@PathVariable String barcode) {
-        return new ResponseEntity<>(productService.searchProduct(barcode), HttpStatus.OK);
+    public ResponseEntity<?> getProduct(@PathVariable String barcode, @CurrentUser UserEntity user) {
+        return new ResponseEntity<>(productService.searchProduct(barcode, user.getCompany().getRuc()), HttpStatus.OK);
+    }
+
+    @GetMapping("/suggestions")
+    public ResponseEntity<?> getProductSuggestions(
+            @RequestParam String search,
+            @CurrentUser UserEntity user
+    ) {
+        return new ResponseEntity<>(productService.getProductSuggestions(user.getCompany().getRuc(), search), HttpStatus.OK);
+    }
+
+    @GetMapping("/top-selling")
+    public ResponseEntity<?> getTopSellingProducts(@CurrentUser UserEntity user) {
+        return new ResponseEntity<>(productService.getTopSellingProducts(user.getCompany().getRuc()), HttpStatus.OK);
     }
 
     @GetMapping("/all")
@@ -96,6 +109,8 @@ public class ProductController {
             @RequestParam(required = false) String search,
             @CurrentUser UserEntity user
     ) {
+        //Este endpoint se usa para obtener un producto por el id que se le pasa a un componente y pueda editar el producto
+        //Ejemplo: productos/editar-producto/7750670020916
         return new ResponseEntity(this.productService.searchProductsInSaleModule(user.getCompany().getRuc(), search), HttpStatus.OK);
     }
 

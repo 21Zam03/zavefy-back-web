@@ -82,6 +82,10 @@ public class SaleEntity {
     @JoinColumn(name = "id_usuario", nullable = false)
     private UserEntity user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_caja")
+    private CajaEntity caja;
+
     @PrePersist
     public void prePersist() {
         createdDate = LocalDateTime.now();
@@ -156,6 +160,14 @@ public class SaleEntity {
 
     public void setUser(UserEntity user) {
         this.user = user;
+    }
+
+    public CajaEntity getCaja() {
+        return caja;
+    }
+
+    public void setCaja(CajaEntity caja) {
+        this.caja = caja;
     }
 
     public String getRegisterDate() {

@@ -1,6 +1,7 @@
 package com.example.ventas_bodega.service.impl;
 
 import com.example.ventas_bodega.dto.*;
+import com.example.ventas_bodega.dto.interfaces.TopSellingProductDtoInter;
 import com.example.ventas_bodega.entity.*;
 import com.example.ventas_bodega.enums.StockMovementTypeEnum;
 import com.example.ventas_bodega.exceptions.BusinessException;
@@ -172,21 +173,32 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDto searchProduct(String barcode) {
+    public ProductDto searchProduct(String barcode, String ruc) {
         ProductGeneralEntity productGeneralEntity = productGeneralService.findProductByBarcode(barcode);
         //System.out.println("PRODUCTO ENCONTRADO: "+productGeneralEntity);
+        ProductDto productDto;
         if(productGeneralEntity == null){
             ProductFoodDto p = foodRestTemplate.getProductByBarcode(barcode);
             if(p != null) {
                 System.out.println("P: "+p);
-                return ProductMapper.mapToInternal(p);
+                productDto = ProductMapper.mapToInternal(p);
             } else {
                 System.out.println("P: "+p);
-                return new ProductDto();
+                productDto = new ProductDto();
             }
         } else {
-            return ProductMapper.entityGeneralToDto(productGeneralEntity);
+            productDto = ProductMapper.entityGeneralToDto(productGeneralEntity);
         }
+
+        if(ruc != null) {
+            productRepository.findByBarcodeAndCompany_Ruc(barcode, ruc)
+                    .ifPresent(existing -> {
+                        productDto.setAlreadyInInventory(true);
+                        productDto.setExistingProductId(existing.getId());
+                    });
+        }
+
+        return productDto;
     }
 
     @Override
@@ -205,6 +217,21 @@ public class ProductServiceImpl implements ProductService {
     public ProductDto searchProductsInSaleModule(String ruc, String search) {
         ProductEntity product = productRepository.searchProductsByCompanyForSaleModule(ruc, search);
         return ProductMapper.entityToDto(product);
+    }
+
+    @Override
+    public List<ProductDto> getProductSuggestions(String ruc, String search) {
+        if (search == null || search.isBlank()) {
+            return List.of();
+        }
+        return productRepository.findProductSuggestions(ruc, search).stream()
+                .map(ProductMapper::entityToDto)
+                .toList();
+    }
+
+    @Override
+    public List<TopSellingProductDtoInter> getTopSellingProducts(String ruc) {
+        return productRepository.findTopSellingProducts(ruc);
     }
 
     @Override

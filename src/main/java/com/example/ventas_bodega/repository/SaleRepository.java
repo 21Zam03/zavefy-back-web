@@ -12,6 +12,9 @@ import java.util.List;
 
 public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
 
+    @Query("SELECT COALESCE(SUM(v.total), 0) FROM SaleEntity v WHERE v.caja.id = :cajaId AND LOWER(v.paymentMethod) = 'efectivo'")
+    BigDecimal sumTotalEfectivoByCajaId(@Param("cajaId") Long cajaId);
+
     @Query("""
         SELECT s
            FROM SaleEntity s

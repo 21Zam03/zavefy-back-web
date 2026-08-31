@@ -1,6 +1,7 @@
 package com.example.ventas_bodega.repository;
 
 import com.example.ventas_bodega.dto.ProductDto;
+import com.example.ventas_bodega.dto.interfaces.TopSellingProductDtoInter;
 import com.example.ventas_bodega.entity.ProductEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     ProductEntity findByBarcodeAndCompany_RucAndActive(String barcode, String ruc, boolean active);
+    Optional<ProductEntity> findByBarcodeAndCompany_Ruc(String barcode, String ruc);
     boolean existsByBarcodeAndCompany_Ruc(String barcode, String ruc);
     boolean existsByBarcodeAndCompany_CompanyId(String barcode, Long companyId);
     Page<ProductEntity> findByCompany_Ruc(String ruc, Pageable pageable);
@@ -165,6 +167,49 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             @Param("ruc") String ruc,
             @Param("search") String search
     );
+
+    @Query(
+            value = """
+        SELECT DISTINCT p.*
+        FROM tb_producto p
+        INNER JOIN tb_empresa e
+            ON p.id_empresa = e.id_empresa
+        WHERE e.ruc = :ruc
+        AND p.activo = true
+        AND (
+            LOWER(p.nombre) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR p.codigo_barras LIKE CONCAT(:search, '%')
+        )
+        ORDER BY p.fecha_actualizacion DESC
+        LIMIT 5
+        """,
+            nativeQuery = true
+    )
+    List<ProductEntity> findProductSuggestions(
+            @Param("ruc") String ruc,
+            @Param("search") String search
+    );
+
+    @Query(value = """
+        SELECT
+            p.id_producto AS productId,
+            p.nombre AS name,
+            p.codigo_barras AS barcode,
+            p.image_url AS imageUrl,
+            p.precio_venta AS price,
+            p.stock AS stock,
+            SUM(d.cantidad) AS totalSold
+        FROM tb_detalle_venta d
+        INNER JOIN tb_venta v ON d.id_venta = v.id_venta
+        INNER JOIN tb_producto p ON d.id_producto = p.id_producto
+        INNER JOIN tb_usuario u ON v.id_usuario = u.id_usuario
+        INNER JOIN tb_empresa e ON u.id_empresa = e.id_empresa
+        WHERE e.ruc = :ruc
+        GROUP BY p.id_producto, p.nombre, p.codigo_barras, p.image_url, p.precio_venta, p.stock
+        ORDER BY totalSold DESC
+        LIMIT 10
+        """, nativeQuery = true)
+    List<TopSellingProductDtoInter> findTopSellingProducts(@Param("ruc") String ruc);
 
     @Modifying
     @Query("UPDATE ProductEntity p SET p.barcode = :barcode WHERE p.id = :id")

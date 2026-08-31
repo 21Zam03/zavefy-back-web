@@ -4,11 +4,14 @@ import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.SaleDetailDto;
 import com.example.ventas_bodega.dto.SaleDto;
 import com.example.ventas_bodega.dto.interfaces.SaleDetailDtoInter;
+import com.example.ventas_bodega.entity.CajaEntity;
 import com.example.ventas_bodega.entity.SaleDetailEntity;
 import com.example.ventas_bodega.entity.SaleEntity;
 import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.mapper.SaleDetailMapper;
 import com.example.ventas_bodega.mapper.SaleMapper;
+import com.example.ventas_bodega.repository.CajaRepository;
 import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.repository.SaleDetailRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
@@ -29,6 +32,7 @@ public class SaleServiceImpl implements SaleService {
     private final SaleRepository saleRepository;
     private final SaleDetailRepository saleDetailRepository;
     private final ProductRepository productRepository;
+    private final CajaRepository cajaRepository;
 
     private final ProductService productService;
     private final InventoryService inventoryService;
@@ -41,6 +45,7 @@ public class SaleServiceImpl implements SaleService {
             SaleDetailRepository saleDetailRepository,
             ProductService productService,
             ProductRepository productRepository,
+            CajaRepository cajaRepository,
             InventoryService inventoryService,
             FileService fileService,
             AgentService agentService) {
@@ -48,6 +53,7 @@ public class SaleServiceImpl implements SaleService {
         this.saleDetailRepository = saleDetailRepository;
         this.productService = productService;
         this.productRepository = productRepository;
+        this.cajaRepository = cajaRepository;
         this.inventoryService = inventoryService;
         this.fileService = fileService;
         this.agentService = agentService;
@@ -65,8 +71,13 @@ public class SaleServiceImpl implements SaleService {
 
         validateDataOfSaleDto(saleDto);
 
+        CajaEntity cajaAbierta = cajaRepository
+                .findFirstByUser_Company_RucAndFechaCierreIsNullOrderByFechaAperturaDesc(userEntity.getCompany().getRuc())
+                .orElseThrow(() -> new BusinessException("No hay una caja abierta. Abre caja antes de vender."));
+
         SaleEntity saleToCreate = SaleMapper.dtoToEntity(saleDto);
         saleToCreate.setUser(userEntity);
+        saleToCreate.setCaja(cajaAbierta);
         saleToCreate.setIssuerRuc(userEntity.getCompany().getRuc());
         saleToCreate.setSaleLink("https://www.zavefy.com/comprobantes/" + userEntity.getCompany().getRuc()
                 + "-" + saleDto.getSerial() + "-" + saleDto.getNumber());

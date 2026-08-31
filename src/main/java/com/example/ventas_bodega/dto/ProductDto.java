@@ -28,6 +28,8 @@ public class ProductDto {
     private boolean automaticSaved;
     private String notes;
     private boolean removeImage;
+    private boolean alreadyInInventory;
+    private Long existingProductId;
 
     public ProductDto() {
     }
@@ -210,6 +212,22 @@ public class ProductDto {
 
     public void setRemoveImage(boolean removeImage) {
         this.removeImage = removeImage;
+    }
+
+    public boolean isAlreadyInInventory() {
+        return alreadyInInventory;
+    }
+
+    public void setAlreadyInInventory(boolean alreadyInInventory) {
+        this.alreadyInInventory = alreadyInInventory;
+    }
+
+    public Long getExistingProductId() {
+        return existingProductId;
+    }
+
+    public void setExistingProductId(Long existingProductId) {
+        this.existingProductId = existingProductId;
     }
 
     @Override
