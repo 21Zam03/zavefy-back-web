@@ -1,6 +1,7 @@
 package com.example.ventas_bodega.service.impl;
 
 import com.example.ventas_bodega.entity.PaymentEntity;
+import com.example.ventas_bodega.enums.PaymentStatus;
 import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.mapper.PaymentMapper;
@@ -34,22 +35,27 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         return paymentRepository.findByFingerprint(request.getFingerprint())
-                .map(existing -> new PaymentResponse(true, "DUPLICATE", existing.getId()))
+                .map(this::toDuplicateResponse)
                 .orElseGet(() -> createPayment(request, companyId));
     }
 
     private PaymentResponse createPayment(PaymentRequest request, Long companyId) {
         PaymentEntity entity = PaymentMapper.requestToEntity(request, companyId);
+        entity.setStatus(PaymentStatus.RECEIVED);
         try {
             PaymentEntity saved = paymentRepository.save(entity);
-            return new PaymentResponse(true, "CREATED", saved.getId());
+            return new PaymentResponse(true, "CREATED", saved.getId(), saved.getStatus().toString());
         } catch (DataIntegrityViolationException e) {
             // Condición de carrera: otra solicitud con el mismo fingerprint se guardó
             // entre el chequeo findByFingerprint y este save (protegido por el UNIQUE de BD)
             return paymentRepository.findByFingerprint(request.getFingerprint())
-                    .map(existing -> new PaymentResponse(true, "DUPLICATE", existing.getId()))
+                    .map(this::toDuplicateResponse)
                     .orElseThrow(() -> e);
         }
+    }
+
+    private PaymentResponse toDuplicateResponse(PaymentEntity existing) {
+        return new PaymentResponse(true, "DUPLICATE", existing.getId(), existing.getStatus().toString());
     }
 
     private Long parseCompanyId(String companyId) {

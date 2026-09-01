@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.entity;
 
+import com.example.ventas_bodega.enums.PaymentStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -37,6 +38,10 @@ public class PaymentEntity {
 
     @Column(name = "fingerprint", nullable = false, unique = true)
     private String fingerprint;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false)
+    private PaymentStatus status;
 
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime createdAt;
@@ -119,6 +124,14 @@ public class PaymentEntity {
 
     public void setFingerprint(String fingerprint) {
         this.fingerprint = fingerprint;
+    }
+
+    public PaymentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PaymentStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

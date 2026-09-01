@@ -12,5 +12,6 @@ public class PaymentResponse {
     private boolean success;
     private String status;
     private Long paymentId;
+    private String paymentStatus;
 
 }

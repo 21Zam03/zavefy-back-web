@@ -50,26 +50,28 @@ class PaymentControllerTest {
 
     @Test
     void receivePayment_conPagoNuevo_debeRetornar201YCreated() throws Exception {
-        when(paymentService.receivePayment(any())).thenReturn(new PaymentResponse(true, "CREATED", 1L));
+        when(paymentService.receivePayment(any())).thenReturn(new PaymentResponse(true, "CREATED", 1L, "RECEIVED"));
 
         mockMvc.perform(post("/api/payments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPayload()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("CREATED"))
-                .andExpect(jsonPath("$.paymentId").value(1));
+                .andExpect(jsonPath("$.paymentId").value(1))
+                .andExpect(jsonPath("$.paymentStatus").value("RECEIVED"));
     }
 
     @Test
     void receivePayment_conFingerprintDuplicado_debeRetornar200YDuplicate() throws Exception {
-        when(paymentService.receivePayment(any())).thenReturn(new PaymentResponse(true, "DUPLICATE", 1L));
+        when(paymentService.receivePayment(any())).thenReturn(new PaymentResponse(true, "DUPLICATE", 1L, "RECEIVED"));
 
         mockMvc.perform(post("/api/payments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPayload()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DUPLICATE"))
-                .andExpect(jsonPath("$.paymentId").value(1));
+                .andExpect(jsonPath("$.paymentId").value(1))
+                .andExpect(jsonPath("$.paymentStatus").value("RECEIVED"));
     }
 
     @Test

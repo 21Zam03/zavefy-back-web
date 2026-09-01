@@ -1,6 +1,7 @@
 package com.example.ventas_bodega.service.impl;
 
 import com.example.ventas_bodega.entity.PaymentEntity;
+import com.example.ventas_bodega.enums.PaymentStatus;
 import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.repository.CompanyRepository;
 import com.example.ventas_bodega.repository.PaymentRepository;
@@ -70,11 +71,13 @@ class PaymentServiceImplTest {
         assertThat(response.isSuccess()).isTrue();
         assertThat(response.getStatus()).isEqualTo("CREATED");
         assertThat(response.getPaymentId()).isEqualTo(10L);
+        assertThat(response.getPaymentStatus()).isEqualTo("RECEIVED");
 
         ArgumentCaptor<PaymentEntity> captor = ArgumentCaptor.forClass(PaymentEntity.class);
         verify(paymentRepository).save(captor.capture());
         assertThat(captor.getValue().getCompanyId()).isEqualTo(123L);
         assertThat(captor.getValue().getFingerprint()).isEqualTo(request.getFingerprint());
+        assertThat(captor.getValue().getStatus()).isEqualTo(PaymentStatus.RECEIVED);
     }
 
     @Test
@@ -84,6 +87,7 @@ class PaymentServiceImplTest {
         PaymentEntity existing = new PaymentEntity();
         existing.setId(99L);
         existing.setFingerprint(request.getFingerprint());
+        existing.setStatus(PaymentStatus.RECEIVED);
 
         when(companyRepository.existsById(123L)).thenReturn(true);
         when(paymentRepository.findByFingerprint(request.getFingerprint())).thenReturn(Optional.of(existing));
@@ -93,6 +97,7 @@ class PaymentServiceImplTest {
         assertThat(response.isSuccess()).isTrue();
         assertThat(response.getStatus()).isEqualTo("DUPLICATE");
         assertThat(response.getPaymentId()).isEqualTo(99L);
+        assertThat(response.getPaymentStatus()).isEqualTo("RECEIVED");
 
         verify(paymentRepository, never()).save(any());
     }
@@ -104,6 +109,7 @@ class PaymentServiceImplTest {
         PaymentEntity existing = new PaymentEntity();
         existing.setId(55L);
         existing.setFingerprint(request.getFingerprint());
+        existing.setStatus(PaymentStatus.RECEIVED);
 
         when(companyRepository.existsById(123L)).thenReturn(true);
         when(paymentRepository.findByFingerprint(request.getFingerprint()))
