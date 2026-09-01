@@ -10,5 +10,6 @@ public interface PaymentService {
 
     PaymentResponse receivePayment(PaymentRequest request);
     Page<PaymentDto> getPayments(Long companyId, String source, String status, Pageable pageable);
+    PaymentDto verifyPayment(Long paymentId, String securityCode, Long companyId);
 
 }

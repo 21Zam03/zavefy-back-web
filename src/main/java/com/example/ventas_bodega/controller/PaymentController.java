@@ -1,7 +1,9 @@
 package com.example.ventas_bodega.controller;
 
+import com.example.ventas_bodega.dto.PaymentDto;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.request.PaymentRequest;
+import com.example.ventas_bodega.request.VerifyPaymentRequest;
 import com.example.ventas_bodega.response.PaymentResponse;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.PaymentService;
@@ -44,6 +46,17 @@ public class PaymentController {
         Pageable pageable = PageRequest.of(page, size);
         Long companyId = user.getCompany().getCompanyId();
         return new ResponseEntity<>(paymentService.getPayments(companyId, source, status, pageable), HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}/verify")
+    public ResponseEntity<?> verifyPayment(
+            @PathVariable Long id,
+            @Valid @RequestBody VerifyPaymentRequest request,
+            @CurrentUser UserEntity user
+    ) {
+        Long companyId = user.getCompany().getCompanyId();
+        PaymentDto dto = paymentService.verifyPayment(id, request.getSecurityCode(), companyId);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
 }

@@ -197,4 +197,71 @@ class PaymentServiceImplTest {
         verify(paymentRepository, never()).findByCompanyIdAndFilters(any(), any(), any(), any());
     }
 
+    private PaymentEntity buildReceivedPayment(Long id, Long companyId, String securityCode) {
+        PaymentEntity entity = new PaymentEntity();
+        entity.setId(id);
+        entity.setCompanyId(companyId);
+        entity.setSource("YAPE");
+        entity.setNotificationId(456L);
+        entity.setSenderName("Horst Zam*");
+        entity.setAmount(new BigDecimal("1.00"));
+        entity.setSecurityCode(securityCode);
+        entity.setReceivedAt(LocalDateTime.of(2026, 8, 31, 16, 1, 7));
+        entity.setFingerprint("fp-1");
+        entity.setStatus(PaymentStatus.RECEIVED);
+        return entity;
+    }
+
+    @Test
+    void verifyPayment_conCodigoCorrecto_debeCambiarEstadoAMatched() {
+        PaymentEntity payment = buildReceivedPayment(1L, 123L, "342");
+
+        when(paymentRepository.findByIdAndCompanyId(1L, 123L)).thenReturn(Optional.of(payment));
+        when(paymentRepository.save(any(PaymentEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        PaymentDto dto = paymentService.verifyPayment(1L, "342", 123L);
+
+        assertThat(dto.getStatus()).isEqualTo("MATCHED");
+
+        ArgumentCaptor<PaymentEntity> captor = ArgumentCaptor.forClass(PaymentEntity.class);
+        verify(paymentRepository).save(captor.capture());
+        assertThat(captor.getValue().getStatus()).isEqualTo(PaymentStatus.MATCHED);
+    }
+
+    @Test
+    void verifyPayment_conCodigoIncorrecto_debeLanzarBusinessExceptionYNoGuardar() {
+        PaymentEntity payment = buildReceivedPayment(1L, 123L, "342");
+
+        when(paymentRepository.findByIdAndCompanyId(1L, 123L)).thenReturn(Optional.of(payment));
+
+        assertThatThrownBy(() -> paymentService.verifyPayment(1L, "999", 123L))
+                .isInstanceOf(BusinessException.class);
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.RECEIVED);
+        verify(paymentRepository, never()).save(any());
+    }
+
+    @Test
+    void verifyPayment_conPagoDeOtraEmpresa_debeLanzarNotFoundException() {
+        when(paymentRepository.findByIdAndCompanyId(1L, 999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> paymentService.verifyPayment(1L, "342", 999L))
+                .isInstanceOf(NotFoundException.class);
+
+        verify(paymentRepository, never()).save(any());
+    }
+
+    @Test
+    void verifyPayment_conPagoYaVerificado_debeLanzarBusinessException() {
+        PaymentEntity payment = buildReceivedPayment(1L, 123L, "342");
+        payment.setStatus(PaymentStatus.MATCHED);
+
+        when(paymentRepository.findByIdAndCompanyId(1L, 123L)).thenReturn(Optional.of(payment));
+
+        assertThatThrownBy(() -> paymentService.verifyPayment(1L, "342", 123L))
+                .isInstanceOf(BusinessException.class);
+
+        verify(paymentRepository, never()).save(any());
+    }
+
 }

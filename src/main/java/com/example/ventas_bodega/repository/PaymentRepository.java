@@ -14,6 +14,7 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 
     boolean existsByFingerprint(String fingerprint);
     Optional<PaymentEntity> findByFingerprint(String fingerprint);
+    Optional<PaymentEntity> findByIdAndCompanyId(Long id, Long companyId);
 
     @Query("""
         SELECT p FROM PaymentEntity p

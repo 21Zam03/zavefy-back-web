@@ -87,4 +87,21 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    @Override
+    public PaymentDto verifyPayment(Long paymentId, String securityCode, Long companyId) {
+        PaymentEntity payment = paymentRepository.findByIdAndCompanyId(paymentId, companyId)
+                .orElseThrow(() -> new NotFoundException("El pago con id " + paymentId + " no existe"));
+
+        if (payment.getStatus() != PaymentStatus.RECEIVED) {
+            throw new BusinessException("El pago no está pendiente de verificación (estado actual: " + payment.getStatus() + ")");
+        }
+
+        if (payment.getSecurityCode() == null || !payment.getSecurityCode().trim().equals(securityCode.trim())) {
+            throw new BusinessException("El código de verificación no coincide");
+        }
+
+        payment.setStatus(PaymentStatus.MATCHED);
+        return PaymentMapper.entityToDto(paymentRepository.save(payment));
+    }
+
 }
