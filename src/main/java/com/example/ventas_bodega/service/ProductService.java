@@ -4,6 +4,7 @@ import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.SaleDetailDto;
 import com.example.ventas_bodega.dto.interfaces.TopSellingProductDtoInter;
 import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.request.ProductRequest;
 import com.example.ventas_bodega.response.MessageResponse;
 import org.springframework.data.domain.Page;
 
@@ -12,6 +13,7 @@ import java.util.List;
 public interface ProductService {
 
     public MessageResponse createProduct(ProductDto productDto, UserEntity userEntity) throws Exception;
+    public List<MessageResponse> createProductsBulk(List<ProductRequest> requests, UserEntity user);
     public ProductDto searchProduct(String barcode, String ruc);
     public Page<ProductDto> getProductsByCompany(String ruc, String barcode, String name, String stockStatus, Boolean active, Long categoryId, int page, int size);
     public ProductDto searchProductsInSaleModule(String ruc, String search);

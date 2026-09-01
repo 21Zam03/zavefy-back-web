@@ -15,11 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(ProductController.API_PATH)
+@Validated
 public class ProductController {
 
     public static final String API_PATH = "/api/product";
@@ -66,6 +70,15 @@ public class ProductController {
         MessageResponse messageResponse = productService.createProduct(productDto, user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(messageResponse);
+    }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<?> crearProductosMasivo(
+            @Valid @RequestBody List<ProductRequest> products,
+            @CurrentUser UserEntity user
+    ) {
+        List<MessageResponse> results = productService.createProductsBulk(products, user);
+        return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
     @GetMapping("/{barcode}")

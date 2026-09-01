@@ -7,6 +7,7 @@ import com.example.ventas_bodega.enums.StockMovementTypeEnum;
 import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.mapper.ProductMapper;
 import com.example.ventas_bodega.repository.ProductRepository;
+import com.example.ventas_bodega.request.ProductRequest;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.rest.FoodRestTemplate;
 import com.example.ventas_bodega.service.*;
@@ -15,6 +16,7 @@ import com.example.ventas_bodega.validators.ProductValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -41,6 +44,10 @@ public class ProductServiceImpl implements ProductService {
     private final ProductValidator productValidator;
 
     private final JdbcTemplate jdbcTemplate;
+
+    @Lazy
+    @Autowired
+    private ProductService self;
 
     @Autowired
     public ProductServiceImpl(
@@ -117,6 +124,57 @@ public class ProductServiceImpl implements ProductService {
             // Permite que @Transactional haga rollback
             throw e;
         }
+    }
+
+    @Override
+    public List<MessageResponse> createProductsBulk(List<ProductRequest> requests, UserEntity user) {
+        List<MessageResponse> results = new ArrayList<>();
+        for (ProductRequest request : requests) {
+            try {
+                results.add(processBulkProduct(request, user));
+            } catch (Exception e) {
+                MessageResponse error = new MessageResponse();
+                error.setStatus(false);
+                error.setMessage(e.getMessage());
+                results.add(error);
+            }
+        }
+        return results;
+    }
+
+    private MessageResponse processBulkProduct(ProductRequest request, UserEntity user) throws Exception {
+        String barcode = request.getBarcode();
+        if (barcode != null && !barcode.isBlank()) {
+            Optional<ProductEntity> existing = productRepository.findByBarcodeAndCompany_Ruc(barcode, user.getCompany().getRuc());
+            if (existing.isPresent()) {
+                return updateExistingProductStock(existing.get(), request, user);
+            }
+        }
+        ProductDto productDto = ProductMapper.buildProductDtoFromProductRequest(request, null);
+        return self.createProduct(productDto, user); // pasa por el proxy → transacción real por producto
+    }
+
+    private MessageResponse updateExistingProductStock(ProductEntity existing, ProductRequest request, UserEntity user) {
+        int currentStock = existing.getStock() == null ? 0 : existing.getStock();
+        int newStock = request.getStock() == null ? currentStock : request.getStock();
+
+        AdjustmentStockDto adjustmentStockDto = new AdjustmentStockDto();
+        adjustmentStockDto.setProductId(existing.getId());
+        adjustmentStockDto.setCurrentStock(currentStock);
+        adjustmentStockDto.setNewStock(newStock);
+        adjustmentStockDto.setQuantity(newStock - currentStock);
+        adjustmentStockDto.setAdjustmentType(newStock >= currentStock ? "INCREMENTO" : "DECREMENTO");
+        adjustmentStockDto.setReason("Actualización masiva de stock (bulk import)");
+
+        // reutiliza el mismo mecanismo de InventoryController.adjustStock: guarda el ajuste,
+        // registra el historial (calculando stockAfter - stockBefore) y actualiza tb_producto.stock
+        MessageResponse adjustmentResult = inventoryService.createAdjustmentStock(adjustmentStockDto, user);
+        if (!adjustmentResult.isStatus()) {
+            return adjustmentResult;
+        }
+
+        existing.setStock(newStock);
+        return buildProductUpdatedResponse(existing);
     }
 
     private MessageResponse buildProductUpdatedResponse(ProductEntity product) {
