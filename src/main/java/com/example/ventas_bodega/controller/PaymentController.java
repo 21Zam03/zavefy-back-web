@@ -1,16 +1,17 @@
 package com.example.ventas_bodega.controller;
 
+import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.request.PaymentRequest;
 import com.example.ventas_bodega.response.PaymentResponse;
+import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(PaymentController.API_PATH)
@@ -30,6 +31,19 @@ public class PaymentController {
         PaymentResponse response = paymentService.receivePayment(request);
         HttpStatus status = "CREATED".equals(response.getStatus()) ? HttpStatus.CREATED : HttpStatus.OK;
         return new ResponseEntity<>(response, status);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getPayments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String source,
+            @RequestParam(required = false) String status,
+            @CurrentUser UserEntity user
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Long companyId = user.getCompany().getCompanyId();
+        return new ResponseEntity<>(paymentService.getPayments(companyId, source, status, pageable), HttpStatus.OK);
     }
 
 }

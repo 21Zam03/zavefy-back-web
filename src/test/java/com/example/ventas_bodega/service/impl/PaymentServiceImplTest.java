@@ -1,7 +1,9 @@
 package com.example.ventas_bodega.service.impl;
 
+import com.example.ventas_bodega.dto.PaymentDto;
 import com.example.ventas_bodega.entity.PaymentEntity;
 import com.example.ventas_bodega.enums.PaymentStatus;
+import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.repository.CompanyRepository;
 import com.example.ventas_bodega.repository.PaymentRepository;
@@ -14,15 +16,22 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -135,6 +144,57 @@ class PaymentServiceImplTest {
 
         verify(paymentRepository, never()).findByFingerprint(anyString());
         verify(paymentRepository, never()).save(any());
+    }
+
+    @Test
+    void getPayments_debeDelegarEnElRepositorioConLosFiltrosYMapearADto() {
+        PaymentEntity entity = new PaymentEntity();
+        entity.setId(1L);
+        entity.setCompanyId(123L);
+        entity.setSource("YAPE");
+        entity.setNotificationId(456L);
+        entity.setSenderName("Horst Zam*");
+        entity.setAmount(new BigDecimal("1.00"));
+        entity.setSecurityCode("342");
+        entity.setReceivedAt(LocalDateTime.of(2026, 8, 31, 16, 1, 7));
+        entity.setFingerprint("fp-1");
+        entity.setStatus(PaymentStatus.RECEIVED);
+        entity.setCreatedAt(LocalDateTime.of(2026, 8, 31, 16, 1, 10));
+
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<PaymentEntity> repoPage = new PageImpl<>(List.of(entity), pageable, 1);
+
+        when(paymentRepository.findByCompanyIdAndFilters(eq(123L), eq("YAPE"), eq(PaymentStatus.RECEIVED), eq(pageable)))
+                .thenReturn(repoPage);
+
+        Page<PaymentDto> result = paymentService.getPayments(123L, "YAPE", "RECEIVED", pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        PaymentDto dto = result.getContent().get(0);
+        assertThat(dto.getId()).isEqualTo(1L);
+        assertThat(dto.getSource()).isEqualTo("YAPE");
+        assertThat(dto.getStatus()).isEqualTo("RECEIVED");
+    }
+
+    @Test
+    void getPayments_sinFiltros_debePasarNullAlRepositorio() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(paymentRepository.findByCompanyIdAndFilters(eq(123L), isNull(), isNull(), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(), pageable, 0));
+
+        paymentService.getPayments(123L, null, null, pageable);
+
+        verify(paymentRepository).findByCompanyIdAndFilters(123L, null, null, pageable);
+    }
+
+    @Test
+    void getPayments_conStatusInvalido_debeLanzarBusinessException() {
+        Pageable pageable = PageRequest.of(0, 20);
+
+        assertThatThrownBy(() -> paymentService.getPayments(123L, null, "NO_EXISTE", pageable))
+                .isInstanceOf(BusinessException.class);
+
+        verify(paymentRepository, never()).findByCompanyIdAndFilters(any(), any(), any(), any());
     }
 
 }
