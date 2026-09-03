@@ -8,7 +8,7 @@ public class CartDetailDto {
 
     private Long id;
     private Long cartId;
-    private Integer quantity;
+    private BigDecimal quantity;
     private BigDecimal price;
     private BigDecimal total;
     private Long productId;
@@ -32,11 +32,11 @@ public class CartDetailDto {
         this.cartId = cartId;
     }
 
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
 

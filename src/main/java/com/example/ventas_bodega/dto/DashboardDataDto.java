@@ -7,7 +7,7 @@ public class DashboardDataDto {
 
     private BigDecimal total;
     private Long saleCount;
-    private Long productCount;
+    private BigDecimal productCount;
     private BigDecimal averageTicket;
     private List<SalexDay> salexDays;
     private List<TopProductDto> topProducts;
@@ -31,11 +31,11 @@ public class DashboardDataDto {
         this.saleCount = saleCount;
     }
 
-    public Long getProductCount() {
+    public BigDecimal getProductCount() {
         return productCount;
     }
 
-    public void setProductCount(Long productCount) {
+    public void setProductCount(BigDecimal productCount) {
         this.productCount = productCount;
     }
 

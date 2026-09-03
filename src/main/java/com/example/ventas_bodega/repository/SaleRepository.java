@@ -104,7 +104,7 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
     WHERE c.ruc = :ruc
     AND v.fecha_registro BETWEEN :start AND :end
 """, nativeQuery = true)
-    Long countProductsBetweenDates(
+    BigDecimal countProductsBetweenDates(
             @Param("start") String start,
             @Param("end") String end,
             @Param("ruc") String ruc

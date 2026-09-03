@@ -57,4 +57,12 @@ public class RoleEntity {
         this.permissionList = permissionList;
     }
 
+    public Boolean getIsSystemRole() {
+        return isSystemRole;
+    }
+
+    public void setIsSystemRole(Boolean isSystemRole) {
+        this.isSystemRole = isSystemRole;
+    }
+
 }

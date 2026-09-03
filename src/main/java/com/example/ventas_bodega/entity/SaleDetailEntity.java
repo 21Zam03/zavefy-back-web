@@ -17,8 +17,8 @@ public class SaleDetailEntity {
     @JoinColumn(name = "id_venta")
     private SaleEntity saleEntity;
 
-    @Column(name = "cantidad")
-    private Integer quantity;
+    @Column(name = "cantidad", precision = 12, scale = 3)
+    private BigDecimal quantity;
 
     @Column(name = "precio_unitario")
     private BigDecimal unitePrice;
@@ -40,7 +40,7 @@ public class SaleDetailEntity {
 
     public SaleDetailEntity() {}
 
-    public SaleDetailEntity(Long id, SaleEntity saleEntity, Integer quantity, BigDecimal unitePrice, BigDecimal total) {
+    public SaleDetailEntity(Long id, SaleEntity saleEntity, BigDecimal quantity, BigDecimal unitePrice, BigDecimal total) {
         this.id = id;
         this.saleEntity = saleEntity;
         this.quantity = quantity;
@@ -64,11 +64,11 @@ public class SaleDetailEntity {
         this.saleEntity = saleEntity;
     }
 
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
 

@@ -22,6 +22,9 @@ public class SaleMapper {
         saleEntity.setClientPhoneNumber(saleDto.getClientPhoneNumber());
         saleEntity.setPaymentMethod(saleDto.getPaymentMethod());
         saleEntity.setDiscount(saleDto.getDiscount());
+        saleEntity.setCardCommissionPercent(saleDto.getCardCommissionPercent());
+        saleEntity.setCardCommissionAmount(saleDto.getCardCommissionAmount());
+        saleEntity.setTotalWithCommission(saleDto.getTotalWithCommission());
         return saleEntity;
     }
 
@@ -39,6 +42,14 @@ public class SaleMapper {
         saleDto.setMoneyType(saleEntity.getMoneyType());
         saleDto.setClientName(saleEntity.getClientName());
         saleDto.setPaymentMethod(saleEntity.getPaymentMethod());
+        saleDto.setCardCommissionPercent(saleEntity.getCardCommissionPercent());
+        saleDto.setCardCommissionAmount(saleEntity.getCardCommissionAmount());
+        saleDto.setTotalWithCommission(saleEntity.getTotalWithCommission());
+        saleDto.setClientId(saleEntity.getClientId());
+        saleDto.setSplitPayment(saleEntity.getSplitPayment());
+        saleDto.setPartialPayment(saleEntity.getPartialPayment());
+        saleDto.setAmountPaidNow(saleEntity.getAmountPaidNow());
+        saleDto.setPendingBalance(saleEntity.getPendingBalance());
         return saleDto;
     }
 
@@ -58,6 +69,15 @@ public class SaleMapper {
         saleDto.setClientDocumentType(saleRequest.getClientDocumentType());
         saleDto.setClientPhoneNumber(saleRequest.getClientPhoneNumber());
         saleDto.setPaymentMethod(saleRequest.getPaymentMethod());
+        saleDto.setCardCommissionPercent(saleRequest.getCardCommissionPercent());
+        saleDto.setCardCommissionAmount(saleRequest.getCardCommissionAmount());
+        saleDto.setTotalWithCommission(saleRequest.getTotalWithCommission());
+        saleDto.setClientId(saleRequest.getClientId());
+        saleDto.setSplitPayment(saleRequest.getSplitPayment());
+        saleDto.setPartialPayment(saleRequest.getPartialPayment());
+        saleDto.setAmountPaidNow(saleRequest.getAmountPaidNow());
+        saleDto.setPendingBalance(saleRequest.getPendingBalance());
+        saleDto.setPaymentLines(saleRequest.getPaymentLines());
         return saleDto;
     }
 

@@ -33,7 +33,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         Long saleCount = saleRepository.countSalesBetweenDates(fromDate, toDate, user.getCompany().getRuc());
 
-        Long productCount = saleRepository.countProductsBetweenDates(fromDate, toDate,  user.getCompany().getRuc());
+        BigDecimal productCount = saleRepository.countProductsBetweenDates(fromDate, toDate,  user.getCompany().getRuc());
 
         BigDecimal averageTicket = saleRepository.getAverageTicketNative(fromDate, toDate, user.getCompany().getRuc());
 
@@ -49,8 +49,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         List<TopProductDto> topProductResult = new ArrayList<>();
         for (Object[] row : topProduct) {
             String name = row[0].toString();
-            BigDecimal totalSalesBD = (BigDecimal) row[1];
-            int totalSales = totalSalesBD.intValue();
+            BigDecimal totalSales = (BigDecimal) row[1];
             BigDecimal totalIncome = (BigDecimal) row[2];
             topProductResult.add(new TopProductDto(name, totalSales, totalIncome));
         }
@@ -61,7 +60,7 @@ public class DashBoardServiceImpl implements DashBoardService {
             if(!productAlert.isEmpty()) {
                 for (Object[] row : productAlert) {
                     String name = row[0].toString();
-                    Long stock = row[1] == null ? null : ((Number) row[1]).longValue();
+                    BigDecimal stock = row[1] == null ? null : new BigDecimal(row[1].toString());
                     String stockState = row[2].toString();
                     productAlertResult.add(new ProductAlertDto(name, stock, stockState));
                 }

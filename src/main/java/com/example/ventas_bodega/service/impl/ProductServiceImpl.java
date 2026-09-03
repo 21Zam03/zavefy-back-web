@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
             productToCreate.setCategoryEntity(categoryCreated);
             productToCreate.setCompany(userEntity.getCompany());
             productToCreate.setActive(true);
-            productToCreate.setStock(productDto.getStock() == null ? 0 : productDto.getStock());
+            productToCreate.setStock(productDto.getStock() == null ? BigDecimal.ZERO : productDto.getStock());
             ProductEntity productCreated = productRepository.save(productToCreate);
 
             // 4. PROCESAR IMAGEN
@@ -155,15 +156,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private MessageResponse updateExistingProductStock(ProductEntity existing, ProductRequest request, UserEntity user) {
-        int currentStock = existing.getStock() == null ? 0 : existing.getStock();
-        int newStock = request.getStock() == null ? currentStock : request.getStock();
+        BigDecimal currentStock = existing.getStock() == null ? BigDecimal.ZERO : existing.getStock();
+        BigDecimal newStock = request.getStock() == null ? currentStock : request.getStock();
 
         AdjustmentStockDto adjustmentStockDto = new AdjustmentStockDto();
         adjustmentStockDto.setProductId(existing.getId());
         adjustmentStockDto.setCurrentStock(currentStock);
         adjustmentStockDto.setNewStock(newStock);
-        adjustmentStockDto.setQuantity(newStock - currentStock);
-        adjustmentStockDto.setAdjustmentType(newStock >= currentStock ? "INCREMENTO" : "DECREMENTO");
+        adjustmentStockDto.setQuantity(newStock.subtract(currentStock));
+        adjustmentStockDto.setAdjustmentType(newStock.compareTo(currentStock) >= 0 ? "INCREMENTO" : "DECREMENTO");
         adjustmentStockDto.setReason("Actualización masiva de stock (bulk import)");
 
         // reutiliza el mismo mecanismo de InventoryController.adjustStock: guarda el ajuste,

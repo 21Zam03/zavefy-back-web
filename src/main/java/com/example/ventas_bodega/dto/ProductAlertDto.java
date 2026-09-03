@@ -1,14 +1,16 @@
 package com.example.ventas_bodega.dto;
 
+import java.math.BigDecimal;
+
 public class ProductAlertDto {
 
     private String productName;
-    private Long stock;
+    private BigDecimal stock;
     private String stockState;
 
     public ProductAlertDto() {}
 
-    public ProductAlertDto(String productName, Long stock, String stockState) {
+    public ProductAlertDto(String productName, BigDecimal stock, String stockState) {
         this.productName = productName;
         this.stock = stock;
         this.stockState = stockState;
@@ -22,11 +24,11 @@ public class ProductAlertDto {
         this.productName = productName;
     }
 
-    public Long getStock() {
+    public BigDecimal getStock() {
         return stock;
     }
 
-    public void setStock(Long stock) {
+    public void setStock(BigDecimal stock) {
         this.stock = stock;
     }
 

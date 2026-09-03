@@ -1,6 +1,8 @@
 package com.example.ventas_bodega.repository;
 
 import com.example.ventas_bodega.entity.UserEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +15,25 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     public Optional<UserEntity> findByUsername(String username);
     boolean existsByEmail(String email);
+
+    Optional<UserEntity> findByUserIdAndCompany_CompanyId(Integer userId, Long companyId);
+
+    @Query("""
+    SELECT u FROM UserEntity u
+    WHERE u.company.companyId = :companyId
+      AND (
+            :searchKey IS NULL
+            OR LOWER(u.firstname) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(u.lastname) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(u.email) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+      )
+    ORDER BY u.firstname ASC
+    """)
+    Page<UserEntity> findByCompanyWithFilters(
+            @Param("companyId") Long companyId,
+            @Param("searchKey") String searchKey,
+            Pageable pageable
+    );
 
     @Modifying
     @Transactional

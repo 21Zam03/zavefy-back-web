@@ -78,6 +78,30 @@ public class SaleEntity {
     @Column(name = "venta_link")
     private String saleLink;
 
+    @Column(name = "comision_tarjeta_porcentaje")
+    private BigDecimal cardCommissionPercent;
+
+    @Column(name = "comision_tarjeta_monto")
+    private BigDecimal cardCommissionAmount;
+
+    @Column(name = "monto_total_con_comision")
+    private BigDecimal totalWithCommission;
+
+    @Column(name = "id_cliente")
+    private Integer clientId;
+
+    @Column(name = "pago_dividido")
+    private Boolean splitPayment;
+
+    @Column(name = "pago_parcial")
+    private Boolean partialPayment;
+
+    @Column(name = "monto_pagado_ahora")
+    private BigDecimal amountPaidNow;
+
+    @Column(name = "saldo_pendiente")
+    private BigDecimal pendingBalance;
+
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
     private UserEntity user;
@@ -296,6 +320,70 @@ public class SaleEntity {
 
     public void setSaleLink(String saleLink) {
         this.saleLink = saleLink;
+    }
+
+    public BigDecimal getCardCommissionPercent() {
+        return cardCommissionPercent;
+    }
+
+    public void setCardCommissionPercent(BigDecimal cardCommissionPercent) {
+        this.cardCommissionPercent = cardCommissionPercent;
+    }
+
+    public BigDecimal getCardCommissionAmount() {
+        return cardCommissionAmount;
+    }
+
+    public void setCardCommissionAmount(BigDecimal cardCommissionAmount) {
+        this.cardCommissionAmount = cardCommissionAmount;
+    }
+
+    public BigDecimal getTotalWithCommission() {
+        return totalWithCommission;
+    }
+
+    public void setTotalWithCommission(BigDecimal totalWithCommission) {
+        this.totalWithCommission = totalWithCommission;
+    }
+
+    public Integer getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(Integer clientId) {
+        this.clientId = clientId;
+    }
+
+    public Boolean getSplitPayment() {
+        return splitPayment;
+    }
+
+    public void setSplitPayment(Boolean splitPayment) {
+        this.splitPayment = splitPayment;
+    }
+
+    public Boolean getPartialPayment() {
+        return partialPayment;
+    }
+
+    public void setPartialPayment(Boolean partialPayment) {
+        this.partialPayment = partialPayment;
+    }
+
+    public BigDecimal getAmountPaidNow() {
+        return amountPaidNow;
+    }
+
+    public void setAmountPaidNow(BigDecimal amountPaidNow) {
+        this.amountPaidNow = amountPaidNow;
+    }
+
+    public BigDecimal getPendingBalance() {
+        return pendingBalance;
+    }
+
+    public void setPendingBalance(BigDecimal pendingBalance) {
+        this.pendingBalance = pendingBalance;
     }
 
     @Override

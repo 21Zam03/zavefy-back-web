@@ -2,6 +2,7 @@ package com.example.ventas_bodega.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,14 +20,14 @@ public class HistoryStockEntity {
     @Column(name = "fecha_creacion")
     private LocalDateTime createDate;
 
-    @Column(name = "stock_antes")
-    private Long stockBefore;
+    @Column(name = "stock_antes", precision = 12, scale = 3)
+    private BigDecimal stockBefore;
 
-    @Column(name = "stock_despues")
-    private Long stockAfter;
+    @Column(name = "stock_despues", precision = 12, scale = 3)
+    private BigDecimal stockAfter;
 
-    @Column(name = "stock_variacion")
-    private Long stockVariation;
+    @Column(name = "stock_variacion", precision = 12, scale = 3)
+    private BigDecimal stockVariation;
 
     @Column(name = "product_id")
     private Long productId;
@@ -75,27 +76,27 @@ public class HistoryStockEntity {
         this.createDate = createDate;
     }
 
-    public Long getStockBefore() {
+    public BigDecimal getStockBefore() {
         return stockBefore;
     }
 
-    public void setStockBefore(Long stockBefore) {
+    public void setStockBefore(BigDecimal stockBefore) {
         this.stockBefore = stockBefore;
     }
 
-    public Long getStockAfter() {
+    public BigDecimal getStockAfter() {
         return stockAfter;
     }
 
-    public void setStockAfter(Long stockAfter) {
+    public void setStockAfter(BigDecimal stockAfter) {
         this.stockAfter = stockAfter;
     }
 
-    public Long getStockVariation() {
+    public BigDecimal getStockVariation() {
         return stockVariation;
     }
 
-    public void setStockVariation(Long stockVariation) {
+    public void setStockVariation(BigDecimal stockVariation) {
         this.stockVariation = stockVariation;
     }
 

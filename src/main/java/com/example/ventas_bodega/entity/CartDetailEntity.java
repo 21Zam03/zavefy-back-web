@@ -17,8 +17,8 @@ public class CartDetailEntity {
     @JoinColumn(name = "id_carrito")
     private CartEntity cartEntity;
 
-    @Column(name = "cantidad")
-    private Integer quantity;
+    @Column(name = "cantidad", precision = 12, scale = 3)
+    private BigDecimal quantity;
 
     @Column(name = "precio")
     private BigDecimal price;
@@ -48,11 +48,11 @@ public class CartDetailEntity {
         this.cartEntity = cartEntity;
     }
 
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
 

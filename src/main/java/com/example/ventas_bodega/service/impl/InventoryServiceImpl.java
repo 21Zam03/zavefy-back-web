@@ -2,6 +2,7 @@ package com.example.ventas_bodega.service.impl;
 
 import com.example.ventas_bodega.dto.AdjustmentStockDto;
 import com.example.ventas_bodega.dto.HistoryStockDto;
+import com.example.ventas_bodega.dto.PurchaseItemDto;
 import com.example.ventas_bodega.dto.SaleDetailDto;
 import com.example.ventas_bodega.dto.interfaces.HistoryStockDtoInter;
 import com.example.ventas_bodega.entity.AdjustmentStockEntity;
@@ -13,6 +14,7 @@ import com.example.ventas_bodega.mapper.HistoryStockMapper;
 import com.example.ventas_bodega.repository.AdjustmentStockRepository;
 import com.example.ventas_bodega.repository.HistoryStockRepository;
 import com.example.ventas_bodega.repository.ProductRepository;
+import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,10 +59,12 @@ public class InventoryServiceImpl implements InventoryService {
         try {
             for (SaleDetailDto saleDetailDto : saleDetailDtoList) {
                 HistoryStockEntity historyStockEntity = new HistoryStockEntity();
+                BigDecimal stockBefore = saleDetailDto.getStock();
+                BigDecimal stockAfter = stockBefore.subtract(saleDetailDto.getQuantity());
                 historyStockEntity.setEvent(event);
-                historyStockEntity.setStockBefore(saleDetailDto.getStock());
-                historyStockEntity.setStockAfter(saleDetailDto.getStock() - saleDetailDto.getQuantity());
-                historyStockEntity.setStockVariation(historyStockEntity.getStockAfter() - historyStockEntity.getStockBefore());
+                historyStockEntity.setStockBefore(stockBefore);
+                historyStockEntity.setStockAfter(stockAfter);
+                historyStockEntity.setStockVariation(stockAfter.subtract(stockBefore));
                 historyStockEntity.setProductId(saleDetailDto.getProductId());
                 historyStockEntity.setSaleId(saleDetailDto.getSaleId());
                 historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
@@ -109,10 +114,12 @@ public class InventoryServiceImpl implements InventoryService {
         try {
             HistoryStockEntity historyStockEntity = new HistoryStockEntity();
 
+            BigDecimal stockBefore = BigDecimal.ZERO;
+            BigDecimal stockAfter = product.getStock() == null ? BigDecimal.ZERO : product.getStock();
             historyStockEntity.setEvent(event);
-            historyStockEntity.setStockBefore(0L);
-            historyStockEntity.setStockAfter(Long.valueOf(product.getStock()));
-            historyStockEntity.setStockVariation(historyStockEntity.getStockAfter() - historyStockEntity.getStockBefore());
+            historyStockEntity.setStockBefore(stockBefore);
+            historyStockEntity.setStockAfter(stockAfter);
+            historyStockEntity.setStockVariation(stockAfter.subtract(stockBefore));
             historyStockEntity.setProductId(product.getId());
             historyStockEntity.setCompanyId(userEntity.getCompany().getCompanyId());
             historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
@@ -133,10 +140,12 @@ public class InventoryServiceImpl implements InventoryService {
         try {
             HistoryStockEntity historyStockEntity = new HistoryStockEntity();
 
+            BigDecimal stockBefore = adjustmentStockEntity.getCurrentStock();
+            BigDecimal stockAfter = adjustmentStockEntity.getNewStock();
             historyStockEntity.setEvent(event);
-            historyStockEntity.setStockBefore(Long.valueOf(adjustmentStockEntity.getCurrentStock()));
-            historyStockEntity.setStockAfter(Long.valueOf(adjustmentStockEntity.getNewStock()));
-            historyStockEntity.setStockVariation(historyStockEntity.getStockAfter() - historyStockEntity.getStockBefore());
+            historyStockEntity.setStockBefore(stockBefore);
+            historyStockEntity.setStockAfter(stockAfter);
+            historyStockEntity.setStockVariation(stockAfter.subtract(stockBefore));
             historyStockEntity.setProductId(adjustmentStockEntity.getProductId());
             historyStockEntity.setCompanyId(userEntity.getCompany().getCompanyId());
             historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
@@ -182,6 +191,53 @@ public class InventoryServiceImpl implements InventoryService {
             messageResponse.setStatus(true);
             return messageResponse;
         } catch (Exception e) {
+            messageResponse.setMessage(e.getMessage());
+            messageResponse.setStatus(false);
+            return messageResponse;
+        }
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse createHistoryStockForPurchase(List<PurchaseItemDto> purchaseItemDtoList, UserEntity userEntity, Long purchaseId) {
+        MessageResponse messageResponse = new MessageResponse();
+        try {
+            for (PurchaseItemDto item : purchaseItemDtoList) {
+                ProductEntity product = productRepository.findById(item.getProductId())
+                        .orElseThrow(() -> new NotFoundException("El producto con id " + item.getProductId() + " no existe"));
+
+                BigDecimal stockBefore = product.getStock() == null ? BigDecimal.ZERO : product.getStock();
+                BigDecimal stockAfter = stockBefore.add(item.getQuantity());
+
+                HistoryStockEntity historyStockEntity = new HistoryStockEntity();
+                historyStockEntity.setEvent("COMPRA");
+                historyStockEntity.setStockBefore(stockBefore);
+                historyStockEntity.setStockAfter(stockAfter);
+                historyStockEntity.setStockVariation(stockAfter.subtract(stockBefore));
+                historyStockEntity.setProductId(item.getProductId());
+                historyStockEntity.setPurchaseId(purchaseId);
+                historyStockEntity.setCompanyId(userEntity.getCompany().getCompanyId());
+                historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
+                historyStockRepository.save(historyStockEntity);
+            }
+
+            List<Object[]> batchArgs = purchaseItemDtoList.stream()
+                    .map(item -> new Object[]{
+                            item.getQuantity(),
+                            item.getProductId()
+                    })
+                    .toList();
+
+            jdbcTemplate.batchUpdate(
+                    "UPDATE tb_producto SET stock = stock + ? WHERE id_producto = ?",
+                    batchArgs
+            );
+
+            messageResponse.setMessage("Se actualizo el stock por la compra de forma exitosa");
+            messageResponse.setStatus(true);
+            return messageResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
             messageResponse.setMessage(e.getMessage());
             messageResponse.setStatus(false);
             return messageResponse;

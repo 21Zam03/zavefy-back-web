@@ -290,5 +290,23 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     Optional<ProductEntity> findByIdAndCompany_CompanyId(Long productId, Long companyId);
 
+    // Usadas por el cron de notificaciones (NotificationServiceImpl): escanean todas las empresas de una vez,
+    // con los mismos umbrales que el filtro stockStatus de ProductController (SIN_STOCK / BAJO_STOCK).
+    @Query(value = """
+    SELECT p.id_empresa, p.id_producto, p.nombre, p.stock
+    FROM tb_producto p
+    WHERE p.activo = true
+      AND p.stock = 0
+    """, nativeQuery = true)
+    List<Object[]> findOutOfStockProducts();
+
+    @Query(value = """
+    SELECT p.id_empresa, p.id_producto, p.nombre, p.stock
+    FROM tb_producto p
+    WHERE p.activo = true
+      AND p.stock BETWEEN 1 AND 10
+    """, nativeQuery = true)
+    List<Object[]> findLowStockProducts();
+
 }
 

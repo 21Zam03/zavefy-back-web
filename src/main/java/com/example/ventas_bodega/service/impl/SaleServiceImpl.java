@@ -3,17 +3,21 @@ package com.example.ventas_bodega.service.impl;
 import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.SaleDetailDto;
 import com.example.ventas_bodega.dto.SaleDto;
+import com.example.ventas_bodega.dto.SalePaymentLineDto;
 import com.example.ventas_bodega.dto.interfaces.SaleDetailDtoInter;
 import com.example.ventas_bodega.entity.CajaEntity;
 import com.example.ventas_bodega.entity.SaleDetailEntity;
 import com.example.ventas_bodega.entity.SaleEntity;
+import com.example.ventas_bodega.entity.SalePaymentLineEntity;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.mapper.SaleDetailMapper;
 import com.example.ventas_bodega.mapper.SaleMapper;
+import com.example.ventas_bodega.mapper.SalePaymentLineMapper;
 import com.example.ventas_bodega.repository.CajaRepository;
 import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.repository.SaleDetailRepository;
+import com.example.ventas_bodega.repository.SalePaymentLineRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.*;
@@ -31,6 +35,7 @@ public class SaleServiceImpl implements SaleService {
 
     private final SaleRepository saleRepository;
     private final SaleDetailRepository saleDetailRepository;
+    private final SalePaymentLineRepository salePaymentLineRepository;
     private final ProductRepository productRepository;
     private final CajaRepository cajaRepository;
 
@@ -38,25 +43,30 @@ public class SaleServiceImpl implements SaleService {
     private final InventoryService inventoryService;
     private final FileService fileService;
     private final AgentService agentService;
+    private final ReceivableService receivableService;
 
     @Autowired
     public SaleServiceImpl(
             SaleRepository saleRepository,
             SaleDetailRepository saleDetailRepository,
+            SalePaymentLineRepository salePaymentLineRepository,
             ProductService productService,
             ProductRepository productRepository,
             CajaRepository cajaRepository,
             InventoryService inventoryService,
             FileService fileService,
-            AgentService agentService) {
+            AgentService agentService,
+            ReceivableService receivableService) {
         this.saleRepository = saleRepository;
         this.saleDetailRepository = saleDetailRepository;
+        this.salePaymentLineRepository = salePaymentLineRepository;
         this.productService = productService;
         this.productRepository = productRepository;
         this.cajaRepository = cajaRepository;
         this.inventoryService = inventoryService;
         this.fileService = fileService;
         this.agentService = agentService;
+        this.receivableService = receivableService;
     }
 
     @Override
@@ -81,6 +91,11 @@ public class SaleServiceImpl implements SaleService {
         saleToCreate.setIssuerRuc(userEntity.getCompany().getRuc());
         saleToCreate.setSaleLink("https://www.zavefy.com/comprobantes/" + userEntity.getCompany().getRuc()
                 + "-" + saleDto.getSerial() + "-" + saleDto.getNumber());
+        saleToCreate.setClientId(saleDto.getClientId());
+        saleToCreate.setPartialPayment(saleDto.getPartialPayment());
+        saleToCreate.setAmountPaidNow(saleDto.getAmountPaidNow());
+        saleToCreate.setPendingBalance(saleDto.getPendingBalance());
+        saleToCreate.setSplitPayment(saleDto.getSplitPayment());
 
         SaleEntity saleCreated = saleRepository.save(saleToCreate);
 
@@ -104,6 +119,26 @@ public class SaleServiceImpl implements SaleService {
             saleDetailEntity.setSaleEntity(saleCreated);
             saleDetailRepository.save(saleDetailEntity);
             detail.setSaleId(Long.valueOf(saleCreated.getVentaId()));
+        }
+
+        if (Boolean.TRUE.equals(saleDto.getSplitPayment()) && saleDto.getPaymentLines() != null) {
+            for (SalePaymentLineDto lineDto : saleDto.getPaymentLines()) {
+                SalePaymentLineEntity lineEntity = SalePaymentLineMapper.dtoToEntity(lineDto);
+                lineEntity.setSaleEntity(saleCreated);
+                salePaymentLineRepository.save(lineEntity);
+            }
+        }
+
+        if (Boolean.TRUE.equals(saleDto.getPartialPayment())
+                && saleDto.getPendingBalance() != null
+                && saleDto.getPendingBalance().compareTo(BigDecimal.ZERO) > 0) {
+
+            if (saleDto.getClientId() == null) {
+                throw new BusinessException("El pago parcial requiere un cliente registrado");
+            }
+
+            receivableService.createFromSale(saleCreated.getVentaId(), saleDto.getClientId(),
+                    saleDto.getPendingBalance(), userEntity);
         }
 
         if (userEntity.getCompany().isHasStock()) {

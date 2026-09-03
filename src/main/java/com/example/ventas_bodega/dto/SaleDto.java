@@ -23,6 +23,15 @@ public class SaleDto {
     private String clientPhoneNumber;
     private String paymentMethod;
     private BigDecimal discount;
+    private BigDecimal cardCommissionPercent;
+    private BigDecimal cardCommissionAmount;
+    private BigDecimal totalWithCommission;
+    private Integer clientId;
+    private Boolean splitPayment;
+    private Boolean partialPayment;
+    private BigDecimal amountPaidNow;
+    private BigDecimal pendingBalance;
+    private List<SalePaymentLineDto> paymentLines;
     private List<SaleDetailDto> saleDetails;
 
     public Integer getVentaId() {
@@ -167,5 +176,77 @@ public class SaleDto {
 
     public void setSubTotalFinal(BigDecimal subTotalFinal) {
         this.subTotalFinal = subTotalFinal;
+    }
+
+    public BigDecimal getCardCommissionPercent() {
+        return cardCommissionPercent;
+    }
+
+    public void setCardCommissionPercent(BigDecimal cardCommissionPercent) {
+        this.cardCommissionPercent = cardCommissionPercent;
+    }
+
+    public BigDecimal getCardCommissionAmount() {
+        return cardCommissionAmount;
+    }
+
+    public void setCardCommissionAmount(BigDecimal cardCommissionAmount) {
+        this.cardCommissionAmount = cardCommissionAmount;
+    }
+
+    public BigDecimal getTotalWithCommission() {
+        return totalWithCommission;
+    }
+
+    public void setTotalWithCommission(BigDecimal totalWithCommission) {
+        this.totalWithCommission = totalWithCommission;
+    }
+
+    public Integer getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(Integer clientId) {
+        this.clientId = clientId;
+    }
+
+    public Boolean getSplitPayment() {
+        return splitPayment;
+    }
+
+    public void setSplitPayment(Boolean splitPayment) {
+        this.splitPayment = splitPayment;
+    }
+
+    public Boolean getPartialPayment() {
+        return partialPayment;
+    }
+
+    public void setPartialPayment(Boolean partialPayment) {
+        this.partialPayment = partialPayment;
+    }
+
+    public BigDecimal getAmountPaidNow() {
+        return amountPaidNow;
+    }
+
+    public void setAmountPaidNow(BigDecimal amountPaidNow) {
+        this.amountPaidNow = amountPaidNow;
+    }
+
+    public BigDecimal getPendingBalance() {
+        return pendingBalance;
+    }
+
+    public void setPendingBalance(BigDecimal pendingBalance) {
+        this.pendingBalance = pendingBalance;
+    }
+
+    public List<SalePaymentLineDto> getPaymentLines() {
+        return paymentLines;
+    }
+
+    public void setPaymentLines(List<SalePaymentLineDto> paymentLines) {
+        this.paymentLines = paymentLines;
     }
 }

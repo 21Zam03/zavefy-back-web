@@ -20,8 +20,8 @@ public class OpportunityDetailEntity {
     @Column(name = "id_producto")
     private Long productId;
 
-    @Column(name = "cantidad")
-    private Integer quantity;
+    @Column(name = "cantidad", precision = 12, scale = 3)
+    private BigDecimal quantity;
 
     @Column(name = "precio_en_momento")
     private BigDecimal priceAtMoment;
@@ -50,11 +50,11 @@ public class OpportunityDetailEntity {
         this.productId = productId;
     }
 
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
 

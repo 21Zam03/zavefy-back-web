@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class HistoryStockDto {
@@ -7,9 +8,9 @@ public class HistoryStockDto {
     private Long historyStockId;
     private String event;
     private LocalDateTime createdDate;
-    private Long stockBefore;
-    private Long stockAfter;
-    private Long stockVariation;
+    private BigDecimal stockBefore;
+    private BigDecimal stockAfter;
+    private BigDecimal stockVariation;
     private Long companyId;
     private Long createdBy;
     private String createdByName;
@@ -41,27 +42,27 @@ public class HistoryStockDto {
         this.createdDate = createdDate;
     }
 
-    public Long getStockBefore() {
+    public BigDecimal getStockBefore() {
         return stockBefore;
     }
 
-    public void setStockBefore(Long stockBefore) {
+    public void setStockBefore(BigDecimal stockBefore) {
         this.stockBefore = stockBefore;
     }
 
-    public Long getStockAfter() {
+    public BigDecimal getStockAfter() {
         return stockAfter;
     }
 
-    public void setStockAfter(Long stockAfter) {
+    public void setStockAfter(BigDecimal stockAfter) {
         this.stockAfter = stockAfter;
     }
 
-    public Long getStockVariation() {
+    public BigDecimal getStockVariation() {
         return stockVariation;
     }
 
-    public void setStockVariation(Long stockVariation) {
+    public void setStockVariation(BigDecimal stockVariation) {
         this.stockVariation = stockVariation;
     }
 

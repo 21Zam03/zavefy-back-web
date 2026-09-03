@@ -6,7 +6,7 @@ public class SaleDetailDto {
 
     private Long id;
     private Long saleId;
-    private Integer quantity;
+    private BigDecimal quantity;
     private BigDecimal unitePrice;
     private BigDecimal total;
     private Long productId;
@@ -14,11 +14,11 @@ public class SaleDetailDto {
     private String measurementUnit;
     private boolean hasAutomaticSaved;
     private String notes;
-    private Long stock;
+    private BigDecimal stock;
 
     public SaleDetailDto() {}
 
-    public SaleDetailDto(Long id, Long saleId, Integer quantity, BigDecimal unitePrice, BigDecimal total) {
+    public SaleDetailDto(Long id, Long saleId, BigDecimal quantity, BigDecimal unitePrice, BigDecimal total) {
         this.id = id;
         this.saleId = saleId;
         this.quantity = quantity;
@@ -42,11 +42,11 @@ public class SaleDetailDto {
         this.saleId = saleId;
     }
 
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
 
@@ -107,11 +107,11 @@ public class SaleDetailDto {
     }
 
 
-    public Long getStock() {
+    public BigDecimal getStock() {
         return stock;
     }
 
-    public void setStock(Long stock) {
+    public void setStock(BigDecimal stock) {
         this.stock = stock;
     }
 }

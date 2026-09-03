@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 public interface SaleDetailDtoInter {
 
     Long getId();
-    Integer getQuantity();
+    BigDecimal getQuantity();
     BigDecimal getUnitePrice();
     BigDecimal getTotal();
     Long getProductId();

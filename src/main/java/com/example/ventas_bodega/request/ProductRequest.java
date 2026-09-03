@@ -35,8 +35,8 @@ public class ProductRequest {
 
     private String imageUrl;
 
-    @Min(value = 0, message = "El stock no puede ser negativo")
-    private Integer stock;
+    @DecimalMin(value = "0.0", message = "El stock no puede ser negativo")
+    private BigDecimal stock;
 
     @NotNull(message = "La unidad de medida es obligatoria")
     private MeasurementUnitEnum measurementUnit;

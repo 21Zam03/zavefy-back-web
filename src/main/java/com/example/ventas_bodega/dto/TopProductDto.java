@@ -5,10 +5,10 @@ import java.math.BigDecimal;
 public class TopProductDto {
 
     private String productName;
-    private Integer totalSales;
+    private BigDecimal totalSales;
     private BigDecimal totalIncome;
 
-    public TopProductDto(String productName, Integer totalSales, BigDecimal totalIncome) {
+    public TopProductDto(String productName, BigDecimal totalSales, BigDecimal totalIncome) {
         this.productName = productName;
         this.totalSales = totalSales;
         this.totalIncome = totalIncome;
@@ -24,11 +24,11 @@ public class TopProductDto {
         this.productName = productName;
     }
 
-    public Integer getTotalSales() {
+    public BigDecimal getTotalSales() {
         return totalSales;
     }
 
-    public void setTotalSales(Integer totalSales) {
+    public void setTotalSales(BigDecimal totalSales) {
         this.totalSales = totalSales;
     }
 

@@ -182,6 +182,7 @@ public class AuthServiceImpl implements AuthService {
         List<RoleEntity> roles = new ArrayList<>(user.getRoleList());
 
         UserLoggedResponse userLoggedResponse = new UserLoggedResponse();
+        userLoggedResponse.setUserId(user.getUserId());
         userLoggedResponse.setEmail(user.getEmail());
         userLoggedResponse.setType(roles.get(0).getName());
         userLoggedResponse.setIdCompany(user.getCompany().getCompanyId());

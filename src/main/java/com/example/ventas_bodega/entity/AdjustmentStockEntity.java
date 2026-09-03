@@ -2,6 +2,7 @@ package com.example.ventas_bodega.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,17 +17,17 @@ public class AdjustmentStockEntity {
     @Column(name = "id_producto")
     private Long productId;
 
-    @Column(name = "stock_actual")
-    private Integer currentStock;
+    @Column(name = "stock_actual", precision = 12, scale = 3)
+    private BigDecimal currentStock;
 
     @Column(name = "tipo_ajuste")
     private String adjustmentType;
 
-    @Column(name = "cantidad")
-    private Integer quantity;
+    @Column(name = "cantidad", precision = 12, scale = 3)
+    private BigDecimal quantity;
 
-    @Column(name = "nuevo_stock")
-    private Integer newStock;
+    @Column(name = "nuevo_stock", precision = 12, scale = 3)
+    private BigDecimal newStock;
 
     @Column(name = "motivo")
     private String reason;
@@ -62,11 +63,11 @@ public class AdjustmentStockEntity {
         this.productId = productId;
     }
 
-    public Integer getCurrentStock() {
+    public BigDecimal getCurrentStock() {
         return currentStock;
     }
 
-    public void setCurrentStock(Integer currentStock) {
+    public void setCurrentStock(BigDecimal currentStock) {
         this.currentStock = currentStock;
     }
 
@@ -78,19 +79,19 @@ public class AdjustmentStockEntity {
         this.adjustmentType = adjustmentType;
     }
 
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
 
-    public Integer getNewStock() {
+    public BigDecimal getNewStock() {
         return newStock;
     }
 
-    public void setNewStock(Integer newStock) {
+    public void setNewStock(BigDecimal newStock) {
         this.newStock = newStock;
     }
 

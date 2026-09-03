@@ -9,7 +9,7 @@ public interface TopSellingProductDtoInter {
     String getBarcode();
     String getImageUrl();
     BigDecimal getPrice();
-    Integer getStock();
+    BigDecimal getStock();
     Long getTotalSold();
 
 }

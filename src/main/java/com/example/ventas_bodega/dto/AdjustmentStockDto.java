@@ -1,15 +1,16 @@
 package com.example.ventas_bodega.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class AdjustmentStockDto {
 
     private Long id;
     private Long productId;
-    private Integer currentStock;
+    private BigDecimal currentStock;
     private String adjustmentType;
-    private Integer quantity;
-    private Integer newStock;
+    private BigDecimal quantity;
+    private BigDecimal newStock;
     private String reason;
     private String observation;
     private LocalDateTime createdDate;
@@ -31,11 +32,11 @@ public class AdjustmentStockDto {
         this.productId = productId;
     }
 
-    public Integer getCurrentStock() {
+    public BigDecimal getCurrentStock() {
         return currentStock;
     }
 
-    public void setCurrentStock(Integer currentStock) {
+    public void setCurrentStock(BigDecimal currentStock) {
         this.currentStock = currentStock;
     }
 
@@ -47,19 +48,19 @@ public class AdjustmentStockDto {
         this.adjustmentType = adjustmentType;
     }
 
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
 
-    public Integer getNewStock() {
+    public BigDecimal getNewStock() {
         return newStock;
     }
 
-    public void setNewStock(Integer newStock) {
+    public void setNewStock(BigDecimal newStock) {
         this.newStock = newStock;
     }
 

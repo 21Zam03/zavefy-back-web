@@ -2,7 +2,10 @@ package com.example.ventas_bodega.response;
 
 import com.example.ventas_bodega.dto.ClientDto;
 import com.example.ventas_bodega.dto.ProductDto;
+import com.example.ventas_bodega.dto.PurchaseDto;
+import com.example.ventas_bodega.dto.ReceivableDto;
 import com.example.ventas_bodega.dto.SaleDto;
+import com.example.ventas_bodega.dto.SupplierDto;
 
 import java.util.Arrays;
 
@@ -13,6 +16,9 @@ public class MessageResponse {
     private ProductDto productDto;
     private SaleDto saleDto;
     private ClientDto clientDto;
+    private SupplierDto supplierDto;
+    private PurchaseDto purchaseDto;
+    private ReceivableDto receivableDto;
     private Object[] object;
 
     public MessageResponse() {
@@ -76,6 +82,30 @@ public class MessageResponse {
 
     public void setClientDto(ClientDto clientDto) {
         this.clientDto = clientDto;
+    }
+
+    public SupplierDto getSupplierDto() {
+        return supplierDto;
+    }
+
+    public void setSupplierDto(SupplierDto supplierDto) {
+        this.supplierDto = supplierDto;
+    }
+
+    public PurchaseDto getPurchaseDto() {
+        return purchaseDto;
+    }
+
+    public void setPurchaseDto(PurchaseDto purchaseDto) {
+        this.purchaseDto = purchaseDto;
+    }
+
+    public ReceivableDto getReceivableDto() {
+        return receivableDto;
+    }
+
+    public void setReceivableDto(ReceivableDto receivableDto) {
+        this.receivableDto = receivableDto;
     }
 
     @Override

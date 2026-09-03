@@ -433,7 +433,7 @@ public class FileServiceImpl implements FileService {
 
                 row.createCell(6).setCellValue(
                         product.getStock() != null
-                                ? product.getStock()
+                                ? product.getStock().doubleValue()
                                 : 0
                 );
 
@@ -857,17 +857,17 @@ public class FileServiceImpl implements FileService {
         return parts[1] + "-" + parts[2];
     }
 
-    private String getStockStatus(Integer stock) {
+    private String getStockStatus(BigDecimal stock) {
 
-        if (stock == null || stock == 0) {
+        if (stock == null || stock.compareTo(BigDecimal.ZERO) == 0) {
             return "SIN STOCK";
         }
 
-        if (stock <= 10) {
+        if (stock.compareTo(BigDecimal.TEN) <= 0) {
             return "BAJO STOCK";
         }
 
-        if (stock <= 50) {
+        if (stock.compareTo(new BigDecimal("50")) <= 0) {
             return "STOCK MODERADO";
         }
 

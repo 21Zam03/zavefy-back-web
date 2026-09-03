@@ -56,8 +56,8 @@ public class ProductEntity {
     @Column(name = "image_url_thumb")
     private String imageUrlThumb;
 
-    @Column(name = "stock")
-    private Integer stock;
+    @Column(name = "stock", precision = 12, scale = 3)
+    private BigDecimal stock;
 
     @Column(name = "ruta")
     private String filePath;
@@ -263,11 +263,11 @@ public class ProductEntity {
         this.unitPrice = unitPrice;
     }
 
-    public Integer getStock() {
+    public BigDecimal getStock() {
         return stock;
     }
 
-    public void setStock(Integer stock) {
+    public void setStock(BigDecimal stock) {
         this.stock = stock;
     }
 

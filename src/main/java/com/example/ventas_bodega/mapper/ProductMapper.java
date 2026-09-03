@@ -164,7 +164,7 @@ public class ProductMapper {
         productDto.setDescription(description);
         productDto.setPrice(BigDecimal.valueOf(Double.parseDouble(price)));
         productDto.setCategories(categories != null ? Arrays.asList(categories.split(",")) : null);
-        productDto.setStock(stock != null ? Integer.parseInt(stock) : 0);
+        productDto.setStock(stock != null ? new BigDecimal(stock) : BigDecimal.ZERO);
         productDto.setBarcode(barcode);
         productDto.setImageUrl(imageUrl);
         productDto.setFile(file);

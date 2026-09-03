@@ -19,7 +19,7 @@ public class ProductDto {
     private String imageUrl;
     private String imageUrlMedium;
     private String imageUrlThumb;
-    private Integer stock;
+    private BigDecimal stock;
     private MultipartFile file;
     private String filePath;
     private String createdDate;
@@ -126,11 +126,11 @@ public class ProductDto {
         this.imageUrlThumb = imageUrlThumb;
     }
 
-    public Integer getStock() {
+    public BigDecimal getStock() {
         return stock;
     }
 
-    public void setStock(Integer stock) {
+    public void setStock(BigDecimal stock) {
         this.stock = stock;
     }
 

@@ -5,6 +5,7 @@ import java.util.List;
 
 public class UserLoggedResponse {
 
+    private Integer userId;
     private String firstName;
     private String lastName;
     private String email;
@@ -35,6 +36,14 @@ public class UserLoggedResponse {
         this.role = role;
         this.type = type;
         this.username = username;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public String getFirstName() {
