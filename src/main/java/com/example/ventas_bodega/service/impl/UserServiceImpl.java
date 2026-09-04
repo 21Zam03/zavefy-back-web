@@ -71,8 +71,15 @@ public class UserServiceImpl implements UserService {
         if (request.getDocumentNumber() == null || !request.getDocumentNumber().matches("\\d{8}")) {
             throw new BusinessException("Ingresa un DNI válido de 8 dígitos: se usará como contraseña inicial");
         }
+        if (request.getUsername() == null || request.getUsername().isBlank()) {
+            throw new BusinessException("El nombre de usuario es obligatorio");
+        }
+        String normalizedUsername = request.getUsername().trim().toLowerCase();
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateException("El correo " + request.getEmail() + " ya está registrado");
+        }
+        if (userRepository.existsByUsername(normalizedUsername)) {
+            throw new DuplicateException("El nombre de usuario " + normalizedUsername + " ya está en uso");
         }
 
         Set<RoleEntity> roles = request.getRoleIds() == null
@@ -89,7 +96,7 @@ public class UserServiceImpl implements UserService {
         userToCreate.setFirstname(request.getFirstName());
         userToCreate.setLastname(request.getLastName());
         userToCreate.setEmail(request.getEmail());
-        userToCreate.setUsername(request.getEmail());
+        userToCreate.setUsername(normalizedUsername);
         userToCreate.setPassword(passwordEncoder.encode(request.getDocumentNumber()));
         userToCreate.setEnabled(true);
         userToCreate.setAccountExpired(false);

@@ -4,6 +4,7 @@ import com.example.ventas_bodega.dto.*;
 import com.example.ventas_bodega.dto.interfaces.CategoryDtoInter;
 import com.example.ventas_bodega.dto.interfaces.ClientDtoInter;
 import com.example.ventas_bodega.entity.*;
+import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.mapper.*;
 import com.example.ventas_bodega.repository.*;
 import com.example.ventas_bodega.response.MessageResponse;
@@ -33,6 +34,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     private CompanyRepository companyRepository;
     private ClientRepository clientRepository;
     private PermissionRepository permissionRepository;
+    private final RoleRepository roleRepository;
 
     @Autowired
     public MaintenanceServiceImpl(
@@ -42,7 +44,8 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             MeasurementUnitRepository measurementUnitRepository,
             CompanyRepository companyRepository,
             UserRepository userRepository, ProductRepository productRepository,
-            ClientRepository clientRepository, MessageSourceAware messageSourceAware) {
+            ClientRepository clientRepository, MessageSourceAware messageSourceAware,
+            RoleRepository roleRepository) {
         this.categoryRepository = categoryRepository;
         this.yapeRepository = yapeRepository;
         this.categoryClientRepository = categoryClientRepository;
@@ -52,6 +55,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         this.productRepository = productRepository;
         this.clientRepository = clientRepository;
         this.messageSourceAware = messageSourceAware;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -159,13 +163,10 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             CompanyEntity companyCreated = companyRepository.save(companyEntity);
 
             UserEntity userEntity = UserMapper.dtoToEntity(userDto);
-            PermissionEntity permissionEntity = new  PermissionEntity();
-            //Set<PermissionEntity> permissionList = permissionRepository.findAll();
 
-
-            RoleEntity roleEntity = new RoleEntity();
-            Set<RoleEntity> roleList = new HashSet<>();
-
+            RoleEntity adminRole = roleRepository.findByName("Administrador")
+                    .orElseThrow(() -> new NotFoundException("No se encontró el rol Administrador. Verifica que el catálogo de roles esté inicializado."));
+            userEntity.setRoleList(Set.of(adminRole));
 
             userEntity.setCompany(companyCreated);
             userEntity.setCreatedBy(Long.valueOf(user.getUserId()));
