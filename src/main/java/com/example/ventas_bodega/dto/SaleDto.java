@@ -21,6 +21,8 @@ public class SaleDto {
     private String clientDocumentNumber;
     private String clientDocumentType;
     private String clientPhoneNumber;
+    private String clientAddress;
+    private String notes;
     private String paymentMethod;
     private BigDecimal discount;
     private BigDecimal cardCommissionPercent;
@@ -33,6 +35,9 @@ public class SaleDto {
     private BigDecimal pendingBalance;
     private List<SalePaymentLineDto> paymentLines;
     private List<SaleDetailDto> saleDetails;
+    private boolean voided;
+    private LocalDateTime voidedDate;
+    private String voidReason;
 
     public Integer getVentaId() {
         return ventaId;
@@ -248,5 +253,45 @@ public class SaleDto {
 
     public void setPaymentLines(List<SalePaymentLineDto> paymentLines) {
         this.paymentLines = paymentLines;
+    }
+
+    public String getClientAddress() {
+        return clientAddress;
+    }
+
+    public void setClientAddress(String clientAddress) {
+        this.clientAddress = clientAddress;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public boolean isVoided() {
+        return voided;
+    }
+
+    public void setVoided(boolean voided) {
+        this.voided = voided;
+    }
+
+    public LocalDateTime getVoidedDate() {
+        return voidedDate;
+    }
+
+    public void setVoidedDate(LocalDateTime voidedDate) {
+        this.voidedDate = voidedDate;
+    }
+
+    public String getVoidReason() {
+        return voidReason;
+    }
+
+    public void setVoidReason(String voidReason) {
+        this.voidReason = voidReason;
     }
 }

@@ -2,7 +2,9 @@ package com.example.ventas_bodega.controller;
 
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.mapper.SaleMapper;
+import com.example.ventas_bodega.request.SaleClientUpdateRequest;
 import com.example.ventas_bodega.request.SaleRequest;
+import com.example.ventas_bodega.request.VoidSaleRequest;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.SaleService;
@@ -52,6 +54,24 @@ public class SaleController {
     @GetMapping("/details/{id}")
     public ResponseEntity<?> getDetails(@CurrentUser UserEntity user, @PathVariable Long id) {
         return new ResponseEntity<>(saleService.getDetailsOfSale(user, id), HttpStatus.OK);
+    }
+
+    @PatchMapping("/{ventaId}/cliente")
+    public ResponseEntity<?> updateSaleClientInfo(
+            @PathVariable Integer ventaId,
+            @RequestBody SaleClientUpdateRequest request,
+            @CurrentUser UserEntity user
+    ) {
+        return new ResponseEntity<>(saleService.updateSaleClientInfo(ventaId, request, user), HttpStatus.OK);
+    }
+
+    @PatchMapping("/{ventaId}/anular")
+    public ResponseEntity<?> voidSale(
+            @PathVariable Integer ventaId,
+            @RequestBody VoidSaleRequest request,
+            @CurrentUser UserEntity user
+    ) {
+        return new ResponseEntity<>(saleService.voidSale(ventaId, request, user), HttpStatus.OK);
     }
 
 }

@@ -41,4 +41,8 @@ public class ProductRequest {
     @NotNull(message = "La unidad de medida es obligatoria")
     private MeasurementUnitEnum measurementUnit;
 
+    // Opcional: estado de control de stock (ver StockStatusEnum). Si no viene,
+    // ProductServiceImpl.createProduct le pone el default EN_TRANSICION.
+    private String stockStatus;
+
 }

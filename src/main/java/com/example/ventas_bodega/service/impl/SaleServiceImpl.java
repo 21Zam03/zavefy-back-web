@@ -10,7 +10,9 @@ import com.example.ventas_bodega.entity.SaleDetailEntity;
 import com.example.ventas_bodega.entity.SaleEntity;
 import com.example.ventas_bodega.entity.SalePaymentLineEntity;
 import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.enums.StockStatusEnum;
 import com.example.ventas_bodega.exceptions.BusinessException;
+import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.mapper.SaleDetailMapper;
 import com.example.ventas_bodega.mapper.SaleMapper;
 import com.example.ventas_bodega.mapper.SalePaymentLineMapper;
@@ -19,6 +21,8 @@ import com.example.ventas_bodega.repository.ProductRepository;
 import com.example.ventas_bodega.repository.SaleDetailRepository;
 import com.example.ventas_bodega.repository.SalePaymentLineRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
+import com.example.ventas_bodega.request.SaleClientUpdateRequest;
+import com.example.ventas_bodega.request.VoidSaleRequest;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,17 +107,26 @@ public class SaleServiceImpl implements SaleService {
         for (int i = 0; i < saleDto.getSaleDetails().size(); i++) {
             SaleDetailDto detail = saleDto.getSaleDetails().get(i);
 
-            if (detail.getProductId() == null && detail.isHasAutomaticSaved() && !userEntity.getCompany().isHasStock()) {
+            if (detail.getProductId() == null && detail.isHasAutomaticSaved()) {
+                // Producto vendido sin existir todavía en el inventario: se crea al vuelo
+                // marcado como NO_CONTROLADO (stock 0, no bloquea la venta por falta de stock).
                 ProductDto productDto = new ProductDto();
                 productDto.setPrice(detail.getUnitePrice());
                 productDto.setName(detail.getName());
+                productDto.setBarcode(detail.getBarcode());
                 productDto.setMeasurementUnit(detail.getMeasurementUnit());
                 productDto.setNotes("Producto creado de forma automatica");
                 productDto.setActive(true);
+                productDto.setStockStatus(StockStatusEnum.NO_CONTROLADO.name());
 
-                Object[] productCreated = productService.createProduct(productDto, userEntity).getObject();
-                detail.setProductId(Long.parseLong(productCreated[0].toString()));
-                detail.setNotes(productCreated[4].toString());
+                MessageResponse productResponse = productService.createProduct(productDto, userEntity);
+                if (!productResponse.isStatus() || productResponse.getProductDto() == null) {
+                    throw new IllegalStateException(
+                            productResponse.getMessage() != null ? productResponse.getMessage() : "No se pudo crear el producto de la venta"
+                    );
+                }
+                detail.setProductId(productResponse.getProductDto().getProductId());
+                detail.setNotes("Producto creado de forma automatica");
             }
 
             SaleDetailEntity saleDetailEntity = SaleDetailMapper.dtoToEntity(detail);
@@ -208,6 +222,71 @@ public class SaleServiceImpl implements SaleService {
     public List<SaleDetailDto> getDetailsOfSale(UserEntity user, Long id) {
         List<SaleDetailDtoInter> detailEntityList = saleDetailRepository.findDetailsBySaleId(id);
         return SaleDetailMapper.interListToDtoList(detailEntityList);
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse updateSaleClientInfo(Integer ventaId, SaleClientUpdateRequest request, UserEntity userEntity) {
+        SaleEntity sale = saleRepository.findByVentaIdAndUser_Company_Ruc(ventaId, userEntity.getCompany().getRuc())
+                .orElseThrow(() -> new NotFoundException("La venta no existe"));
+
+        sale.setClientName(request.getClientName());
+        sale.setClientDocumentType(request.getClientDocumentType());
+        sale.setClientDocumentNumber(request.getClientDocumentNumber());
+        sale.setClientPhoneNumber(request.getClientPhoneNumber());
+        sale.setClientAddress(request.getClientAddress());
+        sale.setClientId(request.getClientId());
+        sale.setNotes(request.getNotes());
+        saleRepository.save(sale);
+
+        MessageResponse messageResponse = new MessageResponse();
+        messageResponse.setSaleDto(SaleMapper.entityToDto(sale));
+        messageResponse.setMessage("Datos de la venta actualizados correctamente");
+        messageResponse.setStatus(true);
+        return messageResponse;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MessageResponse voidSale(Integer ventaId, VoidSaleRequest request, UserEntity userEntity) {
+        SaleEntity sale = saleRepository.findByVentaIdAndUser_Company_Ruc(ventaId, userEntity.getCompany().getRuc())
+                .orElseThrow(() -> new NotFoundException("La venta no existe"));
+
+        if (sale.isVoided()) {
+            throw new BusinessException("Esta venta ya está anulada");
+        }
+        // La caja ya cerrada tiene su cuadre (montoContado/montoEsperado) congelado: anular
+        // después dejaría ese cuadre desincronizado en silencio.
+        if (sale.getCaja() != null && sale.getCaja().getFechaCierre() != null) {
+            throw new BusinessException("No se puede anular una venta cuya caja ya fue cerrada");
+        }
+        // El pago parcial ya generó una cuenta por cobrar; hoy no hay forma de cancelarla o
+        // sincronizarla desde aquí, así que se bloquea por seguridad.
+        if (Boolean.TRUE.equals(sale.getPartialPayment())) {
+            throw new BusinessException("No se puede anular una venta con pago parcial (fiado)");
+        }
+        if (request.getReason() == null || request.getReason().isBlank()) {
+            throw new BusinessException("Indica el motivo de la anulación");
+        }
+
+        if (userEntity.getCompany().isHasStock()) {
+            List<SaleDetailEntity> details = saleDetailRepository.findBySaleEntity_VentaId(Long.valueOf(ventaId));
+            MessageResponse reverseResponse = inventoryService.reverseSaleStock(details, userEntity, Long.valueOf(ventaId));
+            if (!reverseResponse.isStatus()) {
+                throw new IllegalStateException(reverseResponse.getMessage());
+            }
+        }
+
+        sale.setVoided(true);
+        sale.setVoidedDate(LocalDateTime.now());
+        sale.setVoidReason(request.getReason());
+        saleRepository.save(sale);
+
+        MessageResponse messageResponse = new MessageResponse();
+        messageResponse.setSaleDto(SaleMapper.entityToDto(sale));
+        messageResponse.setMessage("Venta anulada correctamente");
+        messageResponse.setStatus(true);
+        return messageResponse;
     }
 
     private void validateDataOfSaleDto(SaleDto saleDto) {

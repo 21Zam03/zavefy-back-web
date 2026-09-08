@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.entity;
 
+import com.example.ventas_bodega.enums.StockStatusEnum;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -46,6 +47,13 @@ public class ProductEntity {
 
     @Column(name = "codigo_barras_interno")
     private String internalCode;
+
+    @Column(name = "codigo_generado_sistema", nullable = false)
+    private boolean barcodeGenerated;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_stock", length = 20)
+    private StockStatusEnum stockStatus;
 
     @Column(name = "image_url")
     private String imageUrl;
@@ -153,6 +161,22 @@ public class ProductEntity {
 
     public void setBarcode(String barcode) {
         this.barcode = barcode;
+    }
+
+    public boolean isBarcodeGenerated() {
+        return barcodeGenerated;
+    }
+
+    public void setBarcodeGenerated(boolean barcodeGenerated) {
+        this.barcodeGenerated = barcodeGenerated;
+    }
+
+    public StockStatusEnum getStockStatus() {
+        return stockStatus;
+    }
+
+    public void setStockStatus(StockStatusEnum stockStatus) {
+        this.stockStatus = stockStatus;
     }
 
     public Long getId() {

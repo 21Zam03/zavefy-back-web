@@ -15,8 +15,10 @@ public class ProductGeneralServiceImpl implements ProductGeneralService {
     private final ProductGeneralRepository productGeneralRepository;
 
     @Override
-    public void createIfNotExists(String barcodeOriginalFromDto, ProductEntity product) {
-        if (barcodeOriginalFromDto == null || barcodeOriginalFromDto.isBlank()) {
+    public void createIfNotExists(ProductEntity product) {
+        // Solo los productos con código de barras internacional (no generado por el
+        // sistema) deben ingresar al catálogo general compartido entre empresas.
+        if (product.isBarcodeGenerated() || product.getBarcode() == null || product.getBarcode().isBlank()) {
             return;
         }
 

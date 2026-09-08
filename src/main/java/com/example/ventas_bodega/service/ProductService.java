@@ -15,7 +15,7 @@ public interface ProductService {
     public MessageResponse createProduct(ProductDto productDto, UserEntity userEntity) throws Exception;
     public List<MessageResponse> createProductsBulk(List<ProductRequest> requests, UserEntity user);
     public ProductDto searchProduct(String barcode, String ruc);
-    public Page<ProductDto> getProductsByCompany(String ruc, String barcode, String name, String stockStatus, Boolean active, Long categoryId, int page, int size);
+    public Page<ProductDto> getProductsByCompany(String ruc, String barcode, String name, String stockStatus, Boolean active, Long categoryId, String controlStatus, int page, int size);
     public ProductDto searchProductsInSaleModule(String ruc, String search);
     public List<ProductDto> getProductSuggestions(String ruc, String search);
     public List<TopSellingProductDtoInter> getTopSellingProducts(String ruc);

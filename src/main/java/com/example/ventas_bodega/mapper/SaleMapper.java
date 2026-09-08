@@ -41,6 +41,11 @@ public class SaleMapper {
         saleDto.setRegisterDate(saleEntity.getRegisterDate());
         saleDto.setMoneyType(saleEntity.getMoneyType());
         saleDto.setClientName(saleEntity.getClientName());
+        saleDto.setClientDocumentNumber(saleEntity.getClientDocumentNumber());
+        saleDto.setClientDocumentType(saleEntity.getClientDocumentType());
+        saleDto.setClientPhoneNumber(saleEntity.getClientPhoneNumber());
+        saleDto.setClientAddress(saleEntity.getClientAddress());
+        saleDto.setNotes(saleEntity.getNotes());
         saleDto.setPaymentMethod(saleEntity.getPaymentMethod());
         saleDto.setCardCommissionPercent(saleEntity.getCardCommissionPercent());
         saleDto.setCardCommissionAmount(saleEntity.getCardCommissionAmount());
@@ -50,6 +55,9 @@ public class SaleMapper {
         saleDto.setPartialPayment(saleEntity.getPartialPayment());
         saleDto.setAmountPaidNow(saleEntity.getAmountPaidNow());
         saleDto.setPendingBalance(saleEntity.getPendingBalance());
+        saleDto.setVoided(saleEntity.isVoided());
+        saleDto.setVoidedDate(saleEntity.getVoidedDate());
+        saleDto.setVoidReason(saleEntity.getVoidReason());
         return saleDto;
     }
 

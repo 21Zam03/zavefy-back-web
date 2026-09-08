@@ -30,6 +30,7 @@ public class ProductDto {
     private boolean removeImage;
     private boolean alreadyInInventory;
     private Long existingProductId;
+    private String stockStatus;
 
     public ProductDto() {
     }
@@ -228,6 +229,14 @@ public class ProductDto {
 
     public void setExistingProductId(Long existingProductId) {
         this.existingProductId = existingProductId;
+    }
+
+    public String getStockStatus() {
+        return stockStatus;
+    }
+
+    public void setStockStatus(String stockStatus) {
+        this.stockStatus = stockStatus;
     }
 
     @Override

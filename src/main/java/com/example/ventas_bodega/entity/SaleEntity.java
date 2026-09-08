@@ -102,6 +102,15 @@ public class SaleEntity {
     @Column(name = "saldo_pendiente")
     private BigDecimal pendingBalance;
 
+    @Column(name = "anulada", nullable = false)
+    private boolean voided;
+
+    @Column(name = "fecha_anulacion")
+    private LocalDateTime voidedDate;
+
+    @Column(name = "motivo_anulacion")
+    private String voidReason;
+
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
     private UserEntity user;
@@ -384,6 +393,30 @@ public class SaleEntity {
 
     public void setPendingBalance(BigDecimal pendingBalance) {
         this.pendingBalance = pendingBalance;
+    }
+
+    public boolean isVoided() {
+        return voided;
+    }
+
+    public void setVoided(boolean voided) {
+        this.voided = voided;
+    }
+
+    public LocalDateTime getVoidedDate() {
+        return voidedDate;
+    }
+
+    public void setVoidedDate(LocalDateTime voidedDate) {
+        this.voidedDate = voidedDate;
+    }
+
+    public String getVoidReason() {
+        return voidReason;
+    }
+
+    public void setVoidReason(String voidReason) {
+        this.voidReason = voidReason;
     }
 
     @Override

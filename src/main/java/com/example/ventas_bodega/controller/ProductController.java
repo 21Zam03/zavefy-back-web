@@ -108,13 +108,14 @@ public class ProductController {
             @RequestParam(required = false) String stockStatus,
             @RequestParam(required = false) Boolean active,
             @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) String controlStatus,
             @CurrentUser UserEntity user
     ) {
         Long id = null;
         if(categoryId != null) {
             id = Long.valueOf(categoryId);
         }
-        return new ResponseEntity(this.productService.getProductsByCompany(user.getCompany().getRuc(), barcode, name, stockStatus, active, id, page, size), HttpStatus.OK);
+        return new ResponseEntity(this.productService.getProductsByCompany(user.getCompany().getRuc(), barcode, name, stockStatus, active, id, controlStatus, page, size), HttpStatus.OK);
     }
 
     @GetMapping

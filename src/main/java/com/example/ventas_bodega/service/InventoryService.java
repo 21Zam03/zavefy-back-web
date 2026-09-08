@@ -7,6 +7,7 @@ import com.example.ventas_bodega.dto.PurchaseItemDto;
 import com.example.ventas_bodega.dto.SaleDetailDto;
 import com.example.ventas_bodega.entity.AdjustmentStockEntity;
 import com.example.ventas_bodega.entity.ProductEntity;
+import com.example.ventas_bodega.entity.SaleDetailEntity;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.response.MessageResponse;
 import org.springframework.data.domain.Page;
@@ -21,5 +22,6 @@ public interface InventoryService {
     public Page<HistoryStockDto> getHistoryStockByCompany(UserEntity userEntity, String fromDate, String toDate, String event, String searchKey, int page, int size);
     public MessageResponse createAdjustmentStock(AdjustmentStockDto adjustmentStockDto, UserEntity userEntity);
     public MessageResponse createHistoryStockForPurchase(List<PurchaseItemDto> purchaseItemDtoList, UserEntity userEntity, Long purchaseId);
+    public MessageResponse reverseSaleStock(List<SaleDetailEntity> saleDetailEntityList, UserEntity userEntity, Long saleId);
 
 }

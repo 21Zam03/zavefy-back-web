@@ -10,6 +10,72 @@ public class PurchaseItemDto {
     private BigDecimal cost;
     private BigDecimal totalCost;
 
+    // Datos para crear el producto al vuelo cuando el ítem no trae productId
+    // (negocio recibiendo mercadería de un producto que aún no existe en su inventario).
+    private String barcode;
+    private String name;
+    private String description;
+    private BigDecimal price;
+    private String category;
+    private String measurementUnit;
+    private String imageUrl;
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getMeasurementUnit() {
+        return measurementUnit;
+    }
+
+    public void setMeasurementUnit(String measurementUnit) {
+        this.measurementUnit = measurementUnit;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     public Long getPurchaseItemId() {
         return purchaseItemId;
     }

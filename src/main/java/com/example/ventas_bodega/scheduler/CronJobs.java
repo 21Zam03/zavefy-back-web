@@ -22,6 +22,7 @@ public class CronJobs {
         this.notificationService = notificationService;
     }
 
+    /*
     @Scheduled(fixedDelay = 10000)
     public void OpportunityProcess() {
         try {
@@ -32,6 +33,7 @@ public class CronJobs {
             log.error("ERROR PROCESANDO OPORTUNIDADES");
         }
     }
+    * */
 
     @Scheduled(fixedDelay = 3600000)
     public void NotificationsProcess() {

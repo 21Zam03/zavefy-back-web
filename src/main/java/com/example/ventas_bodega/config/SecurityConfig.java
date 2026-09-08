@@ -52,7 +52,7 @@ public class SecurityConfig {
                             "http://192.168.101.4:5173/",
                             "http://10.74.51.227:5173/",
                             "http://192.168.18.21:5173/",
-                            "http://172.16.202.25:5173/"
+                            "http://172.20.181.227:5173/"
                     ));
                     config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS", "PATCH"));
                     config.setAllowedHeaders(List.of("*"));

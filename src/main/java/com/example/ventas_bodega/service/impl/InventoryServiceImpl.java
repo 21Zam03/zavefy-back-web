@@ -8,7 +8,9 @@ import com.example.ventas_bodega.dto.interfaces.HistoryStockDtoInter;
 import com.example.ventas_bodega.entity.AdjustmentStockEntity;
 import com.example.ventas_bodega.entity.HistoryStockEntity;
 import com.example.ventas_bodega.entity.ProductEntity;
+import com.example.ventas_bodega.entity.SaleDetailEntity;
 import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.enums.StockStatusEnum;
 import com.example.ventas_bodega.mapper.AdjustmentStockMapper;
 import com.example.ventas_bodega.mapper.HistoryStockMapper;
 import com.example.ventas_bodega.repository.AdjustmentStockRepository;
@@ -54,13 +56,23 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public MessageResponse createHistoryStock(List<SaleDetailDto> saleDetailDtoList, UserEntity userEntity, String event) {
-        System.out.println("SIZE: "+saleDetailDtoList.size());
         MessageResponse messageResponse = new MessageResponse();
         try {
             for (SaleDetailDto saleDetailDto : saleDetailDtoList) {
-                HistoryStockEntity historyStockEntity = new HistoryStockEntity();
-                BigDecimal stockBefore = saleDetailDto.getStock();
+                ProductEntity product = productRepository.findById(saleDetailDto.getProductId())
+                        .orElseThrow(() -> new NotFoundException("El producto con id " + saleDetailDto.getProductId() + " no existe"));
+
+                // Solo NO_CONTROLADO y EN_TRANSICION permiten que el stock quede en negativo:
+                // ninguno de los dos viene de un conteo físico confirmado todavía, así que no
+                // tiene sentido bloquear la venta por un número que aún no está verificado.
+                // SINCRONIZADO sí viene de un conteo/ajuste reciente, así que ahí el stock ya
+                // se considera confiable y se aplica el candado estricto.
+                boolean allowsNegative = product.getStockStatus() == StockStatusEnum.NO_CONTROLADO
+                        || product.getStockStatus() == StockStatusEnum.EN_TRANSICION;
+                BigDecimal stockBefore = product.getStock() == null ? BigDecimal.ZERO : product.getStock();
                 BigDecimal stockAfter = stockBefore.subtract(saleDetailDto.getQuantity());
+
+                HistoryStockEntity historyStockEntity = new HistoryStockEntity();
                 historyStockEntity.setEvent(event);
                 historyStockEntity.setStockBefore(stockBefore);
                 historyStockEntity.setStockAfter(stockAfter);
@@ -69,31 +81,24 @@ public class InventoryServiceImpl implements InventoryService {
                 historyStockEntity.setSaleId(saleDetailDto.getSaleId());
                 historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
                 historyStockEntity.setCompanyId(userEntity.getCompany().getCompanyId());
-                HistoryStockEntity historyStock = historyStockRepository.save(historyStockEntity);
-                System.out.println("HISTORY CREATED: "+historyStock.toString());
-            }
+                historyStockRepository.save(historyStockEntity);
 
-            // Convertimos a batch args (forma más estable en Spring Boot 4)
-            List<Object[]> batchArgs = saleDetailDtoList.stream()
-                    .map(item -> new Object[]{
-                            item.getQuantity(),
-                            item.getProductId(),
-                            item.getQuantity()
-                    })
-                    .toList();
-
-            int[] resultados = jdbcTemplate.batchUpdate(
-                    "UPDATE tb_producto SET stock = stock - ? WHERE id_producto = ? AND stock >= ?",
-                    batchArgs
-            );
-            System.out.println("TODO BIEN");
-            // Validación de resultados
-            for (int j = 0; j < resultados.length; j++) {
-                if (resultados[j] == 0) {
-                    throw new RuntimeException(
-                            "Stock insuficiente o producto no existe. ID: " +
-                                    saleDetailDtoList.get(j).getProductId()
+                int rowsAffected;
+                if (allowsNegative) {
+                    rowsAffected = jdbcTemplate.update(
+                            "UPDATE tb_producto SET stock = stock - ? WHERE id_producto = ?",
+                            saleDetailDto.getQuantity(), saleDetailDto.getProductId()
                     );
+                } else {
+                    rowsAffected = jdbcTemplate.update(
+                            "UPDATE tb_producto SET stock = stock - ? WHERE id_producto = ? AND stock >= ?",
+                            saleDetailDto.getQuantity(), saleDetailDto.getProductId(), saleDetailDto.getQuantity()
+                    );
+                    if (rowsAffected == 0) {
+                        throw new RuntimeException(
+                                "Stock insuficiente o producto no existe. ID: " + saleDetailDto.getProductId()
+                        );
+                    }
                 }
             }
 
@@ -187,6 +192,14 @@ public class InventoryServiceImpl implements InventoryService {
             AdjustmentStockEntity adjustmentStockCreated = adjustmentStockRepository.save(adjustmentStockEntity);
 
             createHistoryStock(adjustmentStockCreated, userEntity, "AJUSTE");
+
+            // Un ajuste manual es, por definición, la persona declarando cuál es el stock
+            // real correcto en este momento: el producto queda sincronizado.
+            jdbcTemplate.update(
+                    "UPDATE tb_producto SET estado_stock = ? WHERE id_producto = ?",
+                    StockStatusEnum.SINCRONIZADO.name(), adjustmentStockCreated.getProductId()
+            );
+
             messageResponse.setMessage("Se creo el ajuste de stock de manera exitosa");
             messageResponse.setStatus(true);
             return messageResponse;
@@ -207,7 +220,13 @@ public class InventoryServiceImpl implements InventoryService {
                         .orElseThrow(() -> new NotFoundException("El producto con id " + item.getProductId() + " no existe"));
 
                 BigDecimal stockBefore = product.getStock() == null ? BigDecimal.ZERO : product.getStock();
-                BigDecimal stockAfter = stockBefore.add(item.getQuantity());
+                // Un stock en 0 o negativo es físicamente imposible: no representa nada real (viene
+                // de ventas NO_CONTROLADO/EN_TRANSICION sin respaldo), así que esta compra fija el
+                // stock en la cantidad comprada en vez de sumarse sobre un número que nunca fue
+                // confiable. Si el stock ya era positivo (aunque el producto no esté SINCRONIZADO
+                // todavía), sí es un número físicamente posible y se suma normalmente.
+                boolean resetStock = stockBefore.compareTo(BigDecimal.ZERO) <= 0;
+                BigDecimal stockAfter = resetStock ? item.getQuantity() : stockBefore.add(item.getQuantity());
 
                 HistoryStockEntity historyStockEntity = new HistoryStockEntity();
                 historyStockEntity.setEvent("COMPRA");
@@ -219,21 +238,59 @@ public class InventoryServiceImpl implements InventoryService {
                 historyStockEntity.setCompanyId(userEntity.getCompany().getCompanyId());
                 historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
                 historyStockRepository.save(historyStockEntity);
+
+                if (resetStock) {
+                    jdbcTemplate.update("UPDATE tb_producto SET stock = ? WHERE id_producto = ?", item.getQuantity(), item.getProductId());
+                } else {
+                    jdbcTemplate.update("UPDATE tb_producto SET stock = stock + ? WHERE id_producto = ?", item.getQuantity(), item.getProductId());
+                }
             }
 
-            List<Object[]> batchArgs = purchaseItemDtoList.stream()
-                    .map(item -> new Object[]{
-                            item.getQuantity(),
-                            item.getProductId()
-                    })
-                    .toList();
-
-            jdbcTemplate.batchUpdate(
-                    "UPDATE tb_producto SET stock = stock + ? WHERE id_producto = ?",
-                    batchArgs
-            );
-
             messageResponse.setMessage("Se actualizo el stock por la compra de forma exitosa");
+            messageResponse.setStatus(true);
+            return messageResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
+            messageResponse.setMessage(e.getMessage());
+            messageResponse.setStatus(false);
+            return messageResponse;
+        }
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse reverseSaleStock(List<SaleDetailEntity> saleDetailEntityList, UserEntity userEntity, Long saleId) {
+        MessageResponse messageResponse = new MessageResponse();
+        try {
+            for (SaleDetailEntity detail : saleDetailEntityList) {
+                ProductEntity product = productRepository.findById(detail.getProductId()).orElse(null);
+                // El producto pudo haberse desactivado/eliminado desde la venta original; si ya no
+                // existe no hay a qué devolverle el stock, se omite sin interrumpir el resto.
+                if (product == null) {
+                    continue;
+                }
+
+                BigDecimal stockBefore = product.getStock() == null ? BigDecimal.ZERO : product.getStock();
+                BigDecimal stockAfter = stockBefore.add(detail.getQuantity());
+
+                HistoryStockEntity historyStockEntity = new HistoryStockEntity();
+                historyStockEntity.setEvent("REVERSION_VENTA");
+                historyStockEntity.setStockBefore(stockBefore);
+                historyStockEntity.setStockAfter(stockAfter);
+                historyStockEntity.setStockVariation(stockAfter.subtract(stockBefore));
+                historyStockEntity.setProductId(detail.getProductId());
+                historyStockEntity.setSaleId(saleId);
+                historyStockEntity.setCompanyId(userEntity.getCompany().getCompanyId());
+                historyStockEntity.setCreatedBy(Long.valueOf(userEntity.getUserId()));
+                historyStockRepository.save(historyStockEntity);
+
+                jdbcTemplate.update(
+                        "UPDATE tb_producto SET stock = stock + ? WHERE id_producto = ?",
+                        detail.getQuantity(), detail.getProductId()
+                );
+            }
+
+            messageResponse.setMessage("Se revirtió el stock de la venta original correctamente");
             messageResponse.setStatus(true);
             return messageResponse;
         } catch (Exception e) {

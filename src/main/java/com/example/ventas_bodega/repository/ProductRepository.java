@@ -39,6 +39,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
         OR (:stockStatus = 'STOCK_SUFICIENTE' AND p.stock > 50)
     )
     AND (:active IS NULL OR p.activo = :active)
+    AND (:controlStatus IS NULL OR p.estado_stock = :controlStatus)
     ORDER BY p.fecha_actualizacion DESC
     """,
             countQuery = """
@@ -57,6 +58,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
         OR (:stockStatus = 'STOCK_SUFICIENTE' AND p.stock > 50)
     )
     AND (:active IS NULL OR p.activo = :active)
+    AND (:controlStatus IS NULL OR p.estado_stock = :controlStatus)
     """,
             nativeQuery = true
     )
@@ -67,6 +69,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             @Param("stockStatus") String stockStatus,
             @Param("active") Boolean active,
             @Param("category") Long categoryId,
+            @Param("controlStatus") String controlStatus,
             Pageable pageable
     );
 
@@ -292,11 +295,14 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     // Usadas por el cron de notificaciones (NotificationServiceImpl): escanean todas las empresas de una vez,
     // con los mismos umbrales que el filtro stockStatus de ProductController (SIN_STOCK / BAJO_STOCK).
+    // Se excluyen los productos NO_CONTROLADO: su stock nunca fue verificado (nace en 0 y puede quedar
+    // en negativo por ventas sin control), así que alertar sobre él sería una señal engañosa.
     @Query(value = """
     SELECT p.id_empresa, p.id_producto, p.nombre, p.stock
     FROM tb_producto p
     WHERE p.activo = true
       AND p.stock = 0
+      AND (p.estado_stock IS NULL OR p.estado_stock <> 'NO_CONTROLADO')
     """, nativeQuery = true)
     List<Object[]> findOutOfStockProducts();
 
@@ -305,6 +311,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     FROM tb_producto p
     WHERE p.activo = true
       AND p.stock BETWEEN 1 AND 10
+      AND (p.estado_stock IS NULL OR p.estado_stock <> 'NO_CONTROLADO')
     """, nativeQuery = true)
     List<Object[]> findLowStockProducts();
 

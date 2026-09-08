@@ -15,6 +15,7 @@ public class SaleDetailDto {
     private boolean hasAutomaticSaved;
     private String notes;
     private BigDecimal stock;
+    private String barcode;
 
     public SaleDetailDto() {}
 
@@ -113,5 +114,13 @@ public class SaleDetailDto {
 
     public void setStock(BigDecimal stock) {
         this.stock = stock;
+    }
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
     }
 }

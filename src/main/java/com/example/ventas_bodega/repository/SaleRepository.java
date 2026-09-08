@@ -9,8 +9,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
+
+    Optional<SaleEntity> findByVentaIdAndUser_Company_Ruc(Integer ventaId, String ruc);
 
     @Query("SELECT COALESCE(SUM(v.total), 0) FROM SaleEntity v WHERE v.caja.id = :cajaId AND LOWER(v.paymentMethod) = 'efectivo'")
     BigDecimal sumTotalEfectivoByCajaId(@Param("cajaId") Long cajaId);

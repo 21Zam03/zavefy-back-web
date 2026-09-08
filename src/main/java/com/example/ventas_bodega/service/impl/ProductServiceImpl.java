@@ -4,6 +4,7 @@ import com.example.ventas_bodega.dto.*;
 import com.example.ventas_bodega.dto.interfaces.TopSellingProductDtoInter;
 import com.example.ventas_bodega.entity.*;
 import com.example.ventas_bodega.enums.StockMovementTypeEnum;
+import com.example.ventas_bodega.enums.StockStatusEnum;
 import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.mapper.ProductMapper;
 import com.example.ventas_bodega.repository.ProductRepository;
@@ -80,7 +81,9 @@ public class ProductServiceImpl implements ProductService {
             productValidator.validateForCreation(productDto, userEntity);
 
             // 2. LOGICA DE NEGOCIO EN CATEGORIAS
-            CategoryEntity categoryCreated = categoryService.getOrCreate(productDto.getCategory(), userEntity.getCompany());
+            String categoryName = productDto.getCategory() != null && !productDto.getCategory().isBlank()
+                    ? productDto.getCategory() : "General";
+            CategoryEntity categoryCreated = categoryService.getOrCreate(categoryName, userEntity.getCompany());
 
             // 3. CREACION DEL PRODUCTO A BD
             ProductEntity productToCreate = ProductMapper.dtoToEntity(productDto);
@@ -88,6 +91,7 @@ public class ProductServiceImpl implements ProductService {
             productToCreate.setCompany(userEntity.getCompany());
             productToCreate.setActive(true);
             productToCreate.setStock(productDto.getStock() == null ? BigDecimal.ZERO : productDto.getStock());
+            productToCreate.setStockStatus(resolveStockStatus(productDto.getStockStatus()));
             ProductEntity productCreated = productRepository.save(productToCreate);
 
             // 4. PROCESAR IMAGEN
@@ -97,11 +101,13 @@ public class ProductServiceImpl implements ProductService {
             if (productCreated.getBarcode() == null || productCreated.getBarcode().isBlank()) {
                 String barcodeGenerated = ProductUtil.generarCodigoInterno(productCreated.getId());
                 productCreated.setBarcode(barcodeGenerated);
+                productCreated.setBarcodeGenerated(true);
                 productRepository.save(productCreated);
             }
 
             // 6. SINCRONIZAR PRODUCTO CON CATÁLOGO GENERAL
-            productGeneralService.createIfNotExists(productDto.getBarcode(), productCreated);
+            // (createIfNotExists valida internamente que el código no sea generado por el sistema)
+            productGeneralService.createIfNotExists(productCreated);
 
             // 7. REGISTRAR HISTORIAL DE STOCK
             if (userEntity.getCompany().isHasStock()) {
@@ -168,12 +174,14 @@ public class ProductServiceImpl implements ProductService {
         adjustmentStockDto.setReason("Actualización masiva de stock (bulk import)");
 
         // reutiliza el mismo mecanismo de InventoryController.adjustStock: guarda el ajuste,
-        // registra el historial (calculando stockAfter - stockBefore) y actualiza tb_producto.stock
+        // registra el historial (calculando stockAfter - stockBefore), actualiza tb_producto.stock
+        // y deja el producto SINCRONIZADO (ver InventoryServiceImpl.createAdjustmentStock).
         MessageResponse adjustmentResult = inventoryService.createAdjustmentStock(adjustmentStockDto, user);
         if (!adjustmentResult.isStatus()) {
             return adjustmentResult;
         }
 
+        existing.setStockStatus(StockStatusEnum.SINCRONIZADO);
         existing.setStock(newStock);
         return buildProductUpdatedResponse(existing);
     }
@@ -194,6 +202,20 @@ public class ProductServiceImpl implements ProductService {
         response.setProductDto(ProductMapper.entityToDto(product));
         response.setObject(ProductMapper.entityToObject(product));
         return response;
+    }
+
+    // Estado de control de stock del producto (ver StockStatusEnum). Si el DTO no trae
+    // uno explícito, EN_TRANSICION es el default seguro: tiene un origen conocido
+    // (registro manual, compra) pero todavía no fue reconciliado con un conteo físico.
+    private StockStatusEnum resolveStockStatus(String stockStatus) {
+        if (stockStatus == null || stockStatus.isBlank()) {
+            return StockStatusEnum.EN_TRANSICION;
+        }
+        try {
+            return StockStatusEnum.valueOf(stockStatus);
+        } catch (IllegalArgumentException e) {
+            return StockStatusEnum.EN_TRANSICION;
+        }
     }
 
     private String buildProductImagePath(String ruc, Long productId) {
@@ -261,9 +283,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductDto> getProductsByCompany(String ruc, String barcode, String name, String stockStatus, Boolean active, Long categoryId, int page, int size) {
+    public Page<ProductDto> getProductsByCompany(String ruc, String barcode, String name, String stockStatus, Boolean active, Long categoryId, String controlStatus, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<ProductEntity> productEntityPage = productRepository.findProductsByCompanyAndBarcode(ruc, barcode, name, stockStatus, active, categoryId, pageable);
+        Page<ProductEntity> productEntityPage = productRepository.findProductsByCompanyAndBarcode(ruc, barcode, name, stockStatus, active, categoryId, controlStatus, pageable);
         List<ProductDto> productDtoList = new ArrayList<>();
         for (ProductEntity productEntity : productEntityPage.getContent()) {
             ProductDto productDto = ProductMapper.entityToDto(productEntity);

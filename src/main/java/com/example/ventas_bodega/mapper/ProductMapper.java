@@ -93,6 +93,7 @@ public class ProductMapper {
         product.setCreatedDate(formatToYearMonthDay(productEntity.getCreatedDate()));
         product.setUpdatedDate(formatToYearMonthDay(productEntity.getUpdatedDate()));
         product.setMeasurementUnit(productEntity.getMeasurementUnit());
+        product.setStockStatus(productEntity.getStockStatus() != null ? productEntity.getStockStatus().name() : null);
         return product;
     }
 
@@ -183,6 +184,7 @@ public class ProductMapper {
         productDto.setImageUrl(productRequest.getImageUrl());
         productDto.setFile(file);
         productDto.setMeasurementUnit(productRequest.getMeasurementUnit().toString());
+        productDto.setStockStatus(productRequest.getStockStatus());
         return productDto;
     }
 
