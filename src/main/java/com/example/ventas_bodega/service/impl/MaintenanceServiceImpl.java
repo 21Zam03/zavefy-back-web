@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     private final RoleRepository roleRepository;
     private final PlanRepository planRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public MaintenanceServiceImpl(
@@ -50,7 +52,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             UserRepository userRepository, ProductRepository productRepository,
             ClientRepository clientRepository, MessageSourceAware messageSourceAware,
             RoleRepository roleRepository, PlanRepository planRepository,
-            SubscriptionRepository subscriptionRepository) {
+            SubscriptionRepository subscriptionRepository, PasswordEncoder passwordEncoder) {
         this.categoryRepository = categoryRepository;
         this.yapeRepository = yapeRepository;
         this.categoryClientRepository = categoryClientRepository;
@@ -63,6 +65,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         this.roleRepository = roleRepository;
         this.planRepository = planRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -175,6 +178,10 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             CompanyEntity companyCreated = companyRepository.save(companyEntity);
 
             UserEntity userEntity = UserMapper.dtoToEntity(userDto);
+            // UserMapper.dtoToEntity copia la contraseña tal cual llega del request — sin esto
+            // quedaba en texto plano en tb_usuario (a diferencia de AuthServiceImpl/UserServiceImpl,
+            // que sí la encriptan antes de guardar).
+            userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
 
             RoleEntity adminRole = roleRepository.findByName("Administrador")
                     .orElseThrow(() -> new NotFoundException("No se encontró el rol Administrador. Verifica que el catálogo de roles esté inicializado."));
