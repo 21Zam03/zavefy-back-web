@@ -6,6 +6,7 @@ import com.example.ventas_bodega.dto.interfaces.ClientDtoInter;
 import com.example.ventas_bodega.entity.*;
 import com.example.ventas_bodega.enums.BillingPeriodEnum;
 import com.example.ventas_bodega.enums.SubscriptionStatusEnum;
+import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.mapper.*;
 import com.example.ventas_bodega.repository.*;
@@ -169,6 +170,15 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         MessageResponse messageResponse = new MessageResponse();
         try {
 
+            // El RUC es obligatorio salvo que el plan elegido sea el Básico (para negocios
+            // informales que aún no tienen RUC). Se resuelve el plan primero para poder validar
+            // esto ANTES de guardar nada — y se reutiliza más abajo para crear la suscripción.
+            PlanEntity plan = planId != null ? planRepository.findById(planId).orElse(null) : null;
+            boolean rucRequired = !isBasicPlan(plan);
+            if (rucRequired && (companyDto.getRuc() == null || companyDto.getRuc().isBlank())) {
+                throw new BusinessException("El RUC es obligatorio para el plan seleccionado.");
+            }
+
             CompanyEntity companyEntity = CompanyMapper.dtoToEntity(companyDto);
             // CompanyMapper/CompanyDto no cargan isTest desde el request (viene aparte, como
             // parámetro de este método) ni isActive (no existe en el DTO): sin esto, toda
@@ -183,8 +193,11 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             // que sí la encriptan antes de guardar).
             userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
 
-            RoleEntity adminRole = roleRepository.findByName("Administrador")
-                    .orElseThrow(() -> new NotFoundException("No se encontró el rol Administrador. Verifica que el catálogo de roles esté inicializado."));
+            // BUSINESS_ADMIN es el rol predeterminado del administrador inicial de una empresa
+            // nueva (rol de sistema real, ya sembrado en tb_rol con sus permisos — ver
+            // RoleAndPermissionSeeder). Reemplaza al antiguo "Administrador".
+            RoleEntity adminRole = roleRepository.findByName("BUSINESS_ADMIN")
+                    .orElseThrow(() -> new NotFoundException("No se encontró el rol BUSINESS_ADMIN. Verifica que el catálogo de roles esté inicializado."));
             userEntity.setRoleList(Set.of(adminRole));
 
             userEntity.setCompany(companyCreated);
@@ -199,20 +212,18 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
             // Suscripción inicial: opcional porque el modal de creación puede fallar al cargar
             // los planes (usa un fallback de solo UI en ese caso, sin id real que enviar).
-            if (planId != null) {
-                planRepository.findById(planId).ifPresent(plan -> {
-                    SubscriptionEntity subscription = new SubscriptionEntity();
-                    subscription.setCompany(companyCreated);
-                    subscription.setPlan(plan);
-                    subscription.setStatus(parseSubscriptionStatus(subscriptionStatus));
-                    LocalDateTime now = LocalDateTime.now();
-                    subscription.setStartDate(now);
-                    subscription.setPrice(plan.getPrice());
-                    subscription.setNextPaymentDate(
-                            plan.getBillingPeriod() == BillingPeriodEnum.YEARLY ? now.plusYears(1) : now.plusMonths(1)
-                    );
-                    subscriptionRepository.save(subscription);
-                });
+            if (plan != null) {
+                SubscriptionEntity subscription = new SubscriptionEntity();
+                subscription.setCompany(companyCreated);
+                subscription.setPlan(plan);
+                subscription.setStatus(parseSubscriptionStatus(subscriptionStatus));
+                LocalDateTime now = LocalDateTime.now();
+                subscription.setStartDate(now);
+                subscription.setPrice(plan.getPrice());
+                subscription.setNextPaymentDate(
+                        plan.getBillingPeriod() == BillingPeriodEnum.YEARLY ? now.plusYears(1) : now.plusMonths(1)
+                );
+                subscriptionRepository.save(subscription);
             }
 
             messageResponse.setStatus(true);
@@ -221,6 +232,20 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    // No hay un campo de "tier" en PlanEntity — se identifica el plan Básico por nombre
+    // (mismo criterio ya usado en el frontend: FALLBACK_PLANS / PLAN_META en Planes.vue),
+    // normalizando tildes/mayúsculas. Un plan null (id no enviado o no encontrado) NO se
+    // trata como Básico: por defecto se exige RUC.
+    private boolean isBasicPlan(PlanEntity plan) {
+        if (plan == null || plan.getName() == null) {
+            return false;
+        }
+        String normalized = java.text.Normalizer.normalize(plan.getName(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase();
+        return normalized.contains("basico");
     }
 
     private SubscriptionStatusEnum parseSubscriptionStatus(String subscriptionStatus) {

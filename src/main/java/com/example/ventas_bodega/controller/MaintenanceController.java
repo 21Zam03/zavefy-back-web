@@ -86,7 +86,7 @@ public class MaintenanceController {
     @PostMapping(value = "/company", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> createCompany(
-            @RequestParam("ruc") String ruc,
+            @RequestParam(value = "ruc", required = false) String ruc,
             @RequestParam("socialReason") String socialReason,
             @RequestParam("comertialName") String comertialName,
             @RequestParam("address") String address,

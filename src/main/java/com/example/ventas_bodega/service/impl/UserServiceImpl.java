@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<RoleDto> getAssignableRoles() {
         return roleRepository.findAll().stream()
-                .filter(role -> !Boolean.TRUE.equals(role.getIsSystemRole()))
+                .filter(role -> Boolean.TRUE.equals(role.getAssignable()))
                 .map(RoleMapper::entityToDto)
                 .collect(Collectors.toList());
     }
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
         Set<RoleEntity> roles = request.getRoleIds() == null
                 ? new HashSet<>()
                 : roleRepository.findAllById(request.getRoleIds()).stream()
-                    .filter(role -> !Boolean.TRUE.equals(role.getIsSystemRole()))
+                    .filter(role -> Boolean.TRUE.equals(role.getAssignable()))
                     .collect(Collectors.toSet());
         if (roles.isEmpty()) {
             throw new BusinessException("Selecciona al menos un rol para el usuario");
@@ -99,6 +99,7 @@ public class UserServiceImpl implements UserService {
         userToCreate.setLastname(request.getLastName());
         userToCreate.setEmail(request.getEmail());
         userToCreate.setUsername(normalizedUsername);
+        userToCreate.setDocumentNumber(request.getDocumentNumber());
         userToCreate.setPassword(passwordEncoder.encode(request.getDocumentNumber()));
         userToCreate.setEnabled(true);
         userToCreate.setAccountExpired(false);
@@ -137,7 +138,7 @@ public class UserServiceImpl implements UserService {
 
         if (request.getRoleIds() != null) {
             List<RoleEntity> assignableRoles = roleRepository.findAllById(request.getRoleIds()).stream()
-                    .filter(role -> !Boolean.TRUE.equals(role.getIsSystemRole()))
+                    .filter(role -> Boolean.TRUE.equals(role.getAssignable()))
                     .collect(Collectors.toList());
             Set<RoleEntity> roles = new HashSet<>(assignableRoles);
             target.setRoleList(roles);

@@ -33,7 +33,7 @@ public class RoleAndPermissionSeeder implements CommandLineRunner {
             "DASHBOARD_READ", "SALE_CREATE", "SALE_READ", "PRODUCT_READ", "PRODUCT_CREATE",
             "CUSTOMER_READ", "CUSTOMER_CREATE", "SUPPLIER_READ", "SUPPLIER_CREATE",
             "PURCHASE_CREATE", "PURCHASE_READ", "OPPORTUNITY_READ", "PAY_READ",
-            "STOCK_READ", "STOCK_UPDATE", "BUSINESS_READ", "USER_READ",
+            "STOCK_READ", "STOCK_UPDATE", "BUSINESS_READ", "BUSINESS_USER_READ",
             "FIDE_READ", "FIDE_CREATE", "FIDE_POINTS"
     );
 
@@ -48,18 +48,43 @@ public class RoleAndPermissionSeeder implements CommandLineRunner {
             "SUPPLIER_READ", "SUPPLIER_CREATE", "PURCHASE_READ", "PURCHASE_CREATE"
     );
 
+    // BUSINESS_USER reemplaza a Vendedor/Almacenero como rol asignable vía "Invitar usuario":
+    // une ambos sets de permisos para no perder capacidades al dejar de distinguir entre los dos.
+    private static final List<String> BUSINESS_USER_PERMISSIONS = List.of(
+            "DASHBOARD_READ", "SALE_CREATE", "SALE_READ", "PRODUCT_READ", "PRODUCT_CREATE",
+            "CUSTOMER_READ", "CUSTOMER_CREATE", "SUPPLIER_READ", "SUPPLIER_CREATE",
+            "PURCHASE_READ", "PURCHASE_CREATE", "STOCK_READ", "STOCK_UPDATE",
+            "FIDE_READ", "FIDE_CREATE", "FIDE_POINTS", "PAY_READ"
+    );
+
     @Override
     public void run(String... args) {
         Map<String, PermissionEntity> permissionsByName = ensurePermissionsExist();
-        ensureRoleExists("Administrador", ALL_PERMISSIONS, permissionsByName, false);
-        ensureRoleExists("Vendedor", VENDEDOR_PERMISSIONS, permissionsByName, false);
-        ensureRoleExists("Almacenero", ALMACENERO_PERMISSIONS, permissionsByName, false);
-        // Rol de sistema: no aparece como opción asignable en "Invitar usuario" de una
-        // empresa (ver UserService.getAssignableRoles/createUser, que filtran isSystemRole).
-        // Habilita Mantenimiento > Usuarios (protegido con @PreAuthorize("hasRole('SUPER_ADMIN')")).
-        // No se auto-asigna a nadie: hay que otorgarlo manualmente en la base a la cuenta
-        // que deba administrar el sistema completo.
-        ensureRoleExists("SUPER_ADMIN", ALL_PERMISSIONS, permissionsByName, true);
+        // isSystemRole=true en TODOS: son predeterminados del sistema (ninguno fue creado por
+        // un negocio) — esa es ahora su única función, taxonomía. Lo que decide si aparecen en
+        // "Invitar usuario" es `assignable`, no isSystemRole.
+
+        // Administrador/Vendedor/Almacenero: esquema anterior, reemplazado por
+        // BUSINESS_ADMIN/BUSINESS_USER. Se dejan de sembrar activamente (no se borran del
+        // código por si algún entorno viejo los sigue usando) solo para que empresas/usuarios
+        // ya existentes con estos roles sigan funcionando — ensureRoleExists no toca los que ya
+        // existen en la base, así que esto no afecta producción de ningún modo. assignable=false:
+        // ya no se ofrecen como opción nueva.
+        ensureRoleExists("Administrador", ALL_PERMISSIONS, permissionsByName, true, false);
+        ensureRoleExists("Vendedor", VENDEDOR_PERMISSIONS, permissionsByName, true, false);
+        ensureRoleExists("Almacenero", ALMACENERO_PERMISSIONS, permissionsByName, true, false);
+        // SUPER_ADMIN: habilita Mantenimiento (protegido con @PreAuthorize("hasRole('SUPER_ADMIN')")).
+        // assignable=false SIEMPRE — un dueño de negocio jamás debe poder auto-otorgarse ni
+        // otorgarle a nadie acceso cross-tenant a todo el sistema. No se auto-asigna a nadie:
+        // hay que otorgarlo manualmente en la base a la cuenta que deba administrar el sistema.
+        ensureRoleExists("SUPER_ADMIN", ALL_PERMISSIONS, permissionsByName, true, false);
+        // BUSINESS_ADMIN: rol predeterminado del admin inicial de una empresa nueva (ver
+        // MaintenanceServiceImpl.createCompany). assignable=true: un dueño de negocio también
+        // puede invitar a otro admin desde "Invitar usuario".
+        ensureRoleExists("BUSINESS_ADMIN", ALL_PERMISSIONS, permissionsByName, true, true);
+        // BUSINESS_USER: rol para el staff invitado dentro de una empresa (reemplaza a
+        // Vendedor/Almacenero). assignable=true: es la opción "Empleado" en "Invitar usuario".
+        ensureRoleExists("BUSINESS_USER", BUSINESS_USER_PERMISSIONS, permissionsByName, true, true);
     }
 
     private Map<String, PermissionEntity> ensurePermissionsExist() {
@@ -75,13 +100,14 @@ public class RoleAndPermissionSeeder implements CommandLineRunner {
         return existing;
     }
 
-    private void ensureRoleExists(String roleName, List<String> permissionNames, Map<String, PermissionEntity> permissionsByName, boolean isSystemRole) {
+    private void ensureRoleExists(String roleName, List<String> permissionNames, Map<String, PermissionEntity> permissionsByName, boolean isSystemRole, boolean assignable) {
         if (roleRepository.findByName(roleName).isPresent()) {
             return;
         }
         RoleEntity role = new RoleEntity();
         role.setName(roleName);
         role.setIsSystemRole(isSystemRole);
+        role.setAssignable(assignable);
         Set<PermissionEntity> permissions = permissionNames.stream()
                 .map(permissionsByName::get)
                 .collect(Collectors.toSet());

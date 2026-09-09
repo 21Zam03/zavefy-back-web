@@ -18,6 +18,7 @@ public class TeamUserMapper {
         dto.setUserId(entity.getUserId());
         dto.setFirstName(entity.getFirstname());
         dto.setLastName(entity.getLastname());
+        dto.setDocumentNumber(entity.getDocumentNumber());
         dto.setEmail(entity.getEmail());
         dto.setEnabled(entity.isEnabled());
 

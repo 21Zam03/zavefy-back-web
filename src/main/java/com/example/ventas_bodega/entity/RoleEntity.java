@@ -16,8 +16,16 @@ public class RoleEntity {
     @Column(name = "nombre")
     private String name;
 
+    // "Es un rol predeterminado del sistema" (vs. uno que un negocio cree a futuro) — es
+    // taxonomía, NO controla si se puede asignar. Ver `assignable` para eso.
     @Column(name = "es_sistema_rol")
     private Boolean isSystemRole;
+
+    // Controla si el rol aparece como opción en "Invitar usuario" / es aceptado al crear o
+    // editar un usuario. Independiente de isSystemRole: SUPER_ADMIN es un rol predeterminado
+    // del sistema (isSystemRole=true) pero jamás debe ser asignable por un dueño de negocio.
+    @Column(name = "es_asignable")
+    private Boolean assignable;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_roles_permisos", joinColumns = @JoinColumn(name = "id_rol"), inverseJoinColumns = @JoinColumn(name = "id_permiso"))
@@ -63,6 +71,14 @@ public class RoleEntity {
 
     public void setIsSystemRole(Boolean isSystemRole) {
         this.isSystemRole = isSystemRole;
+    }
+
+    public Boolean getAssignable() {
+        return assignable;
+    }
+
+    public void setAssignable(Boolean assignable) {
+        this.assignable = assignable;
     }
 
 }

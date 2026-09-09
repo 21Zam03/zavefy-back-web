@@ -23,6 +23,9 @@ public class UserEntity {
     @Column(name = "apellidos")
     private String lastname;
 
+    @Column(name = "dni", length = 8)
+    private String documentNumber;
+
     @Column(name = "correo", unique = true, length = 50, nullable = false)
     private String email;
 
@@ -165,6 +168,14 @@ public class UserEntity {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public String getDocumentNumber() {
+        return documentNumber;
+    }
+
+    public void setDocumentNumber(String documentNumber) {
+        this.documentNumber = documentNumber;
     }
 
     public String getUsername() {

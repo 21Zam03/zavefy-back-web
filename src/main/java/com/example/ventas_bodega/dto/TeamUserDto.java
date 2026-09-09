@@ -7,6 +7,7 @@ public class TeamUserDto {
     private Integer userId;
     private String firstName;
     private String lastName;
+    private String documentNumber;
     private String email;
     private boolean enabled;
     private List<RoleDto> roles;
@@ -34,6 +35,14 @@ public class TeamUserDto {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getDocumentNumber() {
+        return documentNumber;
+    }
+
+    public void setDocumentNumber(String documentNumber) {
+        this.documentNumber = documentNumber;
     }
 
     public String getEmail() {
