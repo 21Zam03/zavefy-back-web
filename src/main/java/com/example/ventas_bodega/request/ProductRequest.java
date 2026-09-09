@@ -30,6 +30,11 @@ public class ProductRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
     private BigDecimal price;
 
+    // Opcional: no todos los negocios conocen su costo al registrar el producto. Si se
+    // omite, se puede completar después al editar o al registrar la primera compra.
+    @DecimalMin(value = "0.0", message = "El precio de compra no puede ser negativo")
+    private BigDecimal costPrice;
+
     @NotBlank(message = "La categoria del producto es obligatorio")
     private String category;
 

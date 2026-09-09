@@ -8,6 +8,7 @@ import com.example.ventas_bodega.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -56,6 +57,31 @@ public class UserController {
     @PatchMapping("/deactivate")
     public ResponseEntity<?> deactivateUser(@RequestParam Integer userId, @CurrentUser UserEntity user) {
         return new ResponseEntity<>(userService.deactivateUser(userId, user), HttpStatus.OK);
+    }
+
+    // ==== Mantenimiento > Usuarios (SUPER_ADMIN): cruza todas las empresas ====
+
+    @GetMapping("/all-companies")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String searchKey,
+            @RequestParam(required = false) Boolean enabled
+    ) {
+        return new ResponseEntity<>(userService.getAllUsers(searchKey, enabled, page, size), HttpStatus.OK);
+    }
+
+    @PatchMapping("/all-companies/activate")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> activateUserGlobal(@RequestParam Integer userId) {
+        return new ResponseEntity<>(userService.activateUserGlobal(userId), HttpStatus.OK);
+    }
+
+    @PatchMapping("/all-companies/deactivate")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> deactivateUserGlobal(@RequestParam Integer userId, @CurrentUser UserEntity user) {
+        return new ResponseEntity<>(userService.deactivateUserGlobal(userId, user), HttpStatus.OK);
     }
 
 }

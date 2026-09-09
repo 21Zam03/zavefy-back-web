@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.request;
 
+import com.example.ventas_bodega.enums.CajaMovimientoCategoriaEnum;
 import com.example.ventas_bodega.enums.CajaMovimientoTipoEnum;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -26,5 +27,8 @@ public class AbrirMovimientoCajaRequest {
     @NotBlank(message = "El motivo es obligatorio")
     @Size(max = 255, message = "El motivo no puede superar los 255 caracteres")
     private String motivo;
+
+    @NotNull(message = "La categoría es obligatoria")
+    private CajaMovimientoCategoriaEnum categoria;
 
 }

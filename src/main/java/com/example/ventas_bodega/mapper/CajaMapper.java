@@ -25,6 +25,9 @@ public class CajaMapper {
     public static CajaDto entityToDto(CajaEntity cajaEntity) {
         CajaDto cajaDto = new CajaDto();
         cajaDto.setId(cajaEntity.getId());
+        cajaDto.setCajeroNombre(cajaEntity.getUser() != null
+                ? (cajaEntity.getUser().getFirstname() + " " + cajaEntity.getUser().getLastname()).trim()
+                : null);
         cajaDto.setMontoInicial(cajaEntity.getMontoInicial());
         cajaDto.setObservacion(cajaEntity.getObservacion());
         cajaDto.setFechaApertura(cajaEntity.getFechaApertura());
@@ -34,6 +37,9 @@ public class CajaMapper {
         cajaDto.setMontoEsperado(cajaEntity.getMontoEsperado());
         cajaDto.setDiferencia(cajaEntity.getDiferencia());
         cajaDto.setObservacionCierre(cajaEntity.getObservacionCierre());
+        cajaDto.setTotalVentasEfectivo(cajaEntity.getTotalVentasEfectivo());
+        cajaDto.setTotalIngresos(cajaEntity.getTotalIngresos());
+        cajaDto.setTotalEgresos(cajaEntity.getTotalEgresos());
         return cajaDto;
     }
 

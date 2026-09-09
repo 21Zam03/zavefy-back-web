@@ -51,9 +51,15 @@ public class RoleAndPermissionSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
         Map<String, PermissionEntity> permissionsByName = ensurePermissionsExist();
-        ensureRoleExists("Administrador", ALL_PERMISSIONS, permissionsByName);
-        ensureRoleExists("Vendedor", VENDEDOR_PERMISSIONS, permissionsByName);
-        ensureRoleExists("Almacenero", ALMACENERO_PERMISSIONS, permissionsByName);
+        ensureRoleExists("Administrador", ALL_PERMISSIONS, permissionsByName, false);
+        ensureRoleExists("Vendedor", VENDEDOR_PERMISSIONS, permissionsByName, false);
+        ensureRoleExists("Almacenero", ALMACENERO_PERMISSIONS, permissionsByName, false);
+        // Rol de sistema: no aparece como opción asignable en "Invitar usuario" de una
+        // empresa (ver UserService.getAssignableRoles/createUser, que filtran isSystemRole).
+        // Habilita Mantenimiento > Usuarios (protegido con @PreAuthorize("hasRole('SUPER_ADMIN')")).
+        // No se auto-asigna a nadie: hay que otorgarlo manualmente en la base a la cuenta
+        // que deba administrar el sistema completo.
+        ensureRoleExists("SUPER_ADMIN", ALL_PERMISSIONS, permissionsByName, true);
     }
 
     private Map<String, PermissionEntity> ensurePermissionsExist() {
@@ -69,13 +75,13 @@ public class RoleAndPermissionSeeder implements CommandLineRunner {
         return existing;
     }
 
-    private void ensureRoleExists(String roleName, List<String> permissionNames, Map<String, PermissionEntity> permissionsByName) {
+    private void ensureRoleExists(String roleName, List<String> permissionNames, Map<String, PermissionEntity> permissionsByName, boolean isSystemRole) {
         if (roleRepository.findByName(roleName).isPresent()) {
             return;
         }
         RoleEntity role = new RoleEntity();
         role.setName(roleName);
-        role.setIsSystemRole(false);
+        role.setIsSystemRole(isSystemRole);
         Set<PermissionEntity> permissions = permissionNames.stream()
                 .map(permissionsByName::get)
                 .collect(Collectors.toSet());

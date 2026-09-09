@@ -4,6 +4,8 @@ import com.example.ventas_bodega.dto.*;
 import com.example.ventas_bodega.dto.interfaces.CategoryDtoInter;
 import com.example.ventas_bodega.dto.interfaces.ClientDtoInter;
 import com.example.ventas_bodega.entity.*;
+import com.example.ventas_bodega.enums.BillingPeriodEnum;
+import com.example.ventas_bodega.enums.SubscriptionStatusEnum;
 import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.mapper.*;
 import com.example.ventas_bodega.repository.*;
@@ -35,6 +37,8 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     private ClientRepository clientRepository;
     private PermissionRepository permissionRepository;
     private final RoleRepository roleRepository;
+    private final PlanRepository planRepository;
+    private final SubscriptionRepository subscriptionRepository;
 
     @Autowired
     public MaintenanceServiceImpl(
@@ -45,7 +49,8 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             CompanyRepository companyRepository,
             UserRepository userRepository, ProductRepository productRepository,
             ClientRepository clientRepository, MessageSourceAware messageSourceAware,
-            RoleRepository roleRepository) {
+            RoleRepository roleRepository, PlanRepository planRepository,
+            SubscriptionRepository subscriptionRepository) {
         this.categoryRepository = categoryRepository;
         this.yapeRepository = yapeRepository;
         this.categoryClientRepository = categoryClientRepository;
@@ -56,6 +61,8 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         this.clientRepository = clientRepository;
         this.messageSourceAware = messageSourceAware;
         this.roleRepository = roleRepository;
+        this.planRepository = planRepository;
+        this.subscriptionRepository = subscriptionRepository;
     }
 
     @Override
@@ -155,11 +162,16 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     @Override
     @Transactional
-    public MessageResponse createCompany(CompanyDto companyDto, UserDto userDto, UserEntity user, boolean isTest, String role) {
+    public MessageResponse createCompany(CompanyDto companyDto, UserDto userDto, UserEntity user, boolean isTest, String role, Long planId, String subscriptionStatus) {
         MessageResponse messageResponse = new MessageResponse();
         try {
 
             CompanyEntity companyEntity = CompanyMapper.dtoToEntity(companyDto);
+            // CompanyMapper/CompanyDto no cargan isTest desde el request (viene aparte, como
+            // parámetro de este método) ni isActive (no existe en el DTO): sin esto, toda
+            // empresa nueva nacía inactiva por el valor por defecto de un boolean.
+            companyEntity.setTest(isTest);
+            companyEntity.setActive(true);
             CompanyEntity companyCreated = companyRepository.save(companyEntity);
 
             UserEntity userEntity = UserMapper.dtoToEntity(userDto);
@@ -178,11 +190,37 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             userEntity.setPasswordUpdateDate(LocalDateTime.now());
             userRepository.save(userEntity);
 
+            // Suscripción inicial: opcional porque el modal de creación puede fallar al cargar
+            // los planes (usa un fallback de solo UI en ese caso, sin id real que enviar).
+            if (planId != null) {
+                planRepository.findById(planId).ifPresent(plan -> {
+                    SubscriptionEntity subscription = new SubscriptionEntity();
+                    subscription.setCompany(companyCreated);
+                    subscription.setPlan(plan);
+                    subscription.setStatus(parseSubscriptionStatus(subscriptionStatus));
+                    LocalDateTime now = LocalDateTime.now();
+                    subscription.setStartDate(now);
+                    subscription.setPrice(plan.getPrice());
+                    subscription.setNextPaymentDate(
+                            plan.getBillingPeriod() == BillingPeriodEnum.YEARLY ? now.plusYears(1) : now.plusMonths(1)
+                    );
+                    subscriptionRepository.save(subscription);
+                });
+            }
+
             messageResponse.setStatus(true);
             messageResponse.setMessage("Empresa creada con exitosamente");
             return messageResponse;
         } catch (Exception e) {
             throw e;
+        }
+    }
+
+    private SubscriptionStatusEnum parseSubscriptionStatus(String subscriptionStatus) {
+        try {
+            return SubscriptionStatusEnum.valueOf(subscriptionStatus);
+        } catch (Exception e) {
+            return SubscriptionStatusEnum.TRIAL;
         }
     }
 
@@ -214,6 +252,56 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             messageResponse.setMessage("Ocurrio un error al crear la cliente");
         }
         return messageResponse;
+    }
+
+    @Override
+    public Page<GlobalCompanyDto> getAllCompanies(String searchKey, Boolean active, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CompanyEntity> companies = companyRepository.findAllWithFilters(searchKey, active, pageable);
+
+        List<Long> companyIds = companies.getContent().stream()
+                .map(CompanyEntity::getCompanyId)
+                .collect(java.util.stream.Collectors.toList());
+        Map<Long, Long> usersCountByCompany = userRepository.countUsersByCompanyIds(companyIds).stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
+
+        // Una empresa hoy solo tiene la suscripción creada al momento del alta (no hay flujo
+        // de cambio de plan todavía), así que la de mayor id por empresa es siempre la vigente.
+        Map<Long, SubscriptionEntity> subscriptionByCompany = subscriptionRepository.findByCompany_CompanyIdIn(companyIds).stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        s -> s.getCompany().getCompanyId(),
+                        s -> s,
+                        (a, b) -> a.getSubscriptionId() > b.getSubscriptionId() ? a : b
+                ));
+
+        return companies.map(company ->
+                GlobalCompanyMapper.entityToDto(
+                        company,
+                        usersCountByCompany.getOrDefault(company.getCompanyId(), 0L),
+                        subscriptionByCompany.get(company.getCompanyId())
+                )
+        );
+    }
+
+    @Override
+    public MessageResponse activateCompany(Long companyId) {
+        CompanyEntity company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new NotFoundException("La empresa no existe"));
+        company.setActive(true);
+        companyRepository.save(company);
+        return new MessageResponse("Empresa activada", true);
+    }
+
+    @Override
+    public MessageResponse deactivateCompany(Long companyId) {
+        CompanyEntity company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new NotFoundException("La empresa no existe"));
+        company.setActive(false);
+        companyRepository.save(company);
+        return new MessageResponse("Empresa desactivada", true);
     }
 
 }

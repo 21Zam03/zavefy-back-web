@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.service;
 
+import com.example.ventas_bodega.dto.GlobalUserDto;
 import com.example.ventas_bodega.dto.RoleDto;
 import com.example.ventas_bodega.dto.TeamUserDto;
 import com.example.ventas_bodega.entity.UserEntity;
@@ -18,5 +19,10 @@ public interface UserService {
     MessageResponse updateUser(UpdateUserRequest request, UserEntity currentUser);
     MessageResponse activateUser(Integer userId, UserEntity currentUser);
     MessageResponse deactivateUser(Integer userId, UserEntity currentUser);
+
+    // Mantenimiento > Usuarios (SUPER_ADMIN): cruza todas las empresas.
+    Page<GlobalUserDto> getAllUsers(String searchKey, Boolean enabled, int page, int size);
+    MessageResponse activateUserGlobal(Integer userId);
+    MessageResponse deactivateUserGlobal(Integer userId, UserEntity currentUser);
 
 }

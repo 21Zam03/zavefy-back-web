@@ -42,6 +42,17 @@ public class CajaEntity {
     @Column(name = "observacion_cierre")
     private String observacionCierre;
 
+    // Se persisten al cerrar (antes solo viajaban en la respuesta del cierre y se perdían):
+    // sin esto, el historial y el recibo de cierre no podían mostrar el desglose después.
+    @Column(name = "total_ventas_efectivo")
+    private BigDecimal totalVentasEfectivo;
+
+    @Column(name = "total_ingresos")
+    private BigDecimal totalIngresos;
+
+    @Column(name = "total_egresos")
+    private BigDecimal totalEgresos;
+
     @PrePersist
     public void prePersist() {
         this.fechaApertura = LocalDateTime.now();
@@ -128,6 +139,30 @@ public class CajaEntity {
 
     public void setObservacionCierre(String observacionCierre) {
         this.observacionCierre = observacionCierre;
+    }
+
+    public BigDecimal getTotalVentasEfectivo() {
+        return totalVentasEfectivo;
+    }
+
+    public void setTotalVentasEfectivo(BigDecimal totalVentasEfectivo) {
+        this.totalVentasEfectivo = totalVentasEfectivo;
+    }
+
+    public BigDecimal getTotalIngresos() {
+        return totalIngresos;
+    }
+
+    public void setTotalIngresos(BigDecimal totalIngresos) {
+        this.totalIngresos = totalIngresos;
+    }
+
+    public BigDecimal getTotalEgresos() {
+        return totalEgresos;
+    }
+
+    public void setTotalEgresos(BigDecimal totalEgresos) {
+        this.totalEgresos = totalEgresos;
     }
 
 }

@@ -15,7 +15,9 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
 
     Optional<SaleEntity> findByVentaIdAndUser_Company_Ruc(Integer ventaId, String ruc);
 
-    @Query("SELECT COALESCE(SUM(v.total), 0) FROM SaleEntity v WHERE v.caja.id = :cajaId AND LOWER(v.paymentMethod) = 'efectivo'")
+    // Excluye ventas anuladas: una venta en efectivo anulada mientras la caja sigue abierta
+    // ya no representa dinero real en el cajón, así que no debe contar en el arqueo.
+    @Query("SELECT COALESCE(SUM(v.total), 0) FROM SaleEntity v WHERE v.caja.id = :cajaId AND LOWER(v.paymentMethod) = 'efectivo' AND v.voided = false")
     BigDecimal sumTotalEfectivoByCajaId(@Param("cajaId") Long cajaId);
 
     @Query("""
@@ -77,6 +79,7 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
     INNER JOIN tb_empresa c ON u.id_empresa = c.id_empresa
     WHERE c.ruc = :ruc
     AND s.fecha_registro BETWEEN :start AND :end
+    AND s.anulada = false
 """, nativeQuery = true)
     BigDecimal getTotalSalesBetweenDates(
             @Param("start") String start,
@@ -91,6 +94,7 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
     INNER JOIN tb_empresa c ON u.id_empresa = c.id_empresa
     WHERE c.ruc = :ruc
     AND s.fecha_registro BETWEEN :start AND :end
+    AND s.anulada = false
 """, nativeQuery = true)
     Long countSalesBetweenDates(
             @Param("start") String start,
@@ -106,6 +110,7 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
     INNER JOIN tb_empresa c ON u.id_empresa = c.id_empresa
     WHERE c.ruc = :ruc
     AND v.fecha_registro BETWEEN :start AND :end
+    AND v.anulada = false
 """, nativeQuery = true)
     BigDecimal countProductsBetweenDates(
             @Param("start") String start,
@@ -120,6 +125,7 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
     INNER JOIN tb_empresa c ON u.id_empresa = c.id_empresa
     WHERE c.ruc = :ruc
     AND v.fecha_creacion BETWEEN :start AND :end
+    AND v.anulada = false
 """, nativeQuery = true)
     BigDecimal getAverageTicketNative(
             @Param("start") String start,
@@ -149,9 +155,9 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
         ) t
         WHERE DATE(:start) + INTERVAL t.n DAY <= DATE(:end)
     ) fechas
-    LEFT JOIN tb_venta v 
-        ON DATE(v.fecha_creacion) = fechas.fecha
-    LEFT JOIN tb_usuario u 
+    LEFT JOIN tb_venta v
+        ON DATE(v.fecha_creacion) = fechas.fecha AND v.anulada = false
+    LEFT JOIN tb_usuario u
         ON v.id_usuario = u.id_usuario
     LEFT JOIN tb_empresa c 
         ON u.id_empresa = c.id_empresa
@@ -164,8 +170,49 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
             @Param("ruc") String ruc
     );
 
+    // Margen de ganancia (revenue - costo) para el rango de fechas. Ambas queries filtran
+    // EXACTAMENTE el mismo subconjunto de líneas de venta (mismo JOIN a tb_producto y mismo
+    // "precio_compra IS NOT NULL"): si un producto no tiene costo cargado, su venta queda
+    // fuera de las dos sumas por igual. Si solo se excluyera del costo (como antes) y no del
+    // revenue, esa venta se contaría como 100% de margen, inflando el total.
     @Query(value = """
-        SELECT 
+        SELECT COALESCE(SUM(d.cantidad * d.precio_unitario), 0)
+        FROM tb_detalle_venta d
+        INNER JOIN tb_venta v ON d.id_venta = v.id_venta
+        INNER JOIN tb_producto p ON d.id_producto = p.id_producto
+        INNER JOIN tb_usuario u ON v.id_usuario = u.id_usuario
+        INNER JOIN tb_empresa c ON u.id_empresa = c.id_empresa
+        WHERE c.ruc = :ruc
+        AND v.fecha_registro BETWEEN :start AND :end
+        AND v.anulada = false
+        AND p.precio_compra IS NOT NULL
+    """, nativeQuery = true)
+    BigDecimal getNetRevenueBetweenDates(
+            @Param("start") String start,
+            @Param("end") String end,
+            @Param("ruc") String ruc
+    );
+
+    @Query(value = """
+        SELECT COALESCE(SUM(d.cantidad * p.precio_compra), 0)
+        FROM tb_detalle_venta d
+        INNER JOIN tb_venta v ON d.id_venta = v.id_venta
+        INNER JOIN tb_producto p ON d.id_producto = p.id_producto
+        INNER JOIN tb_usuario u ON v.id_usuario = u.id_usuario
+        INNER JOIN tb_empresa c ON u.id_empresa = c.id_empresa
+        WHERE c.ruc = :ruc
+        AND v.fecha_registro BETWEEN :start AND :end
+        AND v.anulada = false
+        AND p.precio_compra IS NOT NULL
+    """, nativeQuery = true)
+    BigDecimal getTotalCostBetweenDates(
+            @Param("start") String start,
+            @Param("end") String end,
+            @Param("ruc") String ruc
+    );
+
+    @Query(value = """
+        SELECT
             p.nombre AS producto,
             SUM(d.cantidad) AS total_vendidos,
             SUM(d.cantidad * d.precio_unitario) AS total_ingresos
@@ -176,6 +223,7 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Long> {
         INNER JOIN tb_empresa c ON u.id_empresa = c.id_empresa
         WHERE c.ruc = :ruc
         AND v.fecha_registro BETWEEN :start AND :end
+        AND v.anulada = false
         GROUP BY p.nombre
         ORDER BY total_vendidos DESC
             LIMIT 5

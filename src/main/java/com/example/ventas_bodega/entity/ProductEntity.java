@@ -36,6 +36,11 @@ public class ProductEntity {
     @Column(name = "precio_venta")
     private BigDecimal price;
 
+    // Nullable: se llena manualmente al crear/editar el producto, o automáticamente con el
+    // costo de la última compra registrada (ver PurchaseServiceImpl.createPurchase).
+    @Column(name = "precio_compra")
+    private BigDecimal costPrice;
+
     @Column(name = "precio_unitario")
     private BigDecimal unitPrice;
 
@@ -145,6 +150,14 @@ public class ProductEntity {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public BigDecimal getCostPrice() {
+        return costPrice;
+    }
+
+    public void setCostPrice(BigDecimal costPrice) {
+        this.costPrice = costPrice;
     }
 
     public boolean isActive() {

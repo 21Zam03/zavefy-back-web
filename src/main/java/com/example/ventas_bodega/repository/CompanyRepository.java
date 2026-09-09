@@ -1,6 +1,8 @@
 package com.example.ventas_bodega.repository;
 
 import com.example.ventas_bodega.entity.CompanyEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +12,24 @@ import org.springframework.transaction.annotation.Transactional;
 public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
 
     public CompanyEntity findByRuc(String ruc);
+
+    // Mantenimiento > Empresas (SUPER_ADMIN): listado paginado de todas las empresas.
+    @Query("""
+    SELECT c FROM CompanyEntity c
+    WHERE (
+            :searchKey IS NULL
+            OR LOWER(c.comertialName) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(c.socialReason) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR c.ruc LIKE CONCAT('%', :searchKey, '%')
+      )
+      AND (:active IS NULL OR c.isActive = :active)
+    ORDER BY c.comertialName ASC
+    """)
+    Page<CompanyEntity> findAllWithFilters(
+            @Param("searchKey") String searchKey,
+            @Param("active") Boolean active,
+            Pageable pageable
+    );
 
     @Modifying
     @Transactional

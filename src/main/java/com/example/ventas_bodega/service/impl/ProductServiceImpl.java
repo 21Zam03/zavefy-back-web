@@ -276,6 +276,11 @@ public class ProductServiceImpl implements ProductService {
                     .ifPresent(existing -> {
                         productDto.setAlreadyInInventory(true);
                         productDto.setExistingProductId(existing.getId());
+                        // Si ya está en el inventario, sus datos reales pisan a los del
+                        // catálogo general/API externa (que pueden venir sin precio de compra
+                        // o con un precio de venta desactualizado).
+                        productDto.setPrice(existing.getPrice());
+                        productDto.setCostPrice(existing.getCostPrice());
                     });
         }
 
@@ -345,6 +350,7 @@ public class ProductServiceImpl implements ProductService {
             productToUpdate.setName(productDto.getName());
             productToUpdate.setDescription(productDto.getDescription());
             productToUpdate.setPrice(productDto.getPrice());
+            productToUpdate.setCostPrice(productDto.getCostPrice());
             productToUpdate.setMeasurementUnit(productDto.getMeasurementUnit());
             productToUpdate.setCategoryEntity(category);
             ProductEntity productUpdated = productRepository.save(productToUpdate);

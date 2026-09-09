@@ -62,6 +62,7 @@ public class ProductMapper {
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
+        product.setCostPrice(productDto.getCostPrice());
         product.setUnitePrice(calculatePrice(productDto.getPrice()));
         product.setActive(productDto.isActive());
         product.setImageUrl(productDto.getImageUrl());
@@ -77,6 +78,7 @@ public class ProductMapper {
         product.setName(productEntity.getName());
         product.setDescription(productEntity.getDescription());
         product.setPrice(productEntity.getPrice());
+        product.setCostPrice(productEntity.getCostPrice());
         if(productEntity.getUnitPrice() != null) {
             product.setUnitPrice(productEntity.getUnitPrice());
         } else {
@@ -178,6 +180,7 @@ public class ProductMapper {
         productDto.setName(productRequest.getName());
         productDto.setDescription(productRequest.getDescription());
         productDto.setPrice(productRequest.getPrice());
+        productDto.setCostPrice(productRequest.getCostPrice());
         productDto.setCategory(productRequest.getCategory());
         productDto.setStock(productRequest.getStock());
         productDto.setBarcode(productRequest.getBarcode());
@@ -194,6 +197,7 @@ public class ProductMapper {
         productDto.setName(productUpdateRequest.getName());
         productDto.setDescription(productUpdateRequest.getDescription());
         productDto.setPrice(productUpdateRequest.getPrice());
+        productDto.setCostPrice(productUpdateRequest.getCostPrice());
         productDto.setCategory(productUpdateRequest.getCategory());
         productDto.setFile(file);
         productDto.setRemoveImage(productUpdateRequest.isRemoveImage());

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class PlanFeatureDto {
 
     private Long planFeatureId;
-    private Integer planId;
+    private Long planId;
     private String feature;
     private FeatureTypeEnum featureType;
     private String value;

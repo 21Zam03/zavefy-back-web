@@ -50,6 +50,20 @@ public class CajaController {
         return new ResponseEntity<>(cajaService.registrarMovimiento(request, user), HttpStatus.CREATED);
     }
 
+    @PutMapping("/movimientos/{id}")
+    public ResponseEntity<?> actualizarMovimiento(
+            @PathVariable Long id,
+            @Valid @RequestBody AbrirMovimientoCajaRequest request,
+            @CurrentUser UserEntity user
+    ) {
+        return new ResponseEntity<>(cajaService.actualizarMovimiento(id, request, user), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/movimientos/{id}")
+    public ResponseEntity<?> eliminarMovimiento(@PathVariable Long id, @CurrentUser UserEntity user) {
+        return new ResponseEntity<>(cajaService.eliminarMovimiento(id, user), HttpStatus.OK);
+    }
+
     @PostMapping("/cerrar")
     public ResponseEntity<?> cerrarCaja(@Valid @RequestBody CerrarCajaRequest request, @CurrentUser UserEntity user) {
         return new ResponseEntity<>(cajaService.cerrarCaja(request, user), HttpStatus.OK);

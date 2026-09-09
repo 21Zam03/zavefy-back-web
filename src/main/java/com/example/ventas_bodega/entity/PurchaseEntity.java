@@ -29,6 +29,12 @@ public class PurchaseEntity {
     @Column(name = "monto_total")
     private BigDecimal total;
 
+    // true = se pagó al proveedor con el efectivo de la caja abierta (genera un egreso
+    // automático); false/null = se pagó por otra vía (transferencia, crédito, etc.) y no
+    // toca caja.
+    @Column(name = "pagado_desde_caja")
+    private Boolean paidFromCaja;
+
     @Column(name = "id_empresa")
     private Long companyId;
 
@@ -89,6 +95,14 @@ public class PurchaseEntity {
 
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public Boolean getPaidFromCaja() {
+        return paidFromCaja;
+    }
+
+    public void setPaidFromCaja(Boolean paidFromCaja) {
+        this.paidFromCaja = paidFromCaja;
     }
 
     public Long getCompanyId() {

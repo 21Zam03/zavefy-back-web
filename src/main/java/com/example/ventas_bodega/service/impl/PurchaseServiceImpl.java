@@ -4,12 +4,19 @@ import com.example.ventas_bodega.dto.ProductDto;
 import com.example.ventas_bodega.dto.PurchaseDto;
 import com.example.ventas_bodega.dto.PurchaseItemDto;
 import com.example.ventas_bodega.dto.interfaces.PurchaseDtoInter;
+import com.example.ventas_bodega.entity.CajaEntity;
+import com.example.ventas_bodega.entity.CajaMovimientoEntity;
 import com.example.ventas_bodega.entity.PurchaseEntity;
 import com.example.ventas_bodega.entity.PurchaseItemEntity;
 import com.example.ventas_bodega.entity.SupplierEntity;
 import com.example.ventas_bodega.entity.UserEntity;
+import com.example.ventas_bodega.enums.CajaMovimientoCategoriaEnum;
+import com.example.ventas_bodega.enums.CajaMovimientoTipoEnum;
+import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.mapper.PurchaseMapper;
+import com.example.ventas_bodega.repository.CajaMovimientoRepository;
+import com.example.ventas_bodega.repository.CajaRepository;
 import com.example.ventas_bodega.repository.PurchaseItemRepository;
 import com.example.ventas_bodega.repository.PurchaseRepository;
 import com.example.ventas_bodega.repository.SupplierRepository;
@@ -39,6 +46,8 @@ public class PurchaseServiceImpl implements PurchaseService {
     private final InventoryService inventoryService;
     private final ProductService productService;
     private final JdbcTemplate jdbcTemplate;
+    private final CajaRepository cajaRepository;
+    private final CajaMovimientoRepository cajaMovimientoRepository;
 
     @Autowired
     public PurchaseServiceImpl(
@@ -47,13 +56,17 @@ public class PurchaseServiceImpl implements PurchaseService {
             SupplierRepository supplierRepository,
             InventoryService inventoryService,
             ProductService productService,
-            JdbcTemplate jdbcTemplate) {
+            JdbcTemplate jdbcTemplate,
+            CajaRepository cajaRepository,
+            CajaMovimientoRepository cajaMovimientoRepository) {
         this.purchaseRepository = purchaseRepository;
         this.purchaseItemRepository = purchaseItemRepository;
         this.supplierRepository = supplierRepository;
         this.inventoryService = inventoryService;
         this.productService = productService;
         this.jdbcTemplate = jdbcTemplate;
+        this.cajaRepository = cajaRepository;
+        this.cajaMovimientoRepository = cajaMovimientoRepository;
     }
 
     @Override
@@ -99,6 +112,16 @@ public class PurchaseServiceImpl implements PurchaseService {
         SupplierEntity supplierEntity = supplierRepository.findBySupplierIdAndCompanyId(purchaseDto.getSupplierId(), user.getCompany().getCompanyId())
                 .orElseThrow(() -> new NotFoundException("El proveedor no existe en su inventario"));
 
+        // Si se paga desde caja, se exige una caja abierta ANTES de tocar nada más: registrar
+        // la compra sin poder reflejar su salida en caja dejaría el efectivo real desalineado
+        // en silencio (el mismo problema que ya resolvimos para las ventas).
+        CajaEntity cajaAbierta = null;
+        if (Boolean.TRUE.equals(purchaseDto.getPaidFromCaja())) {
+            cajaAbierta = cajaRepository
+                    .findFirstByUser_Company_RucAndFechaCierreIsNullOrderByFechaAperturaDesc(user.getCompany().getRuc())
+                    .orElseThrow(() -> new BusinessException("No hay una caja abierta. Abre caja o marca esta compra como pagada por otra vía."));
+        }
+
         PurchaseEntity purchaseToCreate = PurchaseMapper.dtoToEntity(purchaseDto);
         purchaseToCreate.setCompanyId(user.getCompany().getCompanyId());
         purchaseToCreate.setCreatedBy(Long.valueOf(user.getUserId()));
@@ -113,9 +136,13 @@ public class PurchaseServiceImpl implements PurchaseService {
                 // está entrando, así que deja de estar "no controlado". No toca EN_TRANSICION ni
                 // SINCRONIZADO — solo promueve desde NO_CONTROLADO. La lógica de si el stock se
                 // fija o se suma vive en InventoryServiceImpl.createHistoryStockForPurchase.
+                // El precio de compra del producto se actualiza al costo de ESTA compra (el más
+                // reciente), para que el margen se calcule contra el costo de reposición vigente.
                 jdbcTemplate.update(
-                        "UPDATE tb_producto SET estado_stock = 'EN_TRANSICION' WHERE id_producto = ? AND estado_stock = 'NO_CONTROLADO'",
-                        itemDto.getProductId()
+                        "UPDATE tb_producto SET precio_compra = ?, " +
+                                "estado_stock = CASE WHEN estado_stock = 'NO_CONTROLADO' THEN 'EN_TRANSICION' ELSE estado_stock END " +
+                                "WHERE id_producto = ?",
+                        itemDto.getCost(), itemDto.getProductId()
                 );
             }
             PurchaseItemEntity itemEntity = PurchaseMapper.itemDtoToEntity(itemDto);
@@ -127,6 +154,19 @@ public class PurchaseServiceImpl implements PurchaseService {
         if (!stockResponse.isStatus()) {
             // Fuerza el rollback de TODA la compra (cabecera + detalles), no solo del stock
             throw new IllegalStateException(stockResponse.getMessage());
+        }
+
+        if (cajaAbierta != null) {
+            CajaMovimientoEntity movimiento = new CajaMovimientoEntity();
+            movimiento.setCaja(cajaAbierta);
+            movimiento.setTipo(CajaMovimientoTipoEnum.EGRESO);
+            movimiento.setCategoria(CajaMovimientoCategoriaEnum.PROVEEDOR);
+            movimiento.setMonto(purchaseCreated.getTotal());
+            movimiento.setMotivo("Compra a proveedor: " + supplierEntity.getBusinessName()
+                    + (purchaseCreated.getReference() != null && !purchaseCreated.getReference().isBlank()
+                            ? " — Ref. " + purchaseCreated.getReference()
+                            : ""));
+            cajaMovimientoRepository.save(movimiento);
         }
 
         MessageResponse messageResponse = new MessageResponse();
@@ -150,6 +190,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         productDto.setDescription(itemDto.getDescription());
         productDto.setBarcode(itemDto.getBarcode());
         productDto.setPrice(itemDto.getPrice() != null ? itemDto.getPrice() : BigDecimal.ZERO);
+        productDto.setCostPrice(itemDto.getCost());
         productDto.setCategory(itemDto.getCategory() != null && !itemDto.getCategory().isBlank() ? itemDto.getCategory() : "General");
         productDto.setMeasurementUnit(itemDto.getMeasurementUnit());
         productDto.setImageUrl(itemDto.getImageUrl());

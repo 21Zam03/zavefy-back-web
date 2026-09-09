@@ -3,16 +3,19 @@ package com.example.ventas_bodega.controller;
 import com.example.ventas_bodega.dto.CategoryDto;
 import com.example.ventas_bodega.dto.ClientDto;
 import com.example.ventas_bodega.dto.CompanyDto;
+import com.example.ventas_bodega.dto.GlobalProductDto;
 import com.example.ventas_bodega.dto.UserDto;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.mapper.CompanyMapper;
 import com.example.ventas_bodega.mapper.UserMapper;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.MaintenanceService;
+import com.example.ventas_bodega.service.ProductGeneralService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,10 +26,12 @@ public class MaintenanceController {
     public static final String API_PATH = "/api/maintenance";
 
     public final MaintenanceService maintenanceService;
+    public final ProductGeneralService productGeneralService;
 
     @Autowired
-    public MaintenanceController(MaintenanceService maintenanceService) {
+    public MaintenanceController(MaintenanceService maintenanceService, ProductGeneralService productGeneralService) {
         this.maintenanceService = maintenanceService;
+        this.productGeneralService = productGeneralService;
     }
 
     @GetMapping("/options")
@@ -79,6 +84,7 @@ public class MaintenanceController {
     }
 
     @PostMapping(value = "/company", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> createCompany(
             @RequestParam("ruc") String ruc,
             @RequestParam("socialReason") String socialReason,
@@ -98,11 +104,13 @@ public class MaintenanceController {
             @RequestParam("isTest") String isTest,
             @RequestParam("hasPrinter") String hasPrinter,
             @RequestParam("role") String role,
+            @RequestParam(value = "planId", required = false) Long planId,
+            @RequestParam(value = "subscriptionStatus", required = false) String subscriptionStatus,
             @CurrentUser UserEntity user
     ) {
         CompanyDto companyDto = CompanyMapper.buildCompanyDtoFromController(null, ruc, socialReason, comertialName, address, email, phoneNumber, imageUrl, file, hasBarcode, hasPrinter);
         UserDto userDto = UserMapper.buildCompanyDtoFromController(username, password, firstName, lastName, userEmail, userPhoneNumber);
-        return new ResponseEntity<>(maintenanceService.createCompany(companyDto, userDto, user, Boolean.parseBoolean(isTest), role), HttpStatus.CREATED);
+        return new ResponseEntity<>(maintenanceService.createCompany(companyDto, userDto, user, Boolean.parseBoolean(isTest), role, planId, subscriptionStatus), HttpStatus.CREATED);
     }
 
 
@@ -126,6 +134,55 @@ public class MaintenanceController {
             @CurrentUser UserEntity user
     ) {
         return new ResponseEntity<>(maintenanceService.createClient(clientDto, user),  HttpStatus.CREATED);
+    }
+
+    // ==== Mantenimiento > Empresas (SUPER_ADMIN): cruza todas las empresas ====
+
+    @GetMapping("/companies")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> getAllCompanies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String searchKey,
+            @RequestParam(required = false) Boolean active
+    ) {
+        return new ResponseEntity<>(maintenanceService.getAllCompanies(searchKey, active, page, size), HttpStatus.OK);
+    }
+
+    @PatchMapping("/companies/activate")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> activateCompany(@RequestParam Long companyId) {
+        return new ResponseEntity<>(maintenanceService.activateCompany(companyId), HttpStatus.OK);
+    }
+
+    @PatchMapping("/companies/deactivate")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> deactivateCompany(@RequestParam Long companyId) {
+        return new ResponseEntity<>(maintenanceService.deactivateCompany(companyId), HttpStatus.OK);
+    }
+
+    // ==== Mantenimiento > Productos generales (SUPER_ADMIN): catálogo compartido ====
+
+    @GetMapping("/products-general")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> getAllGeneralProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String searchKey
+    ) {
+        return new ResponseEntity<>(productGeneralService.getAllProducts(searchKey, page, size), HttpStatus.OK);
+    }
+
+    @PutMapping("/products-general")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> updateGeneralProduct(@RequestBody GlobalProductDto productDto) {
+        return new ResponseEntity<>(productGeneralService.updateProduct(productDto), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/products-general")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> deleteGeneralProduct(@RequestParam Long id) {
+        return new ResponseEntity<>(productGeneralService.deleteProduct(id), HttpStatus.OK);
     }
 
 }

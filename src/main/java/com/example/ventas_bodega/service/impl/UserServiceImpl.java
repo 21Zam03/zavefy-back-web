@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.service.impl;
 
+import com.example.ventas_bodega.dto.GlobalUserDto;
 import com.example.ventas_bodega.dto.RoleDto;
 import com.example.ventas_bodega.dto.TeamUserDto;
 import com.example.ventas_bodega.entity.RoleEntity;
@@ -7,6 +8,7 @@ import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.exceptions.DuplicateException;
 import com.example.ventas_bodega.exceptions.NotFoundException;
+import com.example.ventas_bodega.mapper.GlobalUserMapper;
 import com.example.ventas_bodega.mapper.RoleMapper;
 import com.example.ventas_bodega.mapper.TeamUserMapper;
 import com.example.ventas_bodega.repository.RoleRepository;
@@ -164,6 +166,34 @@ public class UserServiceImpl implements UserService {
         }
         UserEntity target = userRepository
                 .findByUserIdAndCompany_CompanyId(userId, currentUser.getCompany().getCompanyId())
+                .orElseThrow(() -> new NotFoundException("El usuario no existe"));
+        target.setEnabled(false);
+        userRepository.save(target);
+        return new MessageResponse("Usuario desactivado", true);
+    }
+
+    @Override
+    public Page<GlobalUserDto> getAllUsers(String searchKey, Boolean enabled, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserEntity> users = userRepository.findAllWithFilters(searchKey, enabled, pageable);
+        return users.map(GlobalUserMapper::entityToDto);
+    }
+
+    @Override
+    public MessageResponse activateUserGlobal(Integer userId) {
+        UserEntity target = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("El usuario no existe"));
+        target.setEnabled(true);
+        userRepository.save(target);
+        return new MessageResponse("Usuario activado", true);
+    }
+
+    @Override
+    public MessageResponse deactivateUserGlobal(Integer userId, UserEntity currentUser) {
+        if (userId.equals(currentUser.getUserId())) {
+            throw new BusinessException("No puedes desactivarte a ti mismo");
+        }
+        UserEntity target = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("El usuario no existe"));
         target.setEnabled(false);
         userRepository.save(target);

@@ -1,5 +1,6 @@
 package com.example.ventas_bodega.entity;
 
+import com.example.ventas_bodega.enums.CajaMovimientoCategoriaEnum;
 import com.example.ventas_bodega.enums.CajaMovimientoTipoEnum;
 import jakarta.persistence.*;
 
@@ -28,6 +29,11 @@ public class CajaMovimientoEntity {
 
     @Column(name = "motivo", nullable = false)
     private String motivo;
+
+    // Nullable porque los movimientos creados antes de esta funcionalidad no tienen categoría.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "categoria")
+    private CajaMovimientoCategoriaEnum categoria;
 
     @Column(name = "fecha", nullable = false)
     private LocalDateTime fecha;
@@ -78,6 +84,14 @@ public class CajaMovimientoEntity {
 
     public void setMotivo(String motivo) {
         this.motivo = motivo;
+    }
+
+    public CajaMovimientoCategoriaEnum getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(CajaMovimientoCategoriaEnum categoria) {
+        this.categoria = categoria;
     }
 
     public LocalDateTime getFecha() {

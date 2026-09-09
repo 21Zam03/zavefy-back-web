@@ -12,6 +12,7 @@ public class PurchaseDto {
     private String reference;
     private String notes;
     private BigDecimal total;
+    private Boolean paidFromCaja;
     private Integer itemCount;
     private Long companyId;
     private Long createdBy;
@@ -71,6 +72,14 @@ public class PurchaseDto {
 
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public Boolean getPaidFromCaja() {
+        return paidFromCaja;
+    }
+
+    public void setPaidFromCaja(Boolean paidFromCaja) {
+        this.paidFromCaja = paidFromCaja;
     }
 
     public Integer getItemCount() {

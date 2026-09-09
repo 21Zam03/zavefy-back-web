@@ -11,6 +11,7 @@ public class CajaMovimientoMapper {
         dto.setTipo(entity.getTipo().toString());
         dto.setMonto(entity.getMonto());
         dto.setMotivo(entity.getMotivo());
+        dto.setCategoria(entity.getCategoria() != null ? entity.getCategoria().toString() : null);
         dto.setFecha(entity.getFecha());
         return dto;
     }

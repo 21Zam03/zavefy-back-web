@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class CajaDto {
 
     private Long id;
+    private String cajeroNombre;
     private BigDecimal montoInicial;
     private String observacion;
     private LocalDateTime fechaApertura;

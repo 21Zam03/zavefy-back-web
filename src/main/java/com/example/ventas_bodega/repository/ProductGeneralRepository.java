@@ -1,6 +1,8 @@
 package com.example.ventas_bodega.repository;
 ;
 import com.example.ventas_bodega.entity.ProductGeneralEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +15,23 @@ public interface ProductGeneralRepository extends JpaRepository<ProductGeneralEn
 
     boolean existsByBarcode(String barcode);
     ProductGeneralEntity findByBarcode(String barcode);
+
+    // Mantenimiento > Productos generales (SUPER_ADMIN): listado paginado del
+    // catálogo compartido entre empresas (tb_producto_general no tiene company_id).
+    @Query("""
+    SELECT p FROM ProductGeneralEntity p
+    WHERE (
+            :searchKey IS NULL
+            OR LOWER(p.name) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(p.category) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR p.barcode LIKE CONCAT('%', :searchKey, '%')
+      )
+    ORDER BY p.name ASC
+    """)
+    Page<ProductGeneralEntity> findAllWithFilters(
+            @Param("searchKey") String searchKey,
+            Pageable pageable
+    );
 
     @Modifying
     @Transactional

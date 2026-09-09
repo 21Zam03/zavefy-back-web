@@ -16,6 +16,7 @@ public class CajaMovimientoDto {
     private String tipo;
     private BigDecimal monto;
     private String motivo;
+    private String categoria;
     private LocalDateTime fecha;
 
 }

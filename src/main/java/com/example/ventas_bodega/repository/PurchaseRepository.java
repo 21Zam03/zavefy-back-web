@@ -8,11 +8,25 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 public interface PurchaseRepository extends JpaRepository<PurchaseEntity, Long> {
 
     Optional<PurchaseEntity> findByPurchaseIdAndCompanyId(Long purchaseId, Long companyId);
+
+    // Dashboard > Resumen general: egresos por compras a proveedores en el rango de fechas.
+    @Query(value = """
+    SELECT COALESCE(SUM(c.monto_total), 0)
+    FROM tb_compra c
+    WHERE c.id_empresa = :companyId
+    AND c.fecha_compra BETWEEN :start AND :end
+    """, nativeQuery = true)
+    BigDecimal getTotalPurchasesBetweenDates(
+            @Param("companyId") Long companyId,
+            @Param("start") String start,
+            @Param("end") String end
+    );
 
     @Query(value = """
     SELECT

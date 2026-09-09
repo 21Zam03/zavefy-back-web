@@ -28,6 +28,9 @@ public class ProductUpdateRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
     private BigDecimal price;
 
+    @DecimalMin(value = "0.0", message = "El precio de compra no puede ser negativo")
+    private BigDecimal costPrice;
+
     @NotBlank(message = "La categoria del producto es obligatorio")
     private String category;
 

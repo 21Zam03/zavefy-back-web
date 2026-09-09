@@ -5,6 +5,7 @@ import com.example.ventas_bodega.dto.CajaMovimientoDto;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.request.AbrirMovimientoCajaRequest;
 import com.example.ventas_bodega.request.CerrarCajaRequest;
+import com.example.ventas_bodega.response.MessageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,6 +17,8 @@ public interface CajaService {
     CajaDto abrirCaja(CajaDto cajaDto, UserEntity user);
     List<CajaMovimientoDto> getMovimientos(String ruc);
     CajaMovimientoDto registrarMovimiento(AbrirMovimientoCajaRequest request, UserEntity user);
+    CajaMovimientoDto actualizarMovimiento(Long movimientoId, AbrirMovimientoCajaRequest request, UserEntity user);
+    MessageResponse eliminarMovimiento(Long movimientoId, UserEntity user);
     CajaDto cerrarCaja(CerrarCajaRequest request, UserEntity user);
     Page<CajaDto> getHistorial(String ruc, Pageable pageable);
 

@@ -38,6 +38,7 @@ public class PurchaseMapper {
         purchaseDto.setReference(purchaseEntity.getReference());
         purchaseDto.setNotes(purchaseEntity.getNotes());
         purchaseDto.setTotal(purchaseEntity.getTotal());
+        purchaseDto.setPaidFromCaja(purchaseEntity.getPaidFromCaja());
         purchaseDto.setCompanyId(purchaseEntity.getCompanyId());
         purchaseDto.setCreatedBy(purchaseEntity.getCreatedBy());
         purchaseDto.setItems(items);
@@ -52,6 +53,7 @@ public class PurchaseMapper {
         purchaseEntity.setReference(purchaseDto.getReference());
         purchaseEntity.setNotes(purchaseDto.getNotes());
         purchaseEntity.setTotal(purchaseDto.getTotal());
+        purchaseEntity.setPaidFromCaja(purchaseDto.getPaidFromCaja());
         return purchaseEntity;
     }
 

@@ -12,6 +12,7 @@ public class ProductDto {
     private String name;
     private String description;
     private BigDecimal price;
+    private BigDecimal costPrice;
     private BigDecimal unitPrice;
     private List<String> categories;
     private String category;
@@ -77,6 +78,14 @@ public class ProductDto {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public BigDecimal getCostPrice() {
+        return costPrice;
+    }
+
+    public void setCostPrice(BigDecimal costPrice) {
+        this.costPrice = costPrice;
     }
 
     public List<String> getCategories() {

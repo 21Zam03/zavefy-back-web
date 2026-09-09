@@ -9,6 +9,10 @@ public class DashboardDataDto {
     private Long saleCount;
     private BigDecimal productCount;
     private BigDecimal averageTicket;
+    private BigDecimal totalCost;
+    private BigDecimal totalMargin;
+    private BigDecimal marginPercent;
+    private BigDecimal totalPurchases;
     private List<SalexDay> salexDays;
     private List<TopProductDto> topProducts;
     private List<ProductAlertDto> productAlerts;
@@ -45,6 +49,38 @@ public class DashboardDataDto {
 
     public void setAverageTicket(BigDecimal averageTicket) {
         this.averageTicket = averageTicket;
+    }
+
+    public BigDecimal getTotalCost() {
+        return totalCost;
+    }
+
+    public void setTotalCost(BigDecimal totalCost) {
+        this.totalCost = totalCost;
+    }
+
+    public BigDecimal getTotalMargin() {
+        return totalMargin;
+    }
+
+    public void setTotalMargin(BigDecimal totalMargin) {
+        this.totalMargin = totalMargin;
+    }
+
+    public BigDecimal getMarginPercent() {
+        return marginPercent;
+    }
+
+    public void setMarginPercent(BigDecimal marginPercent) {
+        this.marginPercent = marginPercent;
+    }
+
+    public BigDecimal getTotalPurchases() {
+        return totalPurchases;
+    }
+
+    public void setTotalPurchases(BigDecimal totalPurchases) {
+        this.totalPurchases = totalPurchases;
     }
 
     public List<SalexDay> getSalexDays() {

@@ -9,15 +9,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
+
+    // Mantenimiento > Empresas (SUPER_ADMIN): cantidad de usuarios por empresa, para las
+    // empresas de la página actual (evita traer todos los usuarios del sistema solo para contar).
+    @Query("SELECT u.company.companyId, COUNT(u) FROM UserEntity u WHERE u.company.companyId IN :companyIds GROUP BY u.company.companyId")
+    List<Object[]> countUsersByCompanyIds(@Param("companyIds") List<Long> companyIds);
 
     public Optional<UserEntity> findByUsername(String username);
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 
     Optional<UserEntity> findByUserIdAndCompany_CompanyId(Integer userId, Long companyId);
+    Optional<UserEntity> findByUserId(Integer userId);
 
     @Query("""
     SELECT u FROM UserEntity u
@@ -33,6 +40,28 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Page<UserEntity> findByCompanyWithFilters(
             @Param("companyId") Long companyId,
             @Param("searchKey") String searchKey,
+            Pageable pageable
+    );
+
+    // Usada por Mantenimiento > Usuarios (SUPER_ADMIN): a diferencia de findByCompanyWithFilters,
+    // cruza todas las empresas. El texto de búsqueda también matchea nombre/RUC de la empresa,
+    // para no necesitar un selector de empresa aparte.
+    @Query("""
+    SELECT u FROM UserEntity u
+    WHERE (
+            :searchKey IS NULL
+            OR LOWER(u.firstname) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(u.lastname) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(u.email) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(u.company.comertialName) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+            OR LOWER(u.company.ruc) LIKE LOWER(CONCAT('%', :searchKey, '%'))
+      )
+      AND (:enabled IS NULL OR u.isEnabled = :enabled)
+    ORDER BY u.company.comertialName ASC, u.firstname ASC
+    """)
+    Page<UserEntity> findAllWithFilters(
+            @Param("searchKey") String searchKey,
+            @Param("enabled") Boolean enabled,
             Pageable pageable
     );
 

@@ -6,12 +6,14 @@ import com.example.ventas_bodega.dto.SalexDay;
 import com.example.ventas_bodega.dto.TopProductDto;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.repository.ProductRepository;
+import com.example.ventas_bodega.repository.PurchaseRepository;
 import com.example.ventas_bodega.repository.SaleRepository;
 import com.example.ventas_bodega.service.DashBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +22,13 @@ public class DashBoardServiceImpl implements DashBoardService {
 
     private final SaleRepository saleRepository;
     private final ProductRepository productRepository;
+    private final PurchaseRepository purchaseRepository;
 
     @Autowired
-    public DashBoardServiceImpl(SaleRepository saleRepository, ProductRepository productRepository) {
+    public DashBoardServiceImpl(SaleRepository saleRepository, ProductRepository productRepository, PurchaseRepository purchaseRepository) {
         this.saleRepository = saleRepository;
         this.productRepository = productRepository;
+        this.purchaseRepository = purchaseRepository;
     }
 
     @Override
@@ -36,6 +40,17 @@ public class DashBoardServiceImpl implements DashBoardService {
         BigDecimal productCount = saleRepository.countProductsBetweenDates(fromDate, toDate,  user.getCompany().getRuc());
 
         BigDecimal averageTicket = saleRepository.getAverageTicketNative(fromDate, toDate, user.getCompany().getRuc());
+
+        BigDecimal totalPurchases = purchaseRepository.getTotalPurchasesBetweenDates(user.getCompany().getCompanyId(), fromDate, toDate);
+
+        // Margen de ganancia: revenue y costo se calculan con la misma base (tb_detalle_venta,
+        // excluyendo anuladas) para que sean comparables entre sí.
+        BigDecimal marginRevenue = saleRepository.getNetRevenueBetweenDates(fromDate, toDate, user.getCompany().getRuc());
+        BigDecimal totalCost = saleRepository.getTotalCostBetweenDates(fromDate, toDate, user.getCompany().getRuc());
+        BigDecimal totalMargin = marginRevenue.subtract(totalCost);
+        BigDecimal marginPercent = marginRevenue.compareTo(BigDecimal.ZERO) > 0
+                ? totalMargin.divide(marginRevenue, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100))
+                : BigDecimal.ZERO;
 
         List<Object[]> list = saleRepository.getSalesByDayWithZeros(fromDate, toDate, user.getCompany().getRuc());
         List<SalexDay> result = new ArrayList<>();
@@ -72,6 +87,10 @@ public class DashBoardServiceImpl implements DashBoardService {
         dashboardDataDto.setSaleCount(saleCount);
         dashboardDataDto.setProductCount(productCount);
         dashboardDataDto.setAverageTicket(averageTicket);
+        dashboardDataDto.setTotalCost(totalCost);
+        dashboardDataDto.setTotalMargin(totalMargin);
+        dashboardDataDto.setMarginPercent(marginPercent);
+        dashboardDataDto.setTotalPurchases(totalPurchases);
         dashboardDataDto.setSalexDays(result);
         dashboardDataDto.setTopProducts(topProductResult);
         dashboardDataDto.setProductAlerts(productAlertResult);
