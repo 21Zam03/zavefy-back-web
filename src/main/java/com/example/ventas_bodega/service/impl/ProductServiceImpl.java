@@ -3,7 +3,6 @@ package com.example.ventas_bodega.service.impl;
 import com.example.ventas_bodega.dto.*;
 import com.example.ventas_bodega.dto.interfaces.TopSellingProductDtoInter;
 import com.example.ventas_bodega.entity.*;
-import com.example.ventas_bodega.enums.MeasurementUnitEnum;
 import com.example.ventas_bodega.enums.StockMovementTypeEnum;
 import com.example.ventas_bodega.enums.StockStatusEnum;
 import com.example.ventas_bodega.exceptions.BusinessException;
@@ -151,14 +150,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private MessageResponse processBulkProduct(ProductRequest request, UserEntity user) throws Exception {
-        // @Valid en el controller no cascada la validación a cada elemento de un
-        // List<ProductRequest> del body — así que un producto sin unidad de medida puede
-        // llegar hasta acá con measurementUnit=null. En vez de rechazar el ítem, se acepta
-        // con "U" (Unidad) por defecto, igual que hace el frontend para su propio fallback.
-        if (request.getMeasurementUnit() == null) {
-            request.setMeasurementUnit(MeasurementUnitEnum.U);
-        }
-
+        // measurementUnit ya no es obligatorio en ProductRequest — si viene null,
+        // ProductMapper.buildProductDtoFromProductRequest le pone "U" (Unidad) por defecto.
         String barcode = request.getBarcode();
         if (barcode != null && !barcode.isBlank()) {
             Optional<ProductEntity> existing = productRepository.findByBarcodeAndCompany_Ruc(barcode, user.getCompany().getRuc());

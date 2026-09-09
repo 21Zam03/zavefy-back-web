@@ -43,7 +43,9 @@ public class ProductRequest {
     @DecimalMin(value = "0.0", message = "El stock no puede ser negativo")
     private BigDecimal stock;
 
-    @NotNull(message = "La unidad de medida es obligatoria")
+    // Opcional: si no viene, ProductMapper.buildProductDtoFromProductRequest le pone "U"
+    // (Unidad) por defecto — antes era obligatorio, pero eso hacía que un solo producto sin
+    // unidad tumbara TODO un lote de carga masiva con un 500 en vez de crear el resto.
     private MeasurementUnitEnum measurementUnit;
 
     // Opcional: estado de control de stock (ver StockStatusEnum). Si no viene,

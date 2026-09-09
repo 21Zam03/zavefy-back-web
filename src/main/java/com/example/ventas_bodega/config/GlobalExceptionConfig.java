@@ -3,6 +3,7 @@ package com.example.ventas_bodega.config;
 import com.example.ventas_bodega.exceptions.BusinessException;
 import com.example.ventas_bodega.exceptions.NotFoundException;
 import com.example.ventas_bodega.response.ErrorResponse;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,6 +70,28 @@ public class GlobalExceptionConfig {
                 .stream()
                 .map(FieldError::getDefaultMessage)
                 .findFirst()
+                .orElse("Error de validación");
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(
+                        400,
+                        "Error de validación",
+                        message
+                ));
+    }
+
+    // Distinto de MethodArgumentNotValidException: este es el que lanza Bean Validation
+    // cuando @Valid cascada dentro de cada elemento de una List<T> en el body (ej.
+    // /api/product/bulk) — sin este handler caía en el genérico de abajo y devolvía 500
+    // en vez de un 400 con el mensaje real de la validación.
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<?> handleConstraintViolationException(
+            ConstraintViolationException ex
+    ) {
+        String message = ex.getConstraintViolations().stream()
+                .findFirst()
+                .map(v -> v.getMessage())
                 .orElse("Error de validación");
 
         return ResponseEntity

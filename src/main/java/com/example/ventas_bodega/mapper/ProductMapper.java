@@ -6,6 +6,7 @@ import com.example.ventas_bodega.dto.ProductFoodDto;
 import com.example.ventas_bodega.entity.CategoryEntity;
 import com.example.ventas_bodega.entity.ProductEntity;
 import com.example.ventas_bodega.entity.ProductGeneralEntity;
+import com.example.ventas_bodega.enums.MeasurementUnitEnum;
 import com.example.ventas_bodega.request.ProductRequest;
 import com.example.ventas_bodega.request.ProductUpdateRequest;
 import org.springframework.web.multipart.MultipartFile;
@@ -186,7 +187,10 @@ public class ProductMapper {
         productDto.setBarcode(productRequest.getBarcode());
         productDto.setImageUrl(productRequest.getImageUrl());
         productDto.setFile(file);
-        productDto.setMeasurementUnit(productRequest.getMeasurementUnit() != null ? productRequest.getMeasurementUnit().toString() : null);
+        // Sin unidad de medida => "U" (Unidad) por defecto, en vez de dejarlo en null.
+        productDto.setMeasurementUnit(
+                (productRequest.getMeasurementUnit() != null ? productRequest.getMeasurementUnit() : MeasurementUnitEnum.U).toString()
+        );
         productDto.setStockStatus(productRequest.getStockStatus());
         return productDto;
     }
