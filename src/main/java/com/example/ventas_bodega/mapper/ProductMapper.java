@@ -186,7 +186,7 @@ public class ProductMapper {
         productDto.setBarcode(productRequest.getBarcode());
         productDto.setImageUrl(productRequest.getImageUrl());
         productDto.setFile(file);
-        productDto.setMeasurementUnit(productRequest.getMeasurementUnit().toString());
+        productDto.setMeasurementUnit(productRequest.getMeasurementUnit() != null ? productRequest.getMeasurementUnit().toString() : null);
         productDto.setStockStatus(productRequest.getStockStatus());
         return productDto;
     }
