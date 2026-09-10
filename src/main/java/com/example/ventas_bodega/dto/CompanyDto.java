@@ -23,6 +23,7 @@ public class CompanyDto {
     private boolean hasBarcode;
     private boolean isTest;
     private boolean hasPrinter;
+    private Integer lowStockThreshold;
     private List<YapeDto> yapes = new ArrayList<>();
 
     public CompanyDto() {
@@ -157,6 +158,14 @@ public class CompanyDto {
 
     public void setHasAutomaticSaved(boolean hasAutomaticSaved) {
         this.hasAutomaticSaved = hasAutomaticSaved;
+    }
+
+    public Integer getLowStockThreshold() {
+        return lowStockThreshold;
+    }
+
+    public void setLowStockThreshold(Integer lowStockThreshold) {
+        this.lowStockThreshold = lowStockThreshold;
     }
 
     public List<YapeDto> getYapes() {

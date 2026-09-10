@@ -12,6 +12,7 @@ import com.example.ventas_bodega.repository.YapeRepository;
 import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.service.ConfigurationService;
 import com.example.ventas_bodega.service.FirebaseStorageService;
+import com.example.ventas_bodega.util.StoragePathUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,18 +26,21 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private final YapeRepository yapeRepository;
     private final FirebaseStorageService firebaseStorageService;
     private final UserRepository userRepository;
+    private final StoragePathUtil storagePathUtil;
 
     @Autowired
     public ConfigurationServiceImpl(
             CompanyRepository companyRepository,
             FirebaseStorageService firebaseStorageService,
             YapeRepository yapeRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            StoragePathUtil storagePathUtil
     ) {
         this.companyRepository = companyRepository;
         this.firebaseStorageService = firebaseStorageService;
         this.yapeRepository = yapeRepository;
         this.userRepository = userRepository;
+        this.storagePathUtil = storagePathUtil;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             if(companyDto.getFile() != null) {
                 //Cuando el cliente sube una imagen de su escritorio
-                String filePath = "bodega-sistemas/clients/" + userEntity.getCompany().getRuc() + "/"+companyToUpdate.getRuc()+"-company-logo";
+                String filePath = storagePathUtil.clientPath(userEntity.getCompany().getRuc(), companyToUpdate.getRuc() + "-company-logo");
                 FileDto fileDto = firebaseStorageService.uploadFile(companyDto.getFile(), filePath);
                 companyToUpdate.setImageUrl(fileDto.getUrl());
                 companyToUpdate.setFilePath(filePath);
@@ -163,16 +167,29 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public MessageResponse updateBusinessOperativeInfo(String hasBarcode, String hasPrinter, UserEntity userEntity) {
+    public MessageResponse updateBusinessOperativeInfo(String hasBarcode, String hasPrinter, String lowStockThreshold, UserEntity userEntity) {
         boolean barcode = Boolean.parseBoolean(hasBarcode);
         boolean printer = Boolean.parseBoolean(hasPrinter);
+
+        Integer threshold = null;
+        if (lowStockThreshold != null && !lowStockThreshold.isBlank()) {
+            try {
+                threshold = Integer.parseInt(lowStockThreshold);
+            } catch (NumberFormatException e) {
+                return new MessageResponse("El umbral de stock bajo debe ser un número entero", false);
+            }
+            if (threshold < 1) {
+                return new MessageResponse("El umbral de stock bajo debe ser mayor a 0", false);
+            }
+        }
 
         Long companyId = userEntity.getCompany().getCompanyId();
 
         int result = companyRepository.updateBusinessConfiguration(
                 companyId,
                 printer,
-                barcode
+                barcode,
+                threshold
         );
 
         if (result == 1) {
@@ -195,12 +212,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // El usuario subió un nuevo logo
         if (file != null && !file.isEmpty()) {
 
-            String filePath =
-                    "bodega-sistemas/clients/"
-                            + userEntity.getCompany().getRuc()
-                            + "/"
-                            + userEntity.getCompany().getRuc()
-                            + "-company-logo";
+            String filePath = storagePathUtil.clientPath(
+                    userEntity.getCompany().getRuc(),
+                    userEntity.getCompany().getRuc() + "-company-logo"
+            );
 
             FileDto fileDto = firebaseStorageService.uploadFile(
                     file,
@@ -244,11 +259,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         if (file != null && !file.isEmpty()) {
 
-            String filePath =
-                    "bodega-sistemas/clients/"
-                            + userEntity.getCompany().getRuc()
-                            + "/yapes/"
-                            + phoneNumber;
+            String filePath = storagePathUtil.clientPath(
+                    userEntity.getCompany().getRuc(),
+                    "yapes/" + phoneNumber
+            );
 
             FileDto fileDto =
                     firebaseStorageService.uploadFile(
@@ -283,11 +297,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         if (qrFile != null && !qrFile.isEmpty()) {
 
-            String filePath =
-                    "bodega-sistemas/clients/"
-                            + user.getCompany().getRuc()
-                            + "/yapes/"
-                            + phoneNumber;
+            String filePath = storagePathUtil.clientPath(
+                    user.getCompany().getRuc(),
+                    "yapes/" + phoneNumber
+            );
 
             FileDto fileDto =
                     firebaseStorageService.uploadFile(

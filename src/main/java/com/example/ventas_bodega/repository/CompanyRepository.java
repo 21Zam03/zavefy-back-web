@@ -73,7 +73,8 @@ public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
             value = """
         UPDATE tb_empresa
         SET tiene_impresora = :hasPrinter,
-            tiene_codigo_barras = :hasBarcode
+            tiene_codigo_barras = :hasBarcode,
+            umbral_stock_bajo = :lowStockThreshold
         WHERE id_empresa = :companyId
         """,
             nativeQuery = true
@@ -81,7 +82,8 @@ public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
     int updateBusinessConfiguration(
             @Param("companyId") Long companyId,
             @Param("hasPrinter") boolean hasPrinter,
-            @Param("hasBarcode") boolean hasBarcode
+            @Param("hasBarcode") boolean hasBarcode,
+            @Param("lowStockThreshold") Integer lowStockThreshold
     );
 
     @Modifying

@@ -13,6 +13,7 @@ import com.example.ventas_bodega.response.MessageResponse;
 import com.example.ventas_bodega.rest.FoodRestTemplate;
 import com.example.ventas_bodega.service.*;
 import com.example.ventas_bodega.util.ProductUtil;
+import com.example.ventas_bodega.util.StoragePathUtil;
 import com.example.ventas_bodega.validators.ProductValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,8 @@ public class ProductServiceImpl implements ProductService {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final StoragePathUtil storagePathUtil;
+
     @Lazy
     @Autowired
     private ProductService self;
@@ -60,7 +63,8 @@ public class ProductServiceImpl implements ProductService {
             JdbcTemplate jdbcTemplate,
             InventoryService inventoryService,
             ProductValidator productValidator,
-            ProductGeneralService productGeneralService) {
+            ProductGeneralService productGeneralService,
+            StoragePathUtil storagePathUtil) {
         this.firebaseStorageService = firebaseStorageService;
         this.foodRestTemplate = foodRestTemplate;
         this.productRepository = productRepository;
@@ -69,6 +73,7 @@ public class ProductServiceImpl implements ProductService {
         this.productValidator = productValidator;
         this.categoryService = categoryService;
         this.productGeneralService = productGeneralService;
+        this.storagePathUtil = storagePathUtil;
     }
 
     @Override
@@ -221,10 +226,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private String buildProductImagePath(String ruc, Long productId) {
-        return "bodega-sistemas/clients/"
-                + ruc
-                + "/products/"
-                + productId;
+        return storagePathUtil.clientPath(ruc, "products/" + productId);
     }
 
     private String processProductImage(ProductDto productDto, ProductEntity productCreated, CompanyEntity company) throws Exception {

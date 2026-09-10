@@ -34,7 +34,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     AND (
         :stockStatus IS NULL
         OR (:stockStatus = 'SIN_STOCK' AND p.stock = 0)
-        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND 10)
+        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND COALESCE(e.umbral_stock_bajo, 10))
         OR (:stockStatus = 'STOCK_MODERADO' AND p.stock BETWEEN 11 AND 50)
         OR (:stockStatus = 'STOCK_SUFICIENTE' AND p.stock > 50)
     )
@@ -53,7 +53,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     AND (
         :stockStatus IS NULL
         OR (:stockStatus = 'SIN_STOCK' AND p.stock = 0)
-        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND 10)
+        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND COALESCE(e.umbral_stock_bajo, 10))
         OR (:stockStatus = 'STOCK_MODERADO' AND p.stock BETWEEN 11 AND 50)
         OR (:stockStatus = 'STOCK_SUFICIENTE' AND p.stock > 50)
     )
@@ -85,7 +85,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     AND (
         :stockStatus IS NULL
         OR (:stockStatus = 'SIN_STOCK' AND p.stock = 0)
-        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND 10)
+        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND COALESCE(e.umbral_stock_bajo, 10))
         OR (:stockStatus = 'STOCK_MODERADO' AND p.stock BETWEEN 11 AND 50)
         OR (:stockStatus = 'STOCK_SUFICIENTE' AND p.stock > 50)
     )
@@ -104,7 +104,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     AND (
         :stockStatus IS NULL
         OR (:stockStatus = 'SIN_STOCK' AND p.stock = 0)
-        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND 10)
+        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND COALESCE(e.umbral_stock_bajo, 10))
         OR (:stockStatus = 'STOCK_MODERADO' AND p.stock BETWEEN 11 AND 50)
         OR (:stockStatus = 'STOCK_SUFICIENTE' AND p.stock > 50)
     )
@@ -133,7 +133,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     AND (
         :stockStatus IS NULL
         OR (:stockStatus = 'SIN_STOCK' AND p.stock = 0)
-        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND 10)
+        OR (:stockStatus = 'BAJO_STOCK' AND p.stock BETWEEN 1 AND COALESCE(e.umbral_stock_bajo, 10))
         OR (:stockStatus = 'STOCK_MODERADO' AND p.stock BETWEEN 11 AND 50)
         OR (:stockStatus = 'STOCK_SUFICIENTE' AND p.stock > 50)
     )
@@ -199,6 +199,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             p.nombre AS name,
             p.codigo_barras AS barcode,
             p.image_url AS imageUrl,
+            p.image_url_thumb AS imageUrlThumb,
             p.precio_venta AS price,
             p.stock AS stock,
             SUM(d.cantidad) AS totalSold
@@ -208,7 +209,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
         INNER JOIN tb_usuario u ON v.id_usuario = u.id_usuario
         INNER JOIN tb_empresa e ON u.id_empresa = e.id_empresa
         WHERE e.ruc = :ruc
-        GROUP BY p.id_producto, p.nombre, p.codigo_barras, p.image_url, p.precio_venta, p.stock
+        GROUP BY p.id_producto, p.nombre, p.codigo_barras, p.image_url, p.image_url_thumb, p.precio_venta, p.stock
         ORDER BY totalSold DESC
         LIMIT 10
         """, nativeQuery = true)
@@ -255,14 +256,17 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             @Param("companyId") Long companyId
     );
 
+    // CRITICO/BAJO se derivan del umbral configurable de la empresa (COALESCE a 10 si no
+    // tiene uno): CRITICO = 20% del umbral, BAJO = el umbral completo — misma proporción
+    // que el default histórico (2 y 5 sobre un umbral de 10).
     @Query(value = """
-    SELECT 
+    SELECT
         p.nombre,
         p.stock,
-        CASE 
+        CASE
             WHEN p.stock = 0 THEN 'SIN STOCK'
-            WHEN p.stock <= 2 THEN 'CRITICO'
-            WHEN p.stock <= 5 THEN 'BAJO'
+            WHEN p.stock <= GREATEST(1, ROUND(COALESCE(c.umbral_stock_bajo, 10) * 0.2)) THEN 'CRITICO'
+            WHEN p.stock <= COALESCE(c.umbral_stock_bajo, 10) THEN 'BAJO'
             ELSE 'NORMAL'
         END AS estado
     FROM tb_producto p
@@ -309,8 +313,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     @Query(value = """
     SELECT p.id_empresa, p.id_producto, p.nombre, p.stock
     FROM tb_producto p
+    INNER JOIN tb_empresa e ON p.id_empresa = e.id_empresa
     WHERE p.activo = true
-      AND p.stock BETWEEN 1 AND 10
+      AND p.stock BETWEEN 1 AND COALESCE(e.umbral_stock_bajo, 10)
       AND (p.estado_stock IS NULL OR p.estado_stock <> 'NO_CONTROLADO')
     """, nativeQuery = true)
     List<Object[]> findLowStockProducts();

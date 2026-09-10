@@ -7,13 +7,18 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
+import com.luciad.imageio.webp.WebPWriteParam;
 import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 
 @Service
 public class FirebaseStorageServiceImpl implements FirebaseStorageService {
@@ -34,11 +40,17 @@ public class FirebaseStorageServiceImpl implements FirebaseStorageService {
     private static final int LARGE_WIDTH = 1200;
     private static final float LARGE_QUALITY = 0.85f;
 
+    // No "immutable"/años: el mismo path se reescribe cuando el producto edita su imagen
+    // (basePath fijo por producto en ProductServiceImpl), así que un cache demasiado largo
+    // dejaría la imagen vieja pegada en el navegador del cliente tras una edición.
+    private static final String CACHE_CONTROL = "public, max-age=86400";
+
     @Override
     public FileDto uploadFile(MultipartFile file, String filePath) throws Exception {
         InputStream inputStream = file.getInputStream();
         BlobInfo blobInfo = BlobInfo.newBuilder(StorageClient.getInstance().bucket().getName(), filePath)
                 .setContentType(file.getContentType())
+                .setCacheControl(CACHE_CONTROL)
                 .build();
         Blob blob = StorageClient.getInstance().bucket().create(blobInfo.getName(), inputStream, blobInfo.getContentType());
         String encodedFilePath = URLEncoder.encode(filePath, StandardCharsets.UTF_8);
@@ -55,6 +67,7 @@ public class FirebaseStorageServiceImpl implements FirebaseStorageService {
                         filePath
                 )
                 .setContentType(contentType)
+                .setCacheControl(CACHE_CONTROL)
                 .build();
 
         Blob blob = StorageClient.getInstance()
@@ -98,9 +111,14 @@ public class FirebaseStorageServiceImpl implements FirebaseStorageService {
     public void deleteProductImages(String basePath) {
         deleteFileQuietly(basePath + "/original.jpg");
         deleteFileQuietly(basePath + "/original.png");
+        deleteFileQuietly(basePath + "/original.webp");
+        // .jpg: productos creados antes de migrar large/medium/thumb a WebP.
         deleteFileQuietly(basePath + "/large.jpg");
         deleteFileQuietly(basePath + "/medium.jpg");
         deleteFileQuietly(basePath + "/thumb.jpg");
+        deleteFileQuietly(basePath + "/large.webp");
+        deleteFileQuietly(basePath + "/medium.webp");
+        deleteFileQuietly(basePath + "/thumb.webp");
     }
 
     private ProductImageSetDto uploadProductImages(byte[] originalBytes, String contentType, String basePath) throws IOException {
@@ -108,28 +126,53 @@ public class FirebaseStorageServiceImpl implements FirebaseStorageService {
 
         uploadBytes(originalBytes, contentType, basePath + "/original." + extensionFor(contentType));
 
-        FileDto large = uploadBytes(resize(original, LARGE_WIDTH, LARGE_QUALITY), "image/jpeg", basePath + "/large.jpg");
-        FileDto medium = uploadBytes(resize(original, MEDIUM_WIDTH, MEDIUM_QUALITY), "image/jpeg", basePath + "/medium.jpg");
-        FileDto thumb = uploadBytes(resize(original, THUMB_WIDTH, THUMB_QUALITY), "image/jpeg", basePath + "/thumb.jpg");
+        FileDto large = uploadBytes(resize(original, LARGE_WIDTH, LARGE_QUALITY), "image/webp", basePath + "/large.webp");
+        FileDto medium = uploadBytes(resize(original, MEDIUM_WIDTH, MEDIUM_QUALITY), "image/webp", basePath + "/medium.webp");
+        FileDto thumb = uploadBytes(resize(original, THUMB_WIDTH, THUMB_QUALITY), "image/webp", basePath + "/thumb.webp");
 
         return new ProductImageSetDto(large, medium, thumb);
     }
 
+    // Redimensiona con Thumbnailator y codifica a WebP con webp-imageio (javax.imageio no
+    // trae un encoder de WebP de fábrica). A igual "quality" que antes con JPEG, WebP
+    // comprime más chico gracias al códec, así que se reusan los mismos valores de calidad.
     private byte[] resize(BufferedImage original, int maxWidth, float quality) throws IOException {
         int targetWidth = Math.min(maxWidth, original.getWidth());
 
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        Thumbnails.of(original)
+        BufferedImage resized = Thumbnails.of(original)
                 .width(targetWidth)
-                .outputFormat("jpg")
-                .outputQuality(quality)
-                .toOutputStream(output);
-        return output.toByteArray();
+                .asBufferedImage();
+
+        return encodeWebP(resized, quality);
+    }
+
+    private byte[] encodeWebP(BufferedImage image, float quality) throws IOException {
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByMIMEType("image/webp");
+        if (!writers.hasNext()) {
+            throw new IOException("No hay un ImageWriter de WebP registrado en ImageIO");
+        }
+        ImageWriter writer = writers.next();
+        try {
+            WebPWriteParam writeParam = new WebPWriteParam(writer.getLocale());
+            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            writeParam.setCompressionType(writeParam.getCompressionTypes()[WebPWriteParam.LOSSY_COMPRESSION]);
+            writeParam.setCompressionQuality(quality);
+
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            try (ImageOutputStream ios = ImageIO.createImageOutputStream(output)) {
+                writer.setOutput(ios);
+                writer.write(null, new IIOImage(image, null, null), writeParam);
+            }
+            return output.toByteArray();
+        } finally {
+            writer.dispose();
+        }
     }
 
     private FileDto uploadBytes(byte[] bytes, String contentType, String filePath) {
         BlobInfo blobInfo = BlobInfo.newBuilder(StorageClient.getInstance().bucket().getName(), filePath)
                 .setContentType(contentType)
+                .setCacheControl(CACHE_CONTROL)
                 .build();
         Blob blob = StorageClient.getInstance().bucket().create(blobInfo.getName(), bytes, blobInfo.getContentType());
 
@@ -142,6 +185,9 @@ public class FirebaseStorageServiceImpl implements FirebaseStorageService {
     private String extensionFor(String contentType) {
         if (contentType != null && contentType.equalsIgnoreCase("image/png")) {
             return "png";
+        }
+        if (contentType != null && contentType.equalsIgnoreCase("image/webp")) {
+            return "webp";
         }
         return "jpg";
     }

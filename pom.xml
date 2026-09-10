@@ -103,6 +103,13 @@
             <artifactId>thumbnailator</artifactId>
             <version>0.4.20</version>
         </dependency>
+        <!-- ImageIO writer para WebP (javax.imageio no lo soporta de fábrica). Trae el
+             binario nativo de libwebp embebido en el jar (incluye Linux x86_64). -->
+        <dependency>
+            <groupId>com.github.gotson</groupId>
+            <artifactId>webp-imageio</artifactId>
+            <version>0.2.2</version>
+        </dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>

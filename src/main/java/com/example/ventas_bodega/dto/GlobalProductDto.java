@@ -15,6 +15,10 @@ public class GlobalProductDto {
     private String imageUrlMedium;
     private String imageUrlThumb;
 
+    // Solo se usan al actualizar (updateProduct); nunca se devuelven en las respuestas de lectura.
+    private org.springframework.web.multipart.MultipartFile file;
+    private boolean removeImage;
+
     public Long getId() {
         return id;
     }
@@ -85,5 +89,21 @@ public class GlobalProductDto {
 
     public void setImageUrlThumb(String imageUrlThumb) {
         this.imageUrlThumb = imageUrlThumb;
+    }
+
+    public org.springframework.web.multipart.MultipartFile getFile() {
+        return file;
+    }
+
+    public void setFile(org.springframework.web.multipart.MultipartFile file) {
+        this.file = file;
+    }
+
+    public boolean isRemoveImage() {
+        return removeImage;
+    }
+
+    public void setRemoveImage(boolean removeImage) {
+        this.removeImage = removeImage;
     }
 }

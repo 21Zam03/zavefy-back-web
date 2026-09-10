@@ -81,10 +81,11 @@ public class ConfigurationController {
     public ResponseEntity<?> updateBusinessOperativeInfo(
             @RequestParam("hasBarcode") String hasBarcode,
             @RequestParam("hasPrinter") String hasPrinter,
+            @RequestParam(value = "lowStockThreshold", required = false) String lowStockThreshold,
             @CurrentUser UserEntity userEntity
 
     ) {
-        return new ResponseEntity<>(configurationService.updateBusinessOperativeInfo(hasBarcode, hasPrinter, userEntity), HttpStatus.OK);
+        return new ResponseEntity<>(configurationService.updateBusinessOperativeInfo(hasBarcode, hasPrinter, lowStockThreshold, userEntity), HttpStatus.OK);
     }
 
     @PutMapping(value = "/business/brand", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

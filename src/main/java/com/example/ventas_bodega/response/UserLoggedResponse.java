@@ -15,6 +15,7 @@ public class UserLoggedResponse {
     private boolean hasStock;
     private boolean hasBarcode;
     private boolean hasAutomaticSaved;
+    private Integer lowStockThreshold;
     private List<String> roles;
     private List<String> permissions;
     private String role;
@@ -140,6 +141,14 @@ public class UserLoggedResponse {
 
     public void setHasAutomaticSaved(boolean hasAutomaticSaved) {
         this.hasAutomaticSaved = hasAutomaticSaved;
+    }
+
+    public Integer getLowStockThreshold() {
+        return lowStockThreshold;
+    }
+
+    public void setLowStockThreshold(Integer lowStockThreshold) {
+        this.lowStockThreshold = lowStockThreshold;
     }
 
     public String getUsername() {

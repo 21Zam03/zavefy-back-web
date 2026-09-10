@@ -7,6 +7,7 @@ import com.example.ventas_bodega.dto.GlobalProductDto;
 import com.example.ventas_bodega.dto.UserDto;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.mapper.CompanyMapper;
+import com.example.ventas_bodega.mapper.GlobalProductMapper;
 import com.example.ventas_bodega.mapper.UserMapper;
 import com.example.ventas_bodega.security.annotation.CurrentUser;
 import com.example.ventas_bodega.service.MaintenanceService;
@@ -173,9 +174,21 @@ public class MaintenanceController {
         return new ResponseEntity<>(productGeneralService.getAllProducts(searchKey, page, size), HttpStatus.OK);
     }
 
-    @PutMapping("/products-general")
+    @PutMapping(value = "/products-general", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<?> updateGeneralProduct(@RequestBody GlobalProductDto productDto) {
+    public ResponseEntity<?> updateGeneralProduct(
+            @RequestParam("id") Long id,
+            @RequestParam("barcode") String barcode,
+            @RequestParam("name") String name,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam("price") java.math.BigDecimal price,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "removeImage", defaultValue = "false") boolean removeImage,
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) {
+        GlobalProductDto productDto = GlobalProductMapper.buildDtoFromController(
+                id, barcode, name, description, price, category, removeImage, file
+        );
         return new ResponseEntity<>(productGeneralService.updateProduct(productDto), HttpStatus.OK);
     }
 

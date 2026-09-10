@@ -195,6 +195,7 @@ public class AuthServiceImpl implements AuthService {
         userLoggedResponse.setHasBarcode(user.getCompany().isHasBarcode());
         userLoggedResponse.setHasStock(user.getCompany().isHasStock());
         userLoggedResponse.setHasAutomaticSaved(user.getCompany().isHasAutomaticSaved());
+        userLoggedResponse.setLowStockThreshold(user.getCompany().getLowStockThreshold());
         userLoggedResponse.setUsername(user.getUsername());
         userLoggedResponse.setPasswordUpdateDate(user.getPasswordUpdateDate());
         userLoggedResponse.setPasswordReset(user.isPasswordReset());

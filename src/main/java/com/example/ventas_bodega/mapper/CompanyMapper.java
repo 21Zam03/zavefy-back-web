@@ -65,6 +65,7 @@ public class CompanyMapper {
         company.setHasStock(companyEntity.isHasStock());
         company.setHasBarcode(companyEntity.isHasBarcode());
         company.setHasPrinter(companyEntity.isHasPrinter());
+        company.setLowStockThreshold(companyEntity.getLowStockThreshold());
         company.setYapes(YapeMapper.mapEntityListToDtoList(companyEntity.getYapes()));
         return company;
     }

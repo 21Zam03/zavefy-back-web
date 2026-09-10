@@ -65,6 +65,12 @@ public class CompanyEntity {
     @Column(name = "es_activa")
     private boolean isActive;
 
+    // Umbral de stock a partir del cual un producto se considera "bajo stock" (filtro de
+    // Ver productos, alertas del Dashboard y notificaciones del cron). Nulo = usa el
+    // default de 10 (COALESCE en las queries de ProductRepository).
+    @Column(name = "umbral_stock_bajo")
+    private Integer lowStockThreshold;
+
     @OneToMany(
             mappedBy = "company",
             cascade = CascadeType.ALL,
@@ -245,6 +251,14 @@ public class CompanyEntity {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public Integer getLowStockThreshold() {
+        return lowStockThreshold;
+    }
+
+    public void setLowStockThreshold(Integer lowStockThreshold) {
+        this.lowStockThreshold = lowStockThreshold;
     }
 
     @Override
