@@ -2,9 +2,11 @@ package com.example.ventas_bodega.service.impl;
 
 import com.example.ventas_bodega.dto.CompanyDto;
 import com.example.ventas_bodega.dto.FileDto;
+import com.example.ventas_bodega.entity.AgentEntity;
 import com.example.ventas_bodega.entity.CompanyEntity;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.entity.YapeEntity;
+import com.example.ventas_bodega.enums.AgentStatus;
 import com.example.ventas_bodega.mapper.CompanyMapper;
 import com.example.ventas_bodega.repository.AgentRepository;
 import com.example.ventas_bodega.repository.CompanyRepository;
@@ -16,9 +18,11 @@ import com.example.ventas_bodega.service.FirebaseStorageService;
 import com.example.ventas_bodega.util.StoragePathUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService {
@@ -55,7 +59,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             CompanyDto companyDto = CompanyMapper.entityToDto(companyEntity);
             if (companyEntity.getDefaultAgentId() != null) {
                 agentRepository.findById(companyEntity.getDefaultAgentId())
-                        .ifPresent(agent -> companyDto.setPrinterName(agent.getDefaultPrinter()));
+                        .ifPresent(agent -> {
+                            companyDto.setAgentId(agent.getId());
+                            companyDto.setPrinterMachineName(agent.getMachineName());
+                            companyDto.setPrinterName(agent.getDefaultPrinter());
+                        });
             }
             return companyDto;
         }
@@ -176,7 +184,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public MessageResponse updateBusinessOperativeInfo(String hasBarcode, String hasPrinter, String lowStockThreshold, String printerName, UserEntity userEntity) {
+    public MessageResponse updateBusinessOperativeInfo(String hasBarcode, String hasPrinter, String lowStockThreshold, UserEntity userEntity) {
         boolean barcode = Boolean.parseBoolean(hasBarcode);
         boolean printer = Boolean.parseBoolean(hasPrinter);
 
@@ -192,10 +200,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
 
-        if (printer && (printerName == null || printerName.isBlank())) {
-            return new MessageResponse("Ingresa el nombre de la impresora tal como aparece en el sistema operativo", false);
-        }
-
         Long companyId = userEntity.getCompany().getCompanyId();
 
         int result = companyRepository.updateBusinessConfiguration(
@@ -205,24 +209,81 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 threshold
         );
 
-        if (result != 1) {
+        if (result == 1) {
             return new MessageResponse(
-                    "No se pudo actualizar la configuración",
-                    false
+                    "Configuración actualizada correctamente",
+                    true
             );
         }
 
-        // Si se desactiva la impresora no se borra el nombre guardado, para no perderlo
-        // si el usuario la vuelve a activar más adelante.
-        Long defaultAgentId = userEntity.getCompany().getDefaultAgentId();
-        if (printer && defaultAgentId != null) {
-            agentRepository.updateDefaultPrinter(defaultAgentId, printerName.trim());
+        return new MessageResponse(
+                "No se pudo actualizar la configuración",
+                false
+        );
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse createBusinessPrinter(String machineName, String printerName, UserEntity userEntity) {
+        CompanyEntity company = userEntity.getCompany();
+
+        if (company.getDefaultAgentId() != null) {
+            return new MessageResponse("Esta empresa ya tiene una impresora configurada. Elimínala antes de crear otra.", false);
+        }
+        if (machineName == null || machineName.isBlank()) {
+            return new MessageResponse("Ingresa un nombre para identificar esta caja o máquina", false);
+        }
+        if (printerName == null || printerName.isBlank()) {
+            return new MessageResponse("Ingresa el nombre de la impresora tal como aparece en el sistema operativo", false);
         }
 
+        AgentEntity agent = new AgentEntity();
+        agent.setCompanyId(company.getCompanyId());
+        agent.setMachineUuid(UUID.randomUUID().toString());
+        agent.setMachineName(machineName.trim());
+        agent.setDefaultPrinter(printerName.trim());
+        agent.setStatus(AgentStatus.OFFLINE);
+        AgentEntity savedAgent = agentRepository.save(agent);
+
+        companyRepository.updateDefaultAgent(company.getCompanyId(), savedAgent.getId(), true);
+
         return new MessageResponse(
-                "Configuración actualizada correctamente",
+                "Impresora creada correctamente. Copia el Agent ID en la configuración del agente de impresión.",
                 true
         );
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse updateBusinessPrinter(String printerName, UserEntity userEntity) {
+        Long agentId = userEntity.getCompany().getDefaultAgentId();
+
+        if (agentId == null) {
+            return new MessageResponse("Todavía no has creado una impresora para esta empresa", false);
+        }
+        if (printerName == null || printerName.isBlank()) {
+            return new MessageResponse("Ingresa el nombre de la impresora tal como aparece en el sistema operativo", false);
+        }
+
+        agentRepository.updateDefaultPrinter(agentId, printerName.trim());
+
+        return new MessageResponse("Nombre de la impresora actualizado correctamente", true);
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse deleteBusinessPrinter(UserEntity userEntity) {
+        CompanyEntity company = userEntity.getCompany();
+
+        if (company.getDefaultAgentId() == null) {
+            return new MessageResponse("No hay una impresora configurada", false);
+        }
+
+        // Desvincula el agente de la empresa (no se borra tb_agente para no perder el
+        // historial de tb_impresora_tarea asociado a ese agentId).
+        companyRepository.updateDefaultAgent(company.getCompanyId(), null, false);
+
+        return new MessageResponse("Impresora eliminada correctamente", true);
     }
 
     @Override

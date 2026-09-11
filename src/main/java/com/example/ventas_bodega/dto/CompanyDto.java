@@ -24,6 +24,8 @@ public class CompanyDto {
     private boolean isTest;
     private boolean hasPrinter;
     private Integer lowStockThreshold;
+    private Long agentId;
+    private String printerMachineName;
     private String printerName;
     private List<YapeDto> yapes = new ArrayList<>();
 
@@ -175,6 +177,22 @@ public class CompanyDto {
 
     public void setPrinterName(String printerName) {
         this.printerName = printerName;
+    }
+
+    public Long getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(Long agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getPrinterMachineName() {
+        return printerMachineName;
+    }
+
+    public void setPrinterMachineName(String printerMachineName) {
+        this.printerMachineName = printerMachineName;
     }
 
     public List<YapeDto> getYapes() {

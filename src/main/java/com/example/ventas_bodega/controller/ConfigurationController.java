@@ -82,11 +82,34 @@ public class ConfigurationController {
             @RequestParam("hasBarcode") String hasBarcode,
             @RequestParam("hasPrinter") String hasPrinter,
             @RequestParam(value = "lowStockThreshold", required = false) String lowStockThreshold,
-            @RequestParam(value = "printerName", required = false) String printerName,
             @CurrentUser UserEntity userEntity
 
     ) {
-        return new ResponseEntity<>(configurationService.updateBusinessOperativeInfo(hasBarcode, hasPrinter, lowStockThreshold, printerName, userEntity), HttpStatus.OK);
+        return new ResponseEntity<>(configurationService.updateBusinessOperativeInfo(hasBarcode, hasPrinter, lowStockThreshold, userEntity), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/business/printer")
+    public ResponseEntity<?> createBusinessPrinter(
+            @RequestParam("machineName") String machineName,
+            @RequestParam("printerName") String printerName,
+            @CurrentUser UserEntity userEntity
+    ) {
+        return new ResponseEntity<>(configurationService.createBusinessPrinter(machineName, printerName, userEntity), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/business/printer")
+    public ResponseEntity<?> updateBusinessPrinter(
+            @RequestParam("printerName") String printerName,
+            @CurrentUser UserEntity userEntity
+    ) {
+        return new ResponseEntity<>(configurationService.updateBusinessPrinter(printerName, userEntity), HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/business/printer")
+    public ResponseEntity<?> deleteBusinessPrinter(
+            @CurrentUser UserEntity userEntity
+    ) {
+        return new ResponseEntity<>(configurationService.deleteBusinessPrinter(userEntity), HttpStatus.OK);
     }
 
     @PutMapping(value = "/business/brand", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

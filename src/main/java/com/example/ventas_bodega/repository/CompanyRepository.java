@@ -103,4 +103,21 @@ public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
             @Param("filePath") String filePath
     );
 
+    @Modifying
+    @Transactional
+    @Query(
+            value = """
+        UPDATE tb_empresa
+        SET id_agente_pordefecto = :agentId,
+            tiene_impresora = :hasPrinter
+        WHERE id_empresa = :companyId
+        """,
+            nativeQuery = true
+    )
+    int updateDefaultAgent(
+            @Param("companyId") Long companyId,
+            @Param("agentId") Long agentId,
+            @Param("hasPrinter") boolean hasPrinter
+    );
+
 }
