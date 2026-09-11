@@ -55,7 +55,7 @@ public class SecurityConfig {
                             "http://10.74.51.227:5173/",
                             "http://192.168.18.21:5173/",
                             "http://172.20.181.227:5173/",
-                            "http://192.168.1.39:5173/"
+                            "http://192.168.101.3:5173/"
                     ));
                     config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS", "PATCH"));
                     config.setAllowedHeaders(List.of("*"));
@@ -72,6 +72,7 @@ public class SecurityConfig {
                         //.requestMatchers("/api/loan/**").hasAnyRole("ASESOR", "ADMIN")
                         //.requestMatchers("/api/maintenance/**").hasAuthority("PERMISSION_MAINTENANCE")
                         .requestMatchers("/api/print-jobs/**").permitAll()
+                        .requestMatchers("/api/agents/**").permitAll()
                         .requestMatchers("/api/catalog/**").permitAll()
                         .requestMatchers("/api/option/**").permitAll()
                         .requestMatchers("/api/membership/**").permitAll()
