@@ -42,4 +42,19 @@ public interface AgentRepository extends JpaRepository<AgentEntity, Long> {
             @Param("agentId") Long agentId
     );
 
+    @Modifying
+    @Transactional
+    @Query(
+            value = """
+        UPDATE tb_agente
+        SET impresora_predeterminada = :printerName
+        WHERE id = :agentId
+        """,
+            nativeQuery = true
+    )
+    int updateDefaultPrinter(
+            @Param("agentId") Long agentId,
+            @Param("printerName") String printerName
+    );
+
 }

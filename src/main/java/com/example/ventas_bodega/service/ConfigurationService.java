@@ -11,7 +11,7 @@ public interface ConfigurationService {
     MessageResponse updateBussiness(CompanyDto companyDto, UserEntity userEntity) throws Exception;
     MessageResponse updateBusinessFiscalInfo(String socialReason, UserEntity userEntity);
     MessageResponse updateBusinessContactInfo(String comertialName, String address, String email, String phoneNumber, UserEntity userEntity);
-    MessageResponse updateBusinessOperativeInfo(String hasBarcode, String hasPrinter, String lowStockThreshold, UserEntity userEntity);
+    MessageResponse updateBusinessOperativeInfo(String hasBarcode, String hasPrinter, String lowStockThreshold, String printerName, UserEntity userEntity);
     MessageResponse updateBusinessBrandInfo(MultipartFile file, UserEntity userEntity) throws Exception;
     MessageResponse createBusinessYape(String aliasName, String phoneNumber, boolean isDefault, MultipartFile file, UserEntity userEntity) throws Exception;
     MessageResponse updateBusinessYape(Integer yapeId, String aliasName, String phoneNumber, boolean isDefault, MultipartFile qrFile, UserEntity user) throws Exception;

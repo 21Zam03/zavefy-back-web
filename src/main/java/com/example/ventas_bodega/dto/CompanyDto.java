@@ -24,6 +24,7 @@ public class CompanyDto {
     private boolean isTest;
     private boolean hasPrinter;
     private Integer lowStockThreshold;
+    private String printerName;
     private List<YapeDto> yapes = new ArrayList<>();
 
     public CompanyDto() {
@@ -166,6 +167,14 @@ public class CompanyDto {
 
     public void setLowStockThreshold(Integer lowStockThreshold) {
         this.lowStockThreshold = lowStockThreshold;
+    }
+
+    public String getPrinterName() {
+        return printerName;
+    }
+
+    public void setPrinterName(String printerName) {
+        this.printerName = printerName;
     }
 
     public List<YapeDto> getYapes() {

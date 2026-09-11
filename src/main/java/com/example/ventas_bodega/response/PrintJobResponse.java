@@ -8,6 +8,8 @@ public class PrintJobResponse {
 
     private String documentType;
 
+    private String printerName;
+
     public PrintJobResponse(Long id, String content, String documentType) {
         this.id = id;
         this.content = content;
@@ -41,6 +43,14 @@ public class PrintJobResponse {
 
     public void setDocumentType(String documentType) {
         this.documentType = documentType;
+    }
+
+    public String getPrinterName() {
+        return printerName;
+    }
+
+    public void setPrinterName(String printerName) {
+        this.printerName = printerName;
     }
 
 }

@@ -6,6 +6,7 @@ import com.example.ventas_bodega.entity.CompanyEntity;
 import com.example.ventas_bodega.entity.UserEntity;
 import com.example.ventas_bodega.entity.YapeEntity;
 import com.example.ventas_bodega.mapper.CompanyMapper;
+import com.example.ventas_bodega.repository.AgentRepository;
 import com.example.ventas_bodega.repository.CompanyRepository;
 import com.example.ventas_bodega.repository.UserRepository;
 import com.example.ventas_bodega.repository.YapeRepository;
@@ -27,6 +28,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private final FirebaseStorageService firebaseStorageService;
     private final UserRepository userRepository;
     private final StoragePathUtil storagePathUtil;
+    private final AgentRepository agentRepository;
 
     @Autowired
     public ConfigurationServiceImpl(
@@ -34,13 +36,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             FirebaseStorageService firebaseStorageService,
             YapeRepository yapeRepository,
             UserRepository userRepository,
-            StoragePathUtil storagePathUtil
+            StoragePathUtil storagePathUtil,
+            AgentRepository agentRepository
     ) {
         this.companyRepository = companyRepository;
         this.firebaseStorageService = firebaseStorageService;
         this.yapeRepository = yapeRepository;
         this.userRepository = userRepository;
         this.storagePathUtil = storagePathUtil;
+        this.agentRepository = agentRepository;
     }
 
     @Override
@@ -48,7 +52,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         Optional<CompanyEntity> companyOptional = companyRepository.findById(companyId);
         if(companyOptional.isPresent()) {
             CompanyEntity companyEntity = companyOptional.get();
-            return CompanyMapper.entityToDto(companyEntity);
+            CompanyDto companyDto = CompanyMapper.entityToDto(companyEntity);
+            if (companyEntity.getDefaultAgentId() != null) {
+                agentRepository.findById(companyEntity.getDefaultAgentId())
+                        .ifPresent(agent -> companyDto.setPrinterName(agent.getDefaultPrinter()));
+            }
+            return companyDto;
         }
         return null;
     }
@@ -167,7 +176,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public MessageResponse updateBusinessOperativeInfo(String hasBarcode, String hasPrinter, String lowStockThreshold, UserEntity userEntity) {
+    public MessageResponse updateBusinessOperativeInfo(String hasBarcode, String hasPrinter, String lowStockThreshold, String printerName, UserEntity userEntity) {
         boolean barcode = Boolean.parseBoolean(hasBarcode);
         boolean printer = Boolean.parseBoolean(hasPrinter);
 
@@ -183,6 +192,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
 
+        if (printer && (printerName == null || printerName.isBlank())) {
+            return new MessageResponse("Ingresa el nombre de la impresora tal como aparece en el sistema operativo", false);
+        }
+
         Long companyId = userEntity.getCompany().getCompanyId();
 
         int result = companyRepository.updateBusinessConfiguration(
@@ -192,16 +205,23 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 threshold
         );
 
-        if (result == 1) {
+        if (result != 1) {
             return new MessageResponse(
-                    "Configuración actualizada correctamente",
-                    true
+                    "No se pudo actualizar la configuración",
+                    false
             );
         }
 
+        // Si se desactiva la impresora no se borra el nombre guardado, para no perderlo
+        // si el usuario la vuelve a activar más adelante.
+        Long defaultAgentId = userEntity.getCompany().getDefaultAgentId();
+        if (printer && defaultAgentId != null) {
+            agentRepository.updateDefaultPrinter(defaultAgentId, printerName.trim());
+        }
+
         return new MessageResponse(
-                "No se pudo actualizar la configuración",
-                false
+                "Configuración actualizada correctamente",
+                true
         );
     }
 

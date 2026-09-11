@@ -2,6 +2,7 @@ package com.example.ventas_bodega.service.impl;
 
 import com.example.ventas_bodega.entity.PrintJobEntity;
 import com.example.ventas_bodega.enums.PrintJobStatus;
+import com.example.ventas_bodega.repository.AgentRepository;
 import com.example.ventas_bodega.repository.PrintJobRepository;
 import com.example.ventas_bodega.response.PrintJobResponse;
 import com.example.ventas_bodega.service.PrintJobService;
@@ -16,14 +17,22 @@ import java.util.List;
 public class PrintJobServiceImpl implements PrintJobService {
 
     private final PrintJobRepository printJobRepository;
+    private final AgentRepository agentRepository;
 
     @Autowired
-    public PrintJobServiceImpl(PrintJobRepository printJobRepository) {
+    public PrintJobServiceImpl(PrintJobRepository printJobRepository, AgentRepository agentRepository) {
         this.printJobRepository = printJobRepository;
+        this.agentRepository = agentRepository;
     }
 
     @Override
     public List<PrintJobResponse> getPendingJobs(Long agentId) {
+
+        // Todos los jobs de este poll son del mismo agente, así que el nombre de
+        // impresora configurado en tb_agente se resuelve una sola vez.
+        String printerName = agentRepository.findById(agentId)
+                .map(agent -> agent.getDefaultPrinter())
+                .orElse(null);
 
         return printJobRepository
                 .findByAgentIdAndStatus(
@@ -31,10 +40,11 @@ public class PrintJobServiceImpl implements PrintJobService {
                         PrintJobStatus.PENDING
                 )
                 .stream()
-                .map(job -> new PrintJobResponse(
-                        job.getId(),
-                        job.getContent()
-                ))
+                .map(job -> {
+                    PrintJobResponse response = new PrintJobResponse(job.getId(), job.getContent());
+                    response.setPrinterName(printerName);
+                    return response;
+                })
                 .toList();
     }
 
