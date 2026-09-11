@@ -23,12 +23,12 @@ public interface AgentRepository extends JpaRepository<AgentEntity, Long> {
     @Query(
             value = """
         UPDATE tb_agente
-        SET ultimo_visto = NOW()
+        SET ultimo_visto = :now
         WHERE id = :agentId
         """,
             nativeQuery = true
     )
-    int updateLastSeen(@Param("agentId") Long agentId);
+    int updateLastSeen(@Param("agentId") Long agentId, @Param("now") LocalDateTime now);
 
     @Query(
             value = """
