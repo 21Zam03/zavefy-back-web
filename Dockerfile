@@ -1,6 +1,9 @@
 # Usar una imagen base de Java
 FROM eclipse-temurin:17-jdk
 
+# Fija la zona horaria del contenedor (las imágenes base vienen en UTC por defecto)
+ENV TZ=America/Lima
+
 # Crear directorio de la app
 WORKDIR /app
 
