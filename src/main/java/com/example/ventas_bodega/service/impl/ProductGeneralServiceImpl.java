@@ -40,15 +40,17 @@ public class ProductGeneralServiceImpl implements ProductGeneralService {
         }
 
         ProductGeneralEntity productGeneral = ProductMapper.entityToEntityGeneral(product);
+        // La imagen del catálogo general solo la define el super admin desde Mantenimiento;
+        // no se hereda la imagen que sube la empresa al crear su producto independiente.
         productGeneralRepository.insertIfNotExists(
                 productGeneral.getBarcode(),
                 productGeneral.getName(),
                 productGeneral.getDescription(),
                 productGeneral.getPrice(),
                 productGeneral.getCategory(),
-                productGeneral.getImageUrl(),
-                productGeneral.getImageUrlMedium(),
-                productGeneral.getImageUrlThumb()
+                null,
+                null,
+                null
         );
     }
 
