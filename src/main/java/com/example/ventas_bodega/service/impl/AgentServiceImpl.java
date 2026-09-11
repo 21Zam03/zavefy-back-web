@@ -43,7 +43,7 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public void updateLastConnected(Long agentId) {
-        int result = agentRepository.updateLastSeen(agentId);
+        int result = agentRepository.updateLastSeen(agentId, LocalDateTime.now());
 
         if (result == 0) {
             throw new RuntimeException(
