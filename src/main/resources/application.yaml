@@ -8,12 +8,12 @@ spring:
     name: ventas-bodega
 
   datasource:
-    #url: jdbc:mysql://vps-5943657-x.dattaweb.com:3306/zavefy_pos_db_prod?allowPublicKeyRetrieval=true
-    url: jdbc:mysql://vps-5943657-x.dattaweb.com:3306/zavefy_db?allowPublicKeyRetrieval=true
-    #username: root
-    username: zavefy_user
-    #password: 21josesamuel03
-    password: josesamuel
+    url: jdbc:mysql://vps-5943657-x.dattaweb.com:3306/zavefy_pos_db_prod?allowPublicKeyRetrieval=true
+    #url: jdbc:mysql://vps-5943657-x.dattaweb.com:3306/zavefy_db?allowPublicKeyRetrieval=true
+    username: root
+    #username: zavefy_user
+    password: 21josesamuel03
+    #password: josesamuel
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -68,5 +68,5 @@ storage:
   # Carpeta base en Firebase Storage donde se suben imágenes de productos, logos y QR de
   # Yape. Cambiar a mano según el entorno antes de compilar/desplegar (mismo patrón que
   # spring.datasource.url más arriba) para no mezclar archivos de prueba con los reales.
-  base-folder: bodega-sistemas/clients
-  #base-folder: bodega-sistemas-prod/clients
+  #base-folder: bodega-sistemas/clients
+  base-folder: bodega-sistemas-prod/clients
