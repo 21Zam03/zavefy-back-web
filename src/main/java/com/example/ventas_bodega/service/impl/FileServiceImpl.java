@@ -779,7 +779,7 @@ public class FileServiceImpl implements FileService {
         ticket.append("\n");
 
         ticket.append("CLIENTE: ");
-        ticket.append(sale.getClientName());
+        ticket.append(sale.getClientName() != null ? sale.getClientName() : "Varios");
         ticket.append("\n");
 
         ticket.append("--------------------------------\n");
@@ -804,9 +804,9 @@ public class FileServiceImpl implements FileService {
         ticket.append(sale.getSubTotal());
         ticket.append("\n");
 
-        ticket.append("IGV: ");
-        ticket.append(sale.getIgv());
-        ticket.append("\n");
+        // ticket.append("IGV: ");
+        // ticket.append(sale.getIgv());
+        // ticket.append("\n");
 
         ticket.append("TOTAL: ");
         ticket.append(sale.getTotal());
