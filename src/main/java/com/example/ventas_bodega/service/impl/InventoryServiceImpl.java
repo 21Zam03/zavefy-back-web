@@ -59,6 +59,12 @@ public class InventoryServiceImpl implements InventoryService {
         MessageResponse messageResponse = new MessageResponse();
         try {
             for (SaleDetailDto saleDetailDto : saleDetailDtoList) {
+                // Ítems genéricos (ej. "VARIOS") no están ligados a un producto del
+                // inventario: no tienen stock que descontar ni historial que registrar.
+                if (saleDetailDto.getProductId() == null) {
+                    continue;
+                }
+
                 ProductEntity product = productRepository.findById(saleDetailDto.getProductId())
                         .orElseThrow(() -> new NotFoundException("El producto con id " + saleDetailDto.getProductId() + " no existe"));
 
@@ -263,6 +269,11 @@ public class InventoryServiceImpl implements InventoryService {
         MessageResponse messageResponse = new MessageResponse();
         try {
             for (SaleDetailEntity detail : saleDetailEntityList) {
+                // Ítems genéricos (ej. "VARIOS") no tienen id_producto: nada que revertir.
+                if (detail.getProductId() == null) {
+                    continue;
+                }
+
                 ProductEntity product = productRepository.findById(detail.getProductId()).orElse(null);
                 // El producto pudo haberse desactivado/eliminado desde la venta original; si ya no
                 // existe no hay a qué devolverle el stock, se omite sin interrumpir el resto.

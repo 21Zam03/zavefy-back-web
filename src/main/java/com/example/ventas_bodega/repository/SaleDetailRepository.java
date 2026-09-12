@@ -11,8 +11,11 @@ import java.util.List;
 public interface SaleDetailRepository extends JpaRepository<SaleDetailEntity, Long> {
 
     public List<SaleDetailEntity> findBySaleEntity_VentaId(Long id);
+
+    // LEFT JOIN (no INNER): ítems genéricos como "VARIOS" no tienen id_producto,
+    // y con INNER JOIN esa línea desaparecía del ticket y del detalle de venta.
     @Query(value = """
-        SELECT 
+        SELECT
             dv.id_detalle_venta AS id,
             dv.cantidad AS quantity,
             dv.precio_unitario AS unitePrice,
@@ -23,7 +26,7 @@ public interface SaleDetailRepository extends JpaRepository<SaleDetailEntity, Lo
             dv.unidad_medida AS measurementUnit,
             p.codigo_barras AS barcode
         FROM tb_detalle_venta dv
-       INNER JOIN tb_producto p 
+        LEFT JOIN tb_producto p
             ON p.id_producto = dv.id_producto
         WHERE dv.id_venta = :saleId
         """, nativeQuery = true)
